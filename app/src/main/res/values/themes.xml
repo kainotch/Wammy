@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Created by Notch -->
+
+<resources>
+
+    <style name="Theme.Wammy" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

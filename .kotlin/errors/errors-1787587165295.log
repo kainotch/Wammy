@@ -1,0 +1,15 @@
+kotlin version: 2.2.10
+error message: The daemon has terminated unexpectedly on startup attempt #1 with exit code: 134. The daemon process output:
+    ... (11 more lines)
+    12. #
+    13. # An error report file with more information is saved as:
+    14. # /home/notch/.local/share/kotlin/daemon/hs_err_pid5476.log
+    15. #
+    16. # Compiler replay data is saved as:
+    17. # /home/notch/.local/share/kotlin/daemon/replay_pid5476.log
+    18. #
+    19. # If you would like to submit a bug report, please visit:
+    20. #   https://github.com/adoptium/adoptium-support/issues
+    21. #
+The daemon didn't produce the message "Kotlin compile daemon is ready" during startup.
+
