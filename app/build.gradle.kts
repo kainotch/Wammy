@@ -116,6 +116,7 @@ dependencies {
   implementation("com.squareup.okio:okio:3.9.0")
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.8.0")
   implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0")
+  implementation("org.jetbrains.kotlinx:kotlinx-serialization-json-okio:1.8.0")
 
 }
 dependencies {
