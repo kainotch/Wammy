@@ -327,4 +327,19 @@ class ReaderViewModel : ViewModel() {
             currentPages.map { if (it.index == index) it.copy(state = newState) else it }
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        // Clean up the temporary reader cache to prevent 120MB+ storage bloat
+        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val cacheDir = java.io.File(AppContainer.appContext.cacheDir, "reader_cache")
+                if (cacheDir.exists()) {
+                    cacheDir.deleteRecursively()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
 }

@@ -189,7 +189,9 @@ class HomeViewModel : ViewModel() {
                 }
 
                 // Fetch from all installed Tachiyomi sources concurrently
-                val extJobs = AppContainer.extensionManager.activeSources.map { source ->
+                val extJobs = AppContainer.extensionManager.activeSources
+                    .filter { _pinnedMangaSources.value.contains(it.id.toString()) }
+                    .map { source ->
                     async {
                         try {
                             val page = kotlinx.coroutines.withTimeoutOrNull(5000) {
