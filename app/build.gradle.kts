@@ -39,6 +39,8 @@ android {
         excludes += "/META-INF/{AL2.0,LGPL2.1}"
       }
     }
+
+
 }
 
 kotlin {
@@ -127,4 +129,8 @@ dependencies {
     
     implementation("io.ktor:ktor-client-core:2.3.11")
     implementation("io.ktor:ktor-client-okhttp:2.3.11")
+}
+
+base {
+    archivesName.set("wammy")
 }
