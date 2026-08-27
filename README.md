@@ -40,5 +40,5 @@ Please note that Wammy is a **reader only**. The app itself does not host, provi
 
 ---
 <div align="center">
-  <sub>Built with ❤️ by Notch and 1unun</sub>
+  <sub>Built by Notch</sub>
 </div>
