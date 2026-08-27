@@ -117,7 +117,7 @@ fun DynamicInstagramProfileRow(username: String, name: String, fallbackUrl: Stri
     androidx.compose.runtime.LaunchedEffect(username) {
         kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
             try {
-                val doc = org.jsoup.Jsoup.connect("https://www.instagram.com/$username/").userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36").get()
+                val doc = org.jsoup.Jsoup.connect("https://www.instagram.com/$username/").userAgent("WhatsApp/2.21.12.21 A").get()
                 val url = doc.select("meta[property=og:image]").attr("content")
                 if (url.isNotEmpty()) {
                     imageUrl.value = url.replace("&amp;", "&")
