@@ -72,7 +72,22 @@ class WammyApplication : Application() {
             }
             .build()
             
-        Coil.setImageLoader(ImageLoader.Builder(this).okHttpClient { coilClient }.build())
+        Coil.setImageLoader(
+            ImageLoader.Builder(this)
+                .okHttpClient { coilClient }
+                .diskCache {
+                    coil.disk.DiskCache.Builder()
+                        .directory(cacheDir.resolve("image_cache"))
+                        .maxSizeBytes(64L * 1024 * 1024) // Strictly limit disk cache to 64 MB
+                        .build()
+                }
+                .memoryCache {
+                    coil.memory.MemoryCache.Builder(this)
+                        .maxSizePercent(0.15) // Limit memory cache to 15% of available RAM (down from default 25%)
+                        .build()
+                }
+                .build()
+        )
         
         AppContainer.init(this)
     }
