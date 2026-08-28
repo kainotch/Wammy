@@ -9,6 +9,19 @@ class WammyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
 
+        // Clean up any leftover reader cache from previous sessions that were forcefully killed
+        kotlinx.coroutines.GlobalScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val cacheDir = java.io.File(cacheDir, "reader_cache")
+                if (cacheDir.exists()) {
+                    cacheDir.deleteRecursively()
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+
+
         try {
             java.security.Security.insertProviderAt(org.conscrypt.Conscrypt.newProvider(), 1)
         } catch (e: Exception) {
