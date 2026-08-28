@@ -3,6 +3,7 @@ package com.example.wammy
 import android.app.Application
 import coil.ImageLoader
 import coil.Coil
+import kotlinx.coroutines.launch
 import eu.kanade.tachiyomi.network.NetworkHelper
 
 class WammyApplication : Application() {
