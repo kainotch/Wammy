@@ -83,7 +83,7 @@ fun HistoryScreen(
                             searchQuery = ""
                             viewModel.setSearchQuery("")
                         }) {
-                            Icon(Icons.Default.Close, contentDescription = "Close Search", tint = Color.LightGray)
+                            Icon(Icons.Default.Close, contentDescription = "Close Search", tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 )
@@ -94,10 +94,10 @@ fun HistoryScreen(
                     windowInsets = WindowInsets(0.dp),
                     actions = {
                         IconButton(onClick = { isSearching = true }) {
-                            Icon(Icons.Default.Search, contentDescription = "Search", tint = Color.LightGray)
+                            Icon(Icons.Default.Search, contentDescription = "Search", tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                         IconButton(onClick = { viewModel.clearAllHistory() }) {
-                            Icon(Icons.Default.DeleteOutline, contentDescription = "Clear All", tint = Color.LightGray)
+                            Icon(Icons.Default.DeleteOutline, contentDescription = "Clear All", tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 )
@@ -122,7 +122,7 @@ fun HistoryScreen(
                     item {
                         Text(
                             text = dateHeader,
-                            color = Color.LightGray,
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold, fontSize = 15.sp,
                             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
@@ -150,79 +150,54 @@ fun HistoryItemRow(
     onClick: () -> Unit,
     onDelete: () -> Unit
 ) {
-    Box(
+    val onSurfaceColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariantColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(120.dp)
-            .padding(vertical = 4.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF16161A))
-            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp)
+            .clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // Blurred Background
+        // Poster
         AsyncImage(
             model = item.mangaCoverUrl,
             contentDescription = null,
-            modifier = Modifier.fillMaxSize().alpha(0.6f),
-            contentScale = ContentScale.Crop
-        )
-        // Gradient Overlay blending into black
-        Box(
+            contentScale = ContentScale.Crop,
             modifier = Modifier
-                .fillMaxSize()
-                .background(androidx.compose.ui.graphics.Brush.horizontalGradient(
-                    colorStops = arrayOf(
-                        0.0f to Color.Black.copy(alpha = 0.1f),
-                        0.3f to Color.Black.copy(alpha = 0.6f),
-                        0.6f to Color.Black,
-                        1.0f to Color.Black
-                    )
-                ))
+                .size(72.dp, 102.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(Color.DarkGray)
         )
         
-        Row(
-            modifier = Modifier.fillMaxSize().padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(
+            modifier = Modifier.weight(1f)
         ) {
-            // Poster
-            AsyncImage(
-                model = item.mangaCoverUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(72.dp, 102.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(Color.DarkGray)
+            Text(
+                text = item.mangaTitle,
+                color = onSurfaceColor,
+                fontWeight = FontWeight.Bold, fontSize = 15.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = item.mangaTitle,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold, fontSize = 15.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                val progressText = if (item.totalPages > 0) " (Page ${item.lastPageRead}/${item.totalPages})" else ""
-                Text(
-                    text = "${item.chapterName}$progressText - $timeStr",
-                    color = Color(0xFF90CAF9),
-                    fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis
-                )
-            }
-            
-            IconButton(onClick = { /* Add to library */ }) {
-                Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorite", tint = Color.LightGray)
-            }
-            
-            IconButton(onClick = onDelete) {
-                Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = Color.LightGray)
-            }
+            Spacer(modifier = Modifier.height(4.dp))
+            val progressText = if (item.totalPages > 0) " (Page ${item.lastPageRead}/${item.totalPages})" else ""
+            Text(
+                text = "${item.chapterName}$progressText - $timeStr",
+                color = onSurfaceVariantColor,
+                fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis
+            )
+        }
+        
+        IconButton(onClick = { /* Add to library */ }) {
+            Icon(Icons.Default.FavoriteBorder, contentDescription = "Favorite", tint = onSurfaceVariantColor)
+        }
+        
+        IconButton(onClick = onDelete) {
+            Icon(Icons.Default.DeleteOutline, contentDescription = "Delete", tint = onSurfaceVariantColor)
         }
     }
 }
