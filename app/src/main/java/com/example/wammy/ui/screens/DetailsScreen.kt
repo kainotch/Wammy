@@ -184,12 +184,12 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBack) {
-                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = androidx.compose.material3.MaterialTheme.colorScheme.onBackground)
                 }
-                Text("Detail", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
+                Text("Detail", color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground, fontSize = 20.sp, fontWeight = FontWeight.Medium, modifier = Modifier.weight(1f))
                 
                 IconButton(onClick = { viewModel.fetchMangaDetails(context, safeManga) }) {
-                    Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = Color.LightGray)
+                    Icon(Icons.Default.Refresh, contentDescription = "Refresh", tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             
@@ -200,13 +200,13 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                     title = { Text("Delete", color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground, fontWeight = FontWeight.Bold) },
                     text = {
                         Column {
-                            Text("What would you like to delete?", color = Color.LightGray, fontSize = 14.sp)
+                            Text("What would you like to delete?", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 14.sp)
                             if (isDownloaded || downloadedChapters.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Text("• Delete Downloads", color = Color.Gray, fontSize = 12.sp)
+                                Text("• Delete Downloads", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                             }
                             Spacer(modifier = Modifier.height(8.dp))
-                            Text("• Remove from Library", color = Color.Gray, fontSize = 12.sp)
+                            Text("• Remove from Library", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                         }
                     },
                     confirmButton = {
@@ -229,7 +229,7 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                     },
                     dismissButton = {
                         TextButton(onClick = { showDeleteDialog = false }) {
-                            Text("Cancel", color = Color.Gray)
+                            Text("Cancel", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 )
@@ -270,7 +270,7 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = safeManga.titleRomaji,
-                            color = Color.White,
+                            color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
                             fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
                             lineHeight = 26.sp
@@ -286,16 +286,16 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                         Spacer(modifier = Modifier.height(8.dp))
                         
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.HourglassBottom, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(14.dp))
+                            Icon(Icons.Default.HourglassBottom, contentDescription = null, tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Updated: ${safeManga.status ?: "Unknown"}", color = Color.LightGray, fontSize = 13.sp)
+                            Text("Updated: ${safeManga.status ?: "Unknown"}", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(Icons.Default.Description, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(14.dp))
+                            Icon(Icons.Default.Description, contentDescription = null, tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("${chapters.size} Chapters • ${safeManga.sourceName}", color = Color.LightGray, fontSize = 13.sp)
+                            Text("${chapters.size} Chapters • ${safeManga.sourceName}", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
                         }
                     }
                 }
@@ -318,7 +318,7 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                                     .border(1.dp, Color(0xFF303040), RoundedCornerShape(16.dp))
                                     .padding(horizontal = 12.dp, vertical = 6.dp)
                             ) {
-                                Text(genre, color = Color.LightGray, fontSize = 12.sp)
+                                Text(genre, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                             }
                         }
                     }
@@ -407,7 +407,7 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                 Spacer(modifier = Modifier.height(24.dp))
                 
                 // Introduction
-                Text("Introduction", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                Text("Introduction", color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 var isDescriptionExpanded by remember { mutableStateOf(false) }
@@ -430,12 +430,12 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(if (isDescriptionExpanded) "Collapse" else "Expand", color = Color.LightGray, fontSize = 13.sp)
+                        Text(if (isDescriptionExpanded) "Collapse" else "Expand", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
                         Spacer(modifier = Modifier.width(4.dp))
                         Icon(
                             imageVector = if (isDescriptionExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                             contentDescription = "Expand",
-                            tint = Color.LightGray,
+                            tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(16.dp)
                         )
                     }
@@ -450,7 +450,7 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) { Text("Contents", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold); if (isLoadingChapters && chapters.isNotEmpty()) { Spacer(modifier = Modifier.width(12.dp)); androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(16.dp), color = Color.Gray, strokeWidth = 2.dp) } }
+                    Row(verticalAlignment = Alignment.CenterVertically) { Text("Contents", color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground, fontSize = 18.sp, fontWeight = FontWeight.Bold); if (isLoadingChapters && chapters.isNotEmpty()) { Spacer(modifier = Modifier.width(12.dp)); androidx.compose.material3.CircularProgressIndicator(modifier = Modifier.size(16.dp), color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, strokeWidth = 2.dp) } }
                     Spacer(modifier = Modifier.width(16.dp))
                     
                     // Hide Read Button
@@ -460,7 +460,7 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                             .clickable { /* Toggle hide read */ }
                             .padding(horizontal = 12.dp, vertical = 6.dp)
                     ) {
-                        Text("Hide Read", color = Color.LightGray, fontSize = 12.sp)
+                        Text("Hide Read", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
                     }
                     
                     Spacer(modifier = Modifier.weight(1f))
@@ -487,7 +487,7 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.MenuBook, contentDescription = "Read", tint = Color.White, modifier = Modifier.size(16.dp))
                             Spacer(modifier = Modifier.width(8.dp))
-                            Text(buttonText, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.Medium)
+                            Text(buttonText, color = androidx.compose.material3.MaterialTheme.colorScheme.onBackground, fontSize = 14.sp, fontWeight = FontWeight.Medium)
                         }
                     }
                 }
@@ -526,36 +526,38 @@ val displayChapters = if (showDownloadedOnly) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable { handleReadClick(chapter) }
-                        .padding(vertical = 12.dp),
+                        .padding(vertical = 12.dp, horizontal = 16.dp), // Added horizontal padding
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // The explicitly requested 1, 2, 3 indexing (now descending to match Mihon)
-                    Text(
-                        text = "${displayChapters.size - index}",
-                        color = Color.DarkGray,
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.width(32.dp)
-                    )
-                    
                     Column(modifier = Modifier.weight(1f)) {
+                        val titleText = if (chapter.read) chapter.name else "• ${chapter.name}"
                         Text(
-                            text = chapter.name,
-                            color = if (chapter.read) Color.Gray else androidx.compose.material3.MaterialTheme.colorScheme.onBackground,
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Medium
+                            text = titleText,
+                            color = if (chapter.read) Color.Gray else Color(0xFFB388FF), // Primary purple for unread
+                            style = MaterialTheme.typography.bodyLarge,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                         Spacer(modifier = Modifier.height(4.dp))
+                        
+                        // Format date
+                        val dateText = if (chapter.dateUpload > 0L) {
+                            java.text.SimpleDateFormat("M/d/yy", java.util.Locale.getDefault()).format(java.util.Date(chapter.dateUpload))
+                        } else {
+                            "Unknown date"
+                        }
+                        
+                        val subtitleText = if (!chapter.scanlator.isNullOrEmpty()) {
+                            "$dateText • ${chapter.scanlator}"
+                        } else {
+                            dateText
+                        }
+                        
                         Text(
-                            text = "Chapter ${chapter.chapterNumber}",
+                            text = subtitleText,
                             color = Color.Gray,
                             fontSize = 12.sp
                         )
-                    }
-                    
-                    if (chapter.read) {
-                        Icon(Icons.Default.Check, contentDescription = "Read", tint = Color.Gray, modifier = Modifier.size(24.dp))
-                        Spacer(modifier = Modifier.width(8.dp))
                     }
                     val isThisChapterDownloading = currentDownload?.queuedChapterUrls?.contains(chapter.sourceUrl) == true
                     if (downloadedChapters.contains(chapter.sourceUrl)) {
@@ -695,7 +697,7 @@ val displayChapters = if (showDownloadedOnly) {
                 },
                 dismissButton = {
                     TextButton(onClick = { showCreateFolderDialog = false }) {
-                        Text("Cancel", color = Color.Gray)
+                        Text("Cancel", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                 }
             )
@@ -723,7 +725,7 @@ fun ActionButton(icon: ImageVector, label: String, onClick: () -> Unit) {
     ) {
         Icon(icon, contentDescription = label, tint = androidx.compose.material3.MaterialTheme.colorScheme.onBackground, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.height(8.dp))
-        Text(label, color = Color.LightGray, fontSize = 12.sp)
+        Text(label, color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 12.sp)
     }
 }
 

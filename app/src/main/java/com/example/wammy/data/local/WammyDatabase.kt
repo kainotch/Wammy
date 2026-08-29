@@ -17,7 +17,7 @@ import androidx.room.TypeConverters
         MangaFolderCrossRef::class,
         TrackEntity::class
     ],
-    version = 11,
+    version = 12,
     exportSchema = false
 )
 abstract class WammyDatabase : RoomDatabase() {

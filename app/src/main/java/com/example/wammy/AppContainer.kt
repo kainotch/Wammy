@@ -14,6 +14,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object AppContainer {
     lateinit var appContext: Context
     lateinit var database: WammyDatabase
+    lateinit var readerPreferences: com.example.wammy.data.prefs.ReaderPreferences
     lateinit var extensionApi: ExtensionApi
     lateinit var extensionManager: ExtensionManager
     lateinit var trackManager: com.example.wammy.track.TrackManager
@@ -44,12 +45,25 @@ val MIGRATION_8_9 = object : androidx.room.migration.Migration(8, 9) {
                 database.execSQL("ALTER TABLE chapter ADD COLUMN scanlator TEXT")
             }
         }
+        val MIGRATION_11_12 = object : androidx.room.migration.Migration(11, 12) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                // Add orientation column
+                database.execSQL("ALTER TABLE MangaEntity ADD COLUMN orientation INTEGER NOT NULL DEFAULT 0")
+                
+                // Migrate existing readingMode values:
+                // Old: 0=RTL, 1=LTR, 2=WEBTOON
+                // New: 0=DEFAULT, 1=LTR, 2=RTL, 3=VERTICAL, 4=WEBTOON, 5=CONTINUOUS_VERTICAL
+                database.execSQL("UPDATE MangaEntity SET readingMode = 2 WHERE readingMode = 0") // RTL -> RTL
+                database.execSQL("UPDATE MangaEntity SET readingMode = 1 WHERE readingMode = 1") // LTR -> LTR (no-op, but for clarity)
+                database.execSQL("UPDATE MangaEntity SET readingMode = 4 WHERE readingMode = 2") // WEBTOON -> WEBTOON
+            }
+        }
         database = Room.databaseBuilder(
             context.applicationContext,
             WammyDatabase::class.java,
             "wammy.db"
         )
-        .addMigrations(MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
+        .addMigrations(MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
         .fallbackToDestructiveMigration()
         .build()
 

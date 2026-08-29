@@ -1,4 +1,5 @@
 package com.example.wammy.ui.screens
+import com.example.wammy.data.prefs.ReadingMode
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.core.view.WindowInsetsControllerCompat
@@ -40,6 +41,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import me.saket.telephoto.zoomable.zoomable
 import me.saket.telephoto.zoomable.rememberZoomableState
+import com.example.wammy.ui.reader.navigation.NavigationLayouts
+import com.example.wammy.ui.reader.navigation.TapAction
+import com.example.wammy.ui.reader.navigation.TapRegion
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -50,8 +54,9 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import com.example.wammy.ui.ReaderViewModel
-import com.example.wammy.ui.ReadingMode
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
@@ -66,7 +71,33 @@ fun ReaderScreen(
 ) {
     val currentContext = androidx.compose.ui.platform.LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner) {
+    val config = androidx.compose.ui.platform.LocalConfiguration.current
+    val density = androidx.compose.ui.platform.LocalDensity.current.density
+    val pxWidth = (config.screenWidthDp * density).toInt()
+    val pxHeight = (config.screenHeightDp * density).toInt()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val activity = context as? android.app.Activity
+    val isFullscreen = com.example.wammy.AppContainer.readerPreferences.fullscreen.get()
+    val keepScreenOn = com.example.wammy.AppContainer.readerPreferences.keepScreenOn.get()
+    
+    DisposableEffect(lifecycleOwner, isFullscreen, keepScreenOn) {
+        if (activity != null) {
+            val window = activity.window
+            if (keepScreenOn) {
+                window.addFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            } else {
+                window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            }
+            
+            val insetsController = androidx.core.view.WindowCompat.getInsetsController(window, window.decorView)
+            if (isFullscreen) {
+                insetsController.hide(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+                insetsController.systemBarsBehavior = androidx.core.view.WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            } else {
+                insetsController.show(androidx.core.view.WindowInsetsCompat.Type.systemBars())
+            }
+        }
+        
         var startTime = System.currentTimeMillis()
         val observer = LifecycleEventObserver { _, event ->
             if (event == Lifecycle.Event.ON_RESUME) {
@@ -88,7 +119,29 @@ fun ReaderScreen(
     val isLoading by viewModel.isLoading.collectAsState()
     val chapterName by viewModel.chapterName.collectAsState()
     val readingMode by viewModel.readingMode.collectAsState()
-    val colorFilter by viewModel.colorFilter.collectAsState()
+
+
+    val prefs = com.example.wammy.AppContainer.readerPreferences
+    val showPageNumber by prefs.showPageNumber.state.collectAsState()
+    val grayscale by prefs.grayscale.state.collectAsState()
+    val invertedColors by prefs.invertedColors.state.collectAsState()
+    val isCustomBrightness by prefs.customBrightness.state.collectAsState()
+    val brightnessValue by prefs.customBrightnessValue.state.collectAsState()
+    val isColorFilter by prefs.colorFilter.state.collectAsState()
+    val colorR by prefs.colorFilterValueR.state.collectAsState()
+    val colorG by prefs.colorFilterValueG.state.collectAsState()
+    val colorB by prefs.colorFilterValueB.state.collectAsState()
+    val colorA by prefs.colorFilterValueA.state.collectAsState()
+    
+    val scaleTypeStr by prefs.imageScaleType.state.collectAsState()
+    val scaleType = when(scaleTypeStr) {
+        com.example.wammy.data.prefs.ScaleType.FIT_SCREEN -> androidx.compose.ui.layout.ContentScale.Fit
+        com.example.wammy.data.prefs.ScaleType.STRETCH -> androidx.compose.ui.layout.ContentScale.FillBounds
+        com.example.wammy.data.prefs.ScaleType.FIT_WIDTH -> androidx.compose.ui.layout.ContentScale.FillWidth
+        com.example.wammy.data.prefs.ScaleType.FIT_HEIGHT -> androidx.compose.ui.layout.ContentScale.FillHeight
+        else -> androidx.compose.ui.layout.ContentScale.Fit
+    }
+
     
     // Tsundoku feature: Tie Slider to scroll states
     var currentProgress by remember { mutableStateOf(0f) }
@@ -107,7 +160,6 @@ fun ReaderScreen(
     val coroutineScope = rememberCoroutineScope()
 
     var showOverlay by remember { mutableStateOf(false) }
-    val context = LocalContext.current
     DisposableEffect(showOverlay) {
         val window = (context as? Activity)?.window
         if (window != null) {
@@ -147,7 +199,7 @@ fun ReaderScreen(
         } else {
             // Reader Content
             when (readingMode) {
-ReadingMode.WEBTOON -> {
+com.example.wammy.data.prefs.ReadingMode.WEBTOON -> {
                     val listState = rememberLazyListState()
                     
                     // Tsundoku feature: Hide overlay on scroll
@@ -171,27 +223,36 @@ ReadingMode.WEBTOON -> {
                         }
                     }
                     val zoomableState = me.saket.telephoto.zoomable.rememberZoomableState()
-                    val context = LocalContext.current
-                    val sidePadding by viewModel.webtoonSidePadding.collectAsState()
+                                    val sidePadding by com.example.wammy.AppContainer.readerPreferences.webtoonSidePadding.state.collectAsState()
                     
                     LazyColumn(
-                        state = listState,
+                        state = listState, horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier
                             .fillMaxSize()
                             .zoomable(zoomableState)
                             .pointerInput(Unit) {
                                 detectTapGestures(
                                     onTap = { offset ->
-                                        val x = offset.x
-                                        val width = size.width
-                                        when {
-                                            x < width * 0.33f -> {
-                                                coroutineScope.launch { listState.animateScrollToItem(maxOf(0, listState.firstVisibleItemIndex - 1)) }
-                                            }
-                                            x > width * 0.66f -> {
-                                                coroutineScope.launch { listState.animateScrollToItem(minOf(pages.size, listState.firstVisibleItemIndex + 1)) }
-                                            }
-                                            else -> showOverlay = !showOverlay
+                                        val layoutIndex = com.example.wammy.AppContainer.readerPreferences.navigationModeWebtoon.get()
+                                        val invertMode = com.example.wammy.AppContainer.readerPreferences.webtoonNavInverted.get()
+                                        val layout = NavigationLayouts.getLayout(layoutIndex, true, true)
+                                        
+
+                                        
+                                        val action = NavigationLayouts.resolveTap(offset, pxWidth, pxHeight, layout, invertMode)
+                                        
+                                        val finalAction = when (action) {
+                                            TapAction.LEFT -> TapAction.PREV // Webtoon scrolls down, so "left" usually implies back/up
+                                            TapAction.RIGHT -> TapAction.NEXT
+                                            else -> action
+                                        }
+                                        
+                                        if (finalAction == TapAction.MENU) {
+                                            showOverlay = !showOverlay
+                                        } else if (finalAction == TapAction.PREV) {
+                                            coroutineScope.launch { listState.animateScrollToItem(maxOf(0, listState.firstVisibleItemIndex - 1)) }
+                                        } else if (finalAction == TapAction.NEXT) {
+                                            coroutineScope.launch { listState.animateScrollToItem(minOf(pages.size, listState.firstVisibleItemIndex + 1)) }
                                         }
                                     }
                                 )
@@ -210,17 +271,26 @@ ReadingMode.WEBTOON -> {
                                         .crossfade(true)
                                         .build()
                                 }
-                                val cFilter = remember(colorFilter) { getColorFilterForMode(colorFilter) }
+                                val cFilter = remember(grayscale, invertedColors) { getCustomColorFilter(grayscale, invertedColors) }
                                 
-                                AsyncImage(
-                                    model = imageRequest,
-                                    contentDescription = null,
-                                    contentScale = ContentScale.FillWidth,
-                                    alignment = Alignment.TopCenter,
-                                    modifier = Modifier
-                                        .fillMaxWidth(if (sidePadding > 0) 1f - (sidePadding * 2f / 100f) else 1f)
-                                        .graphicsLayer { this.colorFilter = cFilter }
-                                )
+                                Box(modifier = Modifier.fillMaxWidth(if (sidePadding > 0) 1f - (sidePadding * 2f / 100f) else 1f)) {
+                                    AsyncImage(
+                                        model = imageRequest,
+                                        contentDescription = null,
+                                        contentScale = scaleType,
+                                        alignment = Alignment.TopCenter,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .graphicsLayer { this.colorFilter = cFilter }
+                                    )
+                                    if (isColorFilter) {
+                                        Box(modifier = Modifier.matchParentSize().background(Color(colorR, colorG, colorB, colorA)))
+                                    }
+                                    if (isCustomBrightness && brightnessValue < 0) {
+                                        val alpha = (kotlin.math.abs(brightnessValue) / 100f).coerceIn(0f, 1f)
+                                        Box(modifier = Modifier.matchParentSize().background(Color.Black.copy(alpha = alpha)))
+                                    }
+                                }
                             } else {
                                 Box(
                                     modifier = Modifier
@@ -249,8 +319,8 @@ ReadingMode.WEBTOON -> {
                         }
                     }
                 }
-                ReadingMode.LTR, ReadingMode.RTL -> {
-                    val isRtl = readingMode == ReadingMode.RTL
+                com.example.wammy.data.prefs.ReadingMode.LTR, com.example.wammy.data.prefs.ReadingMode.RTL -> {
+                    val isRtl = readingMode == com.example.wammy.data.prefs.ReadingMode.RTL
                     val layoutDirection = if (isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
                     
 CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
@@ -284,22 +354,122 @@ CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
                             if (page < pages.size) {
                                 ZoomableImage(
                                     model = pages[page],
-                                    contentScale = ContentScale.Fit,
+                                    contentScale = scaleType,
                                     modifier = Modifier.fillMaxSize(),
-                                    filterMode = colorFilter,
+                                    grayscale = grayscale,
+                                    invertedColors = invertedColors,
+                                    isCustomBrightness = isCustomBrightness,
+                                    brightnessValue = brightnessValue,
+                                    isColorFilter = isColorFilter,
+                                    colorR = colorR,
+                                    colorG = colorG,
+                                    colorB = colorB,
+                                    colorA = colorA,
                                     onRetry = { viewModel.retryPage(pages[page].index) },
-                                    onTap = { zone ->
-                                        if (zone == TapZone.CENTER) {
+                                    onTap = { offset ->
+                                        val layoutIndex = com.example.wammy.AppContainer.readerPreferences.navigationModePager.get()
+                                        val invertMode = com.example.wammy.AppContainer.readerPreferences.pagerNavInverted.get()
+                                        val isVert = readingMode == com.example.wammy.data.prefs.ReadingMode.VERTICAL
+                                        val layout = NavigationLayouts.getLayout(layoutIndex, false, isVert)
+                                        
+
+                                        
+                                        val action = NavigationLayouts.resolveTap(offset, pxWidth, pxHeight, layout, invertMode)
+                                        
+                                        val finalAction = when (action) {
+                                            TapAction.LEFT -> if (isRtl) TapAction.NEXT else TapAction.PREV
+                                            TapAction.RIGHT -> if (isRtl) TapAction.PREV else TapAction.NEXT
+                                            else -> action
+                                        }
+                                        
+                                        if (finalAction == TapAction.MENU) {
                                             showOverlay = !showOverlay
-                                        } else if (zone == TapZone.LEFT) {
+                                        } else if (finalAction == TapAction.PREV) {
                                             coroutineScope.launch { pagerState.animateScrollToPage(maxOf(0, pagerState.currentPage - 1)) }
-                                        } else {
+                                        } else if (finalAction == TapAction.NEXT) {
                                             coroutineScope.launch { pagerState.animateScrollToPage(minOf(pages.size, pagerState.currentPage + 1)) }
                                         }
                                     }
                                 )
                             } else {
                                 // Reached the end
+                                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                    ChapterTransition(viewModel)
+                                }
+                            }
+                        }
+                    }
+                }
+                else -> {
+                    // Fallback for VERTICAL, etc
+                    val isRtl = true
+                    val layoutDirection = LayoutDirection.Rtl
+                    
+CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
+                        val pagerState = rememberPagerState(pageCount = { pages.size + 1 })
+                        
+                        LaunchedEffect(pagerState.isScrollInProgress) {
+                            if (pagerState.isScrollInProgress && showOverlay) showOverlay = false
+                        }
+                        
+                        LaunchedEffect(pagerState.currentPage) {
+                            if (pages.isNotEmpty() && pagerState.currentPage < pages.size) {
+                                currentProgress = pagerState.currentPage.toFloat() / maxOf(1, pages.size - 1).toFloat()
+                                viewModel.updateProgress(pagerState.currentPage)
+                            }
+                        }
+                        
+                        LaunchedEffect(initialPage) {
+                            if (initialPage > 0 && initialPage < pages.size) {
+                                pagerState.scrollToPage(initialPage)
+                            }
+                        }
+
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxSize()
+                        ) { page ->
+                            if (page < pages.size) {
+                                ZoomableImage(
+                                    model = pages[page],
+                                    contentScale = scaleType,
+                                    modifier = Modifier.fillMaxSize(),
+                                    grayscale = grayscale,
+                                    invertedColors = invertedColors,
+                                    isCustomBrightness = isCustomBrightness,
+                                    brightnessValue = brightnessValue,
+                                    isColorFilter = isColorFilter,
+                                    colorR = colorR,
+                                    colorG = colorG,
+                                    colorB = colorB,
+                                    colorA = colorA,
+                                    onRetry = { viewModel.retryPage(pages[page].index) },
+                                    onTap = { offset ->
+                                        val layoutIndex = com.example.wammy.AppContainer.readerPreferences.navigationModePager.get()
+                                        val invertMode = com.example.wammy.AppContainer.readerPreferences.pagerNavInverted.get()
+                                        val isVert = readingMode == com.example.wammy.data.prefs.ReadingMode.VERTICAL
+                                        val layout = NavigationLayouts.getLayout(layoutIndex, false, isVert)
+                                        
+
+                                        
+                                        val action = NavigationLayouts.resolveTap(offset, pxWidth, pxHeight, layout, invertMode)
+                                        
+                                        val finalAction = when (action) {
+                                            TapAction.LEFT -> if (isRtl) TapAction.NEXT else TapAction.PREV
+                                            TapAction.RIGHT -> if (isRtl) TapAction.PREV else TapAction.NEXT
+                                            else -> action
+                                        }
+                                        
+                                        if (finalAction == TapAction.MENU) {
+                                            showOverlay = !showOverlay
+                                        } else if (finalAction == TapAction.PREV) {
+                                            coroutineScope.launch { pagerState.animateScrollToPage(maxOf(0, pagerState.currentPage - 1)) }
+                                        } else if (finalAction == TapAction.NEXT) {
+                                            coroutineScope.launch { pagerState.animateScrollToPage(minOf(pages.size, pagerState.currentPage + 1)) }
+                                        }
+                                    }
+                                )
+                            } else {
                                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                     ChapterTransition(viewModel)
                                 }
@@ -330,39 +500,22 @@ CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Button(
-                            onClick = { viewModel.setReadingMode(ReadingMode.WEBTOON); showSettingsSheet = false },
-                            colors = ButtonDefaults.buttonColors(containerColor = if (readingMode == ReadingMode.WEBTOON) Color(0xFFB388FF) else Color(0xFF2E2E3A), contentColor = if (readingMode == ReadingMode.WEBTOON) Color(0xFF0D0D1A) else Color.White)
+                            onClick = { viewModel.setReadingModeOverride(com.example.wammy.data.prefs.ReadingMode.WEBTOON); showSettingsSheet = false },
+                            colors = ButtonDefaults.buttonColors(containerColor = if (readingMode == com.example.wammy.data.prefs.ReadingMode.WEBTOON) Color(0xFFB388FF) else Color(0xFF2E2E3A), contentColor = if (readingMode == com.example.wammy.data.prefs.ReadingMode.WEBTOON) Color(0xFF0D0D1A) else Color.White)
                         ) { Text("Webtoon") }
                         Button(
-                            onClick = { viewModel.setReadingMode(ReadingMode.LTR); showSettingsSheet = false },
-                            colors = ButtonDefaults.buttonColors(containerColor = if (readingMode == ReadingMode.LTR) Color(0xFFB388FF) else Color(0xFF2E2E3A), contentColor = if (readingMode == ReadingMode.LTR) Color(0xFF0D0D1A) else Color.White)
+                            onClick = { viewModel.setReadingModeOverride(com.example.wammy.data.prefs.ReadingMode.LTR); showSettingsSheet = false },
+                            colors = ButtonDefaults.buttonColors(containerColor = if (readingMode == com.example.wammy.data.prefs.ReadingMode.LTR) Color(0xFFB388FF) else Color(0xFF2E2E3A), contentColor = if (readingMode == com.example.wammy.data.prefs.ReadingMode.LTR) Color(0xFF0D0D1A) else Color.White)
                         ) { Text("LTR") }
                         Button(
-                            onClick = { viewModel.setReadingMode(ReadingMode.RTL); showSettingsSheet = false },
-                            colors = ButtonDefaults.buttonColors(containerColor = if (readingMode == ReadingMode.RTL) Color(0xFFB388FF) else Color(0xFF2E2E3A), contentColor = if (readingMode == ReadingMode.RTL) Color(0xFF0D0D1A) else Color.White)
+                            onClick = { viewModel.setReadingModeOverride(com.example.wammy.data.prefs.ReadingMode.RTL); showSettingsSheet = false },
+                            colors = ButtonDefaults.buttonColors(containerColor = if (readingMode == com.example.wammy.data.prefs.ReadingMode.RTL) Color(0xFFB388FF) else Color(0xFF2E2E3A), contentColor = if (readingMode == com.example.wammy.data.prefs.ReadingMode.RTL) Color(0xFF0D0D1A) else Color.White)
                         ) { Text("RTL") }
                     }
                     
                     Spacer(modifier = Modifier.height(24.dp))
                     
-                    Text("Color Filter", color = Color.White, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 16.dp))
-                    Row(
-                        modifier = Modifier,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Button(
-                            onClick = { viewModel.setColorFilter(com.example.wammy.ui.ColorFilterMode.NONE); showSettingsSheet = false },
-                            colors = ButtonDefaults.buttonColors(containerColor = if (colorFilter == com.example.wammy.ui.ColorFilterMode.NONE) Color(0xFFB388FF) else Color(0xFF2E2E3A), contentColor = if (colorFilter == com.example.wammy.ui.ColorFilterMode.NONE) Color(0xFF0D0D1A) else Color.White)
-                        ) { Text("None") }
-                        Button(
-                            onClick = { viewModel.setColorFilter(com.example.wammy.ui.ColorFilterMode.INVERT); showSettingsSheet = false },
-                            colors = ButtonDefaults.buttonColors(containerColor = if (colorFilter == com.example.wammy.ui.ColorFilterMode.INVERT) Color(0xFFB388FF) else Color(0xFF2E2E3A), contentColor = if (colorFilter == com.example.wammy.ui.ColorFilterMode.INVERT) Color(0xFF0D0D1A) else Color.White)
-                        ) { Text("Invert") }
-                        Button(
-                            onClick = { viewModel.setColorFilter(com.example.wammy.ui.ColorFilterMode.SEPIA); showSettingsSheet = false },
-                            colors = ButtonDefaults.buttonColors(containerColor = if (colorFilter == com.example.wammy.ui.ColorFilterMode.SEPIA) Color(0xFFB388FF) else Color(0xFF2E2E3A), contentColor = if (colorFilter == com.example.wammy.ui.ColorFilterMode.SEPIA) Color(0xFF0D0D1A) else Color.White)
-                        ) { Text("Sepia") }
-                    }
+                    // Color filter buttons removed because filters are now managed via ReaderPreferences
                     Spacer(modifier = Modifier.height(32.dp))
                 }
             }
@@ -548,8 +701,16 @@ fun ZoomableImage(
     model: com.example.wammy.ui.ReaderPage, 
     contentScale: ContentScale, 
     modifier: Modifier, 
-    filterMode: com.example.wammy.ui.ColorFilterMode,
-    onTap: (com.example.wammy.ui.screens.TapZone) -> Unit,
+    grayscale: Boolean,
+    invertedColors: Boolean,
+    isCustomBrightness: Boolean,
+    brightnessValue: Int,
+    isColorFilter: Boolean,
+    colorR: Int,
+    colorG: Int,
+    colorB: Int,
+    colorA: Int,
+    onTap: (androidx.compose.ui.geometry.Offset) -> Unit,
     onRetry: () -> Unit = {}
 ) {
     androidx.compose.foundation.layout.BoxWithConstraints(modifier = modifier.fillMaxSize()) {
@@ -559,17 +720,13 @@ fun ZoomableImage(
             detectTapGestures(
                 onTap = { offset ->
                     val x = offset.x
-                    when {
-                        x < width * 0.33f -> onTap(com.example.wammy.ui.screens.TapZone.LEFT)
-                        x > width * 0.66f -> onTap(com.example.wammy.ui.screens.TapZone.RIGHT)
-                        else -> onTap(com.example.wammy.ui.screens.TapZone.CENTER)
-                    }
+                    onTap(offset)
                 }
             )
         }
 
         if (model.state == com.example.wammy.ui.PageState.READY) {
-            val context = LocalContext.current
+            val context = androidx.compose.ui.platform.LocalContext.current
             val imageRequest = remember(model) {
                 ImageRequest.Builder(context)
                     .data(model.url)
@@ -582,7 +739,7 @@ fun ZoomableImage(
                     .build()
             }
             
-            val colorFilter = remember(filterMode) { com.example.wammy.ui.screens.getColorFilterForMode(filterMode) }
+            val colorFilter = remember(grayscale, invertedColors) { com.example.wammy.ui.screens.getCustomColorFilter(grayscale, invertedColors) }
             
             me.saket.telephoto.zoomable.coil.ZoomableAsyncImage(
                 model = imageRequest,
@@ -591,13 +748,20 @@ fun ZoomableImage(
                 contentScale = contentScale,
                 onClick = { offset ->
                     val x = offset.x
-                    when {
-                        x < width * 0.33f -> onTap(com.example.wammy.ui.screens.TapZone.LEFT)
-                        x > width * 0.66f -> onTap(com.example.wammy.ui.screens.TapZone.RIGHT)
-                        else -> onTap(com.example.wammy.ui.screens.TapZone.CENTER)
-                    }
+                    onTap(offset)
                 }
             )
+            
+            // Custom Color Filter Overlay
+            if (isColorFilter) {
+                Box(modifier = Modifier.matchParentSize().background(Color(colorR, colorG, colorB, colorA)))
+            }
+            
+            // Custom Brightness Overlay (when negative, draw black overlay)
+            if (isCustomBrightness && brightnessValue < 0) {
+                val alpha = (kotlin.math.abs(brightnessValue) / 100f).coerceIn(0f, 1f)
+                Box(modifier = Modifier.matchParentSize().background(Color.Black.copy(alpha = alpha)))
+            }
                 } else {
             // Background Loading / Queued / Error State
             Box(

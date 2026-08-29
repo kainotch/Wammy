@@ -28,7 +28,8 @@ data class MangaEntity(
     val isNovel: Boolean = false,
     val novelPkgName: String? = null,
     val novelApkFile: String? = null,
-    val readingMode: Int = 0 // 0=RTL, 1=LTR, 2=WEBTOON
+    val readingMode: Int = 0, // 0=DEFAULT, 1=LTR, 2=RTL, 3=VERTICAL, 4=WEBTOON, 5=CONTINUOUS_VERTICAL
+    val orientation: Int = 0 // 0=DEFAULT, 1=FREE, 2=PORTRAIT, 3=LANDSCAPE, 4=LOCKED_PORTRAIT, 5=LOCKED_LANDSCAPE, 6=REVERSE_PORTRAIT
 )
 
 @Entity(
