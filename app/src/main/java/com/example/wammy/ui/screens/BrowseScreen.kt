@@ -252,8 +252,13 @@ fun SourceRow(source: BrowseSourceItem, isPinned: Boolean, onPin: () -> Unit, on
     ) {
         // Source icon
         if (source.iconUrl != null) {
+            val iconModel: Any = if (source.iconUrl.startsWith("/")) {
+                java.io.File(source.iconUrl)
+            } else {
+                source.iconUrl
+            }
             AsyncImage(
-                model = source.iconUrl,
+                model = iconModel,
                 contentDescription = source.name,
                 modifier = Modifier
                     .size(40.dp)

@@ -127,7 +127,7 @@ class HomeViewModel : ViewModel() {
                 // Try local extracted icon first
                 val iconFile = java.io.File(AppContainer.appContext.cacheDir, "${pkgName}_icon.png")
                 if (iconFile.exists()) {
-                    iconUrl = "file://" + iconFile.absolutePath
+                    iconUrl = iconFile.absolutePath
                 }
             }
             // Use the CDN icon URL from the extension index if local not available
@@ -193,13 +193,18 @@ class HomeViewModel : ViewModel() {
             _isLoading.value = true
             nextExtensionIndex = 0
             _loadedExtensions.clear()
-            _hasMoreExtensions.value = AppContainer.extensionManager.activeSources.isNotEmpty()
+            val totalSources = AppContainer.extensionManager.activeSources.size
+            android.util.Log.d("HomeViewModel", "fetchLatest: $totalSources active extension sources found")
+            _hasMoreExtensions.value = totalSources > 0
             try {
                 // Fetch from MangaDex first
                 val mdResults = try {
                     AppContainer.mangaDexSource.fetchLatest(1)
-                } catch (e: Throwable) { emptyList() }
-                
+                } catch (e: Throwable) {
+                    android.util.Log.e("HomeViewModel", "MangaDex fetchLatest failed: ${e.message}")
+                    emptyList()
+                }
+                android.util.Log.d("HomeViewModel", "MangaDex returned ${mdResults.size} results")
                 _latestManga.value = mdResults.shuffled()
             } catch (e: Throwable) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
@@ -216,12 +221,14 @@ class HomeViewModel : ViewModel() {
         if (isLoadingExtension) return
         val sources = AppContainer.extensionManager.activeSources
         if (nextExtensionIndex >= sources.size) {
+            android.util.Log.d("HomeViewModel", "loadNextExtension: All ${sources.size} extensions loaded")
             _hasMoreExtensions.value = false
             _isLoadingMore.value = false
             return
         }
         
         val source = sources[nextExtensionIndex]
+        android.util.Log.d("HomeViewModel", "loadNextExtension: Loading extension ${nextExtensionIndex}/${sources.size}: ${source.name} (id=${source.id})")
         nextExtensionIndex++
         
         // Skip if already loaded
@@ -257,6 +264,7 @@ class HomeViewModel : ViewModel() {
                     _loadedExtensions.add(source.id)
                     kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
                         _latestManga.value = _latestManga.value + mapped
+                        android.util.Log.d("HomeViewModel", "Extension ${source.name} loaded ${mapped.size} manga, total now: ${_latestManga.value.size}")
                     }
                 } else {
                     android.util.Log.w("HomeViewModel", "Extension ${source.name} timed out, skipping")
@@ -268,6 +276,12 @@ class HomeViewModel : ViewModel() {
                 isLoadingExtension = false
                 _isLoadingMore.value = nextExtensionIndex < sources.size
                 _hasMoreExtensions.value = nextExtensionIndex < sources.size
+                // Auto-chain: load the next extension after this one finishes (success or failure)
+                if (nextExtensionIndex < sources.size) {
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        loadNextExtension()
+                    }
+                }
             }
         }
     }

@@ -56,7 +56,9 @@ object NetworkHelper {
                 .readTimeout(30, TimeUnit.SECONDS)
                 .callTimeout(2, TimeUnit.MINUTES)
                 .cookieJar(cookieJar)
+                .addInterceptor(eu.kanade.tachiyomi.network.interceptor.UncaughtExceptionInterceptor())
                 .addInterceptor(UserAgentInterceptor())
+                .addInterceptor(okhttp3.brotli.BrotliInterceptor)
                 .addInterceptor(CloudflareInterceptor(context, cookieJar, { "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36" }))
                 .build()
         }
@@ -68,6 +70,8 @@ object NetworkHelper {
             .readTimeout(30, TimeUnit.SECONDS)
             .callTimeout(2, TimeUnit.MINUTES)
             .cookieJar(cookieJar)
+            .addInterceptor(eu.kanade.tachiyomi.network.interceptor.UncaughtExceptionInterceptor())
             .addInterceptor(UserAgentInterceptor())
+            .addInterceptor(okhttp3.brotli.BrotliInterceptor)
             .build()
 }
