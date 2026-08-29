@@ -59,6 +59,7 @@ class ReaderViewModel : ViewModel() {
 
     private var chapters: List<ChapterEntity> = emptyList()
     private var currentChapterIndex: Int = -1
+    private var currentPageIndex: Int = 0
     private var sourceId: Long = 1L
     private var activeManga: MangaEntity? = null
 
@@ -169,7 +170,12 @@ class ReaderViewModel : ViewModel() {
                         
                         claimMutex.withLock {
                             val currentList = _pages.value
-                            targetPage = currentList.firstOrNull { it.state == PageState.QUEUE } ?: currentList.firstOrNull { it.state == PageState.ERROR }
+                            // Mihon behavior: Prioritize pages closest to the user's current view (currentPageIndex)
+                            // We sort QUEUE pages by their absolute distance to currentPageIndex, then fall back to ERROR pages.
+                            targetPage = currentList
+                                .filter { it.state == PageState.QUEUE }
+                                .minByOrNull { kotlin.math.abs(it.index - currentPageIndex) }
+                                ?: if (currentList.all { it.state == PageState.READY || it.state == PageState.ERROR }) currentList.firstOrNull { it.state == PageState.ERROR } else null
                             if (targetPage != null) {
                                 _pages.update { list ->
                                     list.map { if (it.index == targetPage!!.index) it.copy(state = PageState.DOWNLOAD_IMAGE) else it }
@@ -266,6 +272,7 @@ class ReaderViewModel : ViewModel() {
     }
 
     fun updateProgress(pageIndex: Int) {
+        currentPageIndex = pageIndex
         saveHistory(pageIndex)
     }
 
