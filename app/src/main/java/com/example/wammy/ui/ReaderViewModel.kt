@@ -288,8 +288,8 @@ class ReaderViewModel : ViewModel() {
                                 }
                             }
                             
+                            kotlinx.coroutines.delay(2000) // Cooldown BEFORE marking as ERROR so other workers don't steal and spam it instantly
                             updatePageState(targetPage!!.index, PageState.ERROR)
-                            kotlinx.coroutines.delay(2000) // wait before retry
                         }
                     }
                 }
