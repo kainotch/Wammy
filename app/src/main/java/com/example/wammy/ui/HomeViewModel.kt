@@ -37,6 +37,11 @@ class HomeViewModel : ViewModel() {
     private val _searchResults = MutableStateFlow<List<MangaEntity>>(emptyList())
     val searchResults: StateFlow<List<MangaEntity>> = _searchResults.asStateFlow()
 
+
+    private var nextExtensionIndex = 0
+    private var isLoadingExtension = false
+    private val _loadedExtensions = mutableSetOf<Long>()
+
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     
@@ -180,61 +185,69 @@ class HomeViewModel : ViewModel() {
     fun fetchLatest(): Job {
         return viewModelScope.launch {
             _isLoading.value = true
+            nextExtensionIndex = 0
+            _loadedExtensions.clear()
             try {
-                // Fetch from MangaDex
-                val mdJob = async {
-                    try {
-                        AppContainer.mangaDexSource.fetchLatest(1)
-                    } catch (e: Throwable) { emptyList() }
-                }
-
-                // Fetch from all installed Tachiyomi sources concurrently
-                val extJobs = AppContainer.extensionManager.activeSources
-                    .filter { _pinnedMangaSources.value.contains(it.id.toString()) }
-                    .map { source ->
-                    async {
-                        try {
-                            val page = kotlinx.coroutines.withTimeoutOrNull(5000) {
-                                kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) { source.getPopularManga(1) }
-                            }
-                            if (page == null) {
-                                android.util.Log.e("HomeViewModel", "Extension \${source.name} timed out or hung.")
-                                return@async emptyList()
-                            }
-                            page.mangas.map { sManga ->
-                                MangaEntity(
-                                    aniListId = null,
-                                    titleRomaji = sManga.title,
-                                    coverImageUrl = sManga.thumbnail_url?.let { if (it.startsWith("/") && source is eu.kanade.tachiyomi.source.online.HttpSource) source.baseUrl + it else it } ?: "",
-                                    description = sManga.description ?: "",
-                                    sourceId = source.id,
-                                    sourceUrl = sManga.url,
-                                    author = sManga.author,
-                                    artist = sManga.artist,
-                                    status = "Unknown",
-                                    sourceName = source.name,
-                                    genre = sManga.genre
-                                )
-                            }.take(10)
-                        } catch (e: Throwable) {
-                            emptyList()
-                        }
-                    }
-                }
-
-                val mdResults = mdJob.await()
-                val extResults = extJobs.awaitAll().flatten()
-
-                val combinedList = (mdResults.take(15) + extResults).shuffled()
-                _latestManga.value = combinedList
+                // Fetch from MangaDex first
+                val mdResults = try {
+                    AppContainer.mangaDexSource.fetchLatest(1)
+                } catch (e: Throwable) { emptyList() }
+                
+                _latestManga.value = mdResults.shuffled()
             } catch (e: Throwable) {
                 if (e is kotlinx.coroutines.CancellationException) throw e
                 e.printStackTrace()
-                android.os.Handler(android.os.Looper.getMainLooper()).post {
-                    android.widget.Toast.makeText(AppContainer.appContext, "Search error: ${e.message}", android.widget.Toast.LENGTH_SHORT).show()
-                }
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    fun loadNextExtension() {
+        if (isLoadingExtension) return
+        val sources = AppContainer.extensionManager.activeSources
+        if (nextExtensionIndex >= sources.size) return
+        
+        val source = sources[nextExtensionIndex]
+        nextExtensionIndex++
+        
+        // Skip if already loaded
+        if (_loadedExtensions.contains(source.id)) {
+            loadNextExtension()
+            return
+        }
+        
+        isLoadingExtension = true
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val page = kotlinx.coroutines.withTimeoutOrNull(10000) {
+                    source.getPopularManga(1)
+                }
+                if (page != null) {
+                    val mapped = page.mangas.map { sManga ->
+                        MangaEntity(
+                            aniListId = null,
+                            titleRomaji = sManga.title,
+                            coverImageUrl = sManga.thumbnail_url?.let { if (it.startsWith("/") && source is eu.kanade.tachiyomi.source.online.HttpSource) source.baseUrl + it else it } ?: "",
+                            description = sManga.description ?: "",
+                            sourceId = source.id,
+                            sourceUrl = sManga.url,
+                            author = sManga.author,
+                            artist = sManga.artist,
+                            status = "Unknown",
+                            sourceName = source.name,
+                            genre = sManga.genre
+                        )
+                    }.take(10)
+                    
+                    _loadedExtensions.add(source.id)
+                    val currentList = _latestManga.value
+                    _latestManga.value = currentList + mapped
+                }
+            } catch (e: Throwable) {
+                // Ignore errors from individual extensions
+            } finally {
+                isLoadingExtension = false
             }
         }
     }
