@@ -122,6 +122,13 @@ fun ReaderScreen(
 
 
     val prefs = com.example.wammy.AppContainer.readerPreferences
+    val readerTheme by prefs.readerTheme.state.collectAsState()
+    val bgColor = when(readerTheme) {
+        com.example.wammy.data.prefs.ReaderTheme.BLACK -> Color.Black
+        com.example.wammy.data.prefs.ReaderTheme.GRAY -> Color(0xFF22222E)
+        com.example.wammy.data.prefs.ReaderTheme.WHITE -> Color.White
+        com.example.wammy.data.prefs.ReaderTheme.AUTOMATIC -> androidx.compose.material3.MaterialTheme.colorScheme.background
+    }
     val showPageNumber by prefs.showPageNumber.state.collectAsState()
     val grayscale by prefs.grayscale.state.collectAsState()
     val invertedColors by prefs.invertedColors.state.collectAsState()
@@ -183,7 +190,7 @@ fun ReaderScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(androidx.compose.material3.MaterialTheme.colorScheme.background)
+            .background(bgColor)
     ) {
         if (isLoading) {
             CircularProgressIndicator(

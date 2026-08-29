@@ -288,7 +288,7 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.HourglassBottom, contentDescription = null, tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(6.dp))
-                            Text("Updated: ${safeManga.status ?: "Unknown"}", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                            Text("Status: ${safeManga.status ?: "Unknown"}", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
                         }
                         Spacer(modifier = Modifier.height(4.dp))
                         
@@ -296,6 +296,14 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                             Icon(Icons.Default.Description, contentDescription = null, tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
                             Spacer(modifier = Modifier.width(6.dp))
                             Text("${chapters.size} Chapters • ${safeManga.sourceName}", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
+                        }
+                        Spacer(modifier = Modifier.height(4.dp))
+                        
+                        val readCount = chapters.count { it.read }
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(Icons.Default.CheckCircle, contentDescription = null, tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(14.dp))
+                            Spacer(modifier = Modifier.width(6.dp))
+                            Text("$readCount / ${chapters.size} chapters read", color = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp)
                         }
                     }
                 }
@@ -530,10 +538,20 @@ val displayChapters = if (showDownloadedOnly) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
-                        val titleText = if (chapter.read) chapter.name else "• ${chapter.name}"
+                        // Format chapter number like Mihon (Ch. 1, Ch. 1.5, etc.)
+                        val chNum = chapter.chapterNumber
+                        val chNumStr = if (chNum == chNum.toLong().toFloat()) "Ch. ${chNum.toLong()}" else "Ch. $chNum"
+                        val displayName = if (chapter.name.isNotBlank() && !chapter.name.startsWith("Chapter", ignoreCase = true) && !chapter.name.startsWith("Ch.", ignoreCase = true)) {
+                            "$chNumStr - ${chapter.name}"
+                        } else if (chapter.name.isBlank()) {
+                            chNumStr
+                        } else {
+                            chapter.name
+                        }
+                        val titleText = if (chapter.read) displayName else "• $displayName"
                         Text(
                             text = titleText,
-                            color = if (chapter.read) Color.Gray else Color(0xFFB388FF), // Primary purple for unread
+                            color = if (chapter.read) Color.Gray else Color(0xFFB388FF),
                             style = MaterialTheme.typography.bodyLarge,
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
