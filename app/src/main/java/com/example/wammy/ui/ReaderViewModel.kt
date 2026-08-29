@@ -165,7 +165,7 @@ class ReaderViewModel : ViewModel() {
 
             // Launch a worker pool of 3 concurrent downloaders to mimic Mihon/Tachiyomi
             var lastMdRefreshTime = 0L
-            val workers = List(3) {
+            val workers = List(2) {
                 launch {
                     while (true) {
                         var targetPage: com.example.wammy.ui.ReaderPage? = null
@@ -175,13 +175,8 @@ class ReaderViewModel : ViewModel() {
                             // Mihon behavior: Prioritize pages closest to the user's current view (currentPageIndex)
                             // We sort QUEUE pages by their absolute distance to currentPageIndex, then fall back to ERROR pages.
                             targetPage = currentList
-                                .filter { it.state == PageState.QUEUE }
+                                .filter { it.state == PageState.QUEUE || it.state == PageState.ERROR }
                                 .minByOrNull { kotlin.math.abs(it.index - currentPageIndex) }
-                                ?: if (currentList.all { it.state == PageState.READY || it.state == PageState.ERROR }) {
-                                    currentList
-                                        .filter { it.state == PageState.ERROR }
-                                        .minByOrNull { kotlin.math.abs(it.index - currentPageIndex) }
-                                } else null
                             if (targetPage != null) {
                                 _pages.update { list ->
                                     list.map { if (it.index == targetPage!!.index) it.copy(state = PageState.DOWNLOAD_IMAGE) else it }
