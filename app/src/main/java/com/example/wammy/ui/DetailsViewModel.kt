@@ -282,7 +282,29 @@ private fun fetchChaptersForManga(manga: MangaEntity) {
                         }
 
                         val chaptersToInsert = chaptersList.map { it.copy(mangaId = finalMangaId) }
-                        AppContainer.database.chapterDao().insertChapters(chaptersToInsert)
+                        // Merge with existing chapters to preserve read state
+                        val existingChapters = AppContainer.database.chapterDao().getChaptersForManga(finalMangaId).firstOrNull() ?: emptyList()
+                        val existingMap = existingChapters.associateBy { it.sourceUrl }
+                        
+                        val mergedChapters = chaptersToInsert.map { newCh ->
+                            val existing = existingMap[newCh.sourceUrl]
+                            if (existing != null) {
+                                // Keep the read state, lastPageRead, and ID from the local database, but update scanlator and date
+                                newCh.copy(id = existing.id, read = existing.read, lastPageRead = existing.lastPageRead)
+                            } else {
+                                newCh
+                            }
+                        }
+                        
+                        // Because insertChapters is IGNORE, it won't update existing. We must use an update loop or REPLACE.
+                        // Actually, if we use REPLACE, it would wipe the primary key ID if we didn't copy it. Since we copied the ID, we can just use an upsert loop.
+                        mergedChapters.forEach { ch ->
+                            if (ch.id > 0L) {
+                                AppContainer.database.chapterDao().updateChapter(ch)
+                            } else {
+                                AppContainer.database.chapterDao().insertChapters(listOf(ch))
+                            }
+                        }
 
                         // Re-read fresh from DB so IDs and read-state are accurate
                         val fresh = AppContainer.database.chapterDao().getChaptersForManga(finalMangaId).firstOrNull()
