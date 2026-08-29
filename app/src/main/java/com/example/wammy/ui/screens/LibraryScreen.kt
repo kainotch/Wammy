@@ -268,16 +268,17 @@ fun LibraryScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .clip(RoundedCornerShape(12.dp))
-                            .background(Color(0xFF16161A))
+                            .background(androidx.compose.material3.MaterialTheme.colorScheme.surfaceVariant)
                             .padding(vertical = 16.dp),
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        val onSurface = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
                         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { selectedFilter = "Entries" }) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.List, contentDescription = null, tint = if (selectedFilter == "Entries") Color(0xFF2E65F3) else Color.Gray, modifier = Modifier.size(18.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("${stats.entries}", color = if (selectedFilter == "Entries") Color(0xFF2E65F3) else Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
+                                Text("${stats.entries}", color = if (selectedFilter == "Entries") Color(0xFF2E65F3) else onSurface, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                             }
                             Text("Entries", color = Color.Gray, fontSize = 11.sp)
                         }
@@ -286,7 +287,7 @@ fun LibraryScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.Star, contentDescription = null, tint = if (selectedFilter == "Favorites") Color(0xFFFFB703) else Color.Gray, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("${stats.favorites}", color = if (selectedFilter == "Favorites") Color(0xFFFFB703) else Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text("${stats.favorites}", color = if (selectedFilter == "Favorites") Color(0xFFFFB703) else onSurface, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                             }
                             Text("Favorites", color = Color.Gray, fontSize = 11.sp)
                         }
@@ -295,7 +296,7 @@ fun LibraryScreen(
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Icon(Icons.Default.CheckCircle, contentDescription = null, tint = if (selectedFilter == "Completed") Color(0xFF4CAF50) else Color.Gray, modifier = Modifier.size(16.dp))
                                 Spacer(modifier = Modifier.width(4.dp))
-                                Text("${stats.completed}", color = if (selectedFilter == "Completed") Color(0xFF4CAF50) else Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+                                Text("${stats.completed}", color = if (selectedFilter == "Completed") Color(0xFF4CAF50) else onSurface, fontWeight = FontWeight.Bold, fontSize = 16.sp)
                             }
                             Text("Completed", color = Color.Gray, fontSize = 11.sp)
                         }
@@ -555,13 +556,10 @@ fun LibraryScreen(
                                 if (selectedFilter == "Continue Reading" || selectedFilter == "Novels") {
                     items(if (selectedFilter == "Novels") novelHistory else mangaHistory, span = { GridItemSpan(3) }) { history ->
                         val m = allManga.find { it.sourceUrl == history.mangaSourceUrl }
-                        Box(
+                        Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(120.dp)
-                                .padding(vertical = 4.dp)
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(Color(0xFF16161A))
+                                .padding(vertical = 8.dp)
                                 .clickable { 
                                     if (selectedFilter == "Novels") {
                                         val intent = android.content.Intent(context, com.example.wammy.ui.reader.LNNovelDetailsActivity::class.java).apply {
@@ -574,46 +572,29 @@ fun LibraryScreen(
                                     } else {
                                         onMangaClick(history.chapterSourceUrl, false)
                                     }
-                                }
+                                },
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Blurred Background
+                            val onSurfaceColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+                            val onSurfaceVariantColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+                            
+                            // Poster
                             AsyncImage(
                                 model = history.mangaCoverUrl,
                                 contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                            // Gradient Overlay
-                            Box(
+                                contentScale = ContentScale.Crop,
                                 modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(androidx.compose.ui.graphics.Brush.horizontalGradient(
-                                        colors = listOf(Color.Black.copy(alpha = 0.8f), Color.Black.copy(alpha = 0.5f), Color.Black.copy(alpha = 0.8f))
-                                    ))
+                                    .size(72.dp, 102.dp)
+                                    .clip(RoundedCornerShape(6.dp))
+                                    .background(Color.DarkGray)
                             )
                             
-                            Row(
-                                modifier = Modifier.fillMaxSize().padding(8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                // Poster
-                                AsyncImage(
-                                    model = history.mangaCoverUrl,
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .size(72.dp, 102.dp)
-                                        .clip(RoundedCornerShape(6.dp))
-                                        .background(Color.DarkGray)
-                                )
-                                
-                                Spacer(modifier = Modifier.width(16.dp))
-                                
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(history.mangaTitle, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 15.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
-                                    Spacer(modifier = Modifier.height(4.dp))
-                                    Text(history.chapterName, color = Color(0xFF90CAF9), fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(history.mangaTitle, color = onSurfaceColor, fontWeight = FontWeight.Bold, fontSize = 15.sp, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(history.chapterName, color = onSurfaceVariantColor, fontSize = 12.sp, maxLines = 1, overflow = TextOverflow.Ellipsis)
                             }
                         }
                     }
@@ -893,73 +874,48 @@ fun LibraryScreen(
 
 @Composable
 fun LibraryItem(manga: MangaEntity, modifier: Modifier = Modifier, onClick: () -> Unit, onLongClick: (() -> Unit)? = null) {
-    Box(
+    val onSurfaceColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurface
+    val onSurfaceVariantColor = androidx.compose.material3.MaterialTheme.colorScheme.onSurfaceVariant
+
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(120.dp)
-            .padding(vertical = 4.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFF16161A))
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick ?: {})
+            .padding(vertical = 8.dp)
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick ?: {}),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        // Blurred Background
+        // Poster
         AsyncImage(
             model = manga.coverImageUrl,
             contentDescription = null,
-            modifier = Modifier.fillMaxSize().alpha(0.6f),
-            contentScale = ContentScale.Crop
-        )
-        // Gradient Overlay blending into black
-        Box(
+            contentScale = ContentScale.Crop,
             modifier = Modifier
-                .fillMaxSize()
-                .background(androidx.compose.ui.graphics.Brush.horizontalGradient(
-                    colorStops = arrayOf(
-                        0.0f to Color.Black.copy(alpha = 0.1f),
-                        0.3f to Color.Black.copy(alpha = 0.6f),
-                        0.6f to Color.Black,
-                        1.0f to Color.Black
-                    )
-                ))
+                .size(72.dp, 102.dp)
+                .clip(RoundedCornerShape(6.dp))
+                .background(Color.DarkGray)
         )
         
-        Row(
-            modifier = Modifier.fillMaxSize().padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Column(
+            modifier = Modifier.weight(1f)
         ) {
-            // Poster
-            AsyncImage(
-                model = manga.coverImageUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(72.dp, 102.dp)
-                    .clip(RoundedCornerShape(6.dp))
-                    .background(Color.DarkGray)
+            Text(
+                text = manga.titleRomaji,
+                color = onSurfaceColor,
+                fontWeight = FontWeight.Bold,
+                fontSize = 15.sp,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
             )
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(
-                modifier = Modifier.weight(1f)
-            ) {
-                Text(
-                    text = manga.titleRomaji,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 15.sp,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = manga.sourceName,
-                    color = Color.LightGray,
-                    fontSize = 12.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = manga.sourceName,
+                color = onSurfaceVariantColor,
+                fontSize = 12.sp,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
         }
     }
 }
