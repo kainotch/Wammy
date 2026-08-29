@@ -260,7 +260,8 @@ private fun fetchChaptersForManga(manga: MangaEntity) {
                                         name = sCh.name ?: ("Chapter " + (index + 1)),
                                         sourceUrl = sCh.url,
                                         chapterNumber = if (parsedNumber >= 0f) parsedNumber else (sChapters.size - index).toFloat(),
-                                        dateUpload = sCh.date_upload
+                                        dateUpload = sCh.date_upload,
+                                        scanlator = sCh.scanlator
                                     )
                                 }
                             } else emptyList()

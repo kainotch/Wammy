@@ -44,7 +44,8 @@ data class ChapterEntity(
     val chapterNumber: Float,
     val dateUpload: Long,
     val read: Boolean = false,
-    val lastPageRead: Int = 0
+    val lastPageRead: Int = 0,
+    val scanlator: String? = null
 )
 
 @Entity(tableName = "category")

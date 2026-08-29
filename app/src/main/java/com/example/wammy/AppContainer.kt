@@ -39,12 +39,17 @@ val MIGRATION_8_9 = object : androidx.room.migration.Migration(8, 9) {
                 database.execSQL("ALTER TABLE manga ADD COLUMN novelApkFile TEXT")
             }
         }
+        val MIGRATION_10_11 = object : androidx.room.migration.Migration(10, 11) {
+            override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE chapter ADD COLUMN scanlator TEXT")
+            }
+        }
         database = Room.databaseBuilder(
             context.applicationContext,
             WammyDatabase::class.java,
             "wammy.db"
         )
-        .addMigrations(MIGRATION_8_9, MIGRATION_9_10)
+        .addMigrations(MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
         .fallbackToDestructiveMigration()
         .build()
 
