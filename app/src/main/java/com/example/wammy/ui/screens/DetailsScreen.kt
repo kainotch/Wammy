@@ -355,9 +355,13 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                             .weight(1f)
                             .background(Color(0xFF22222E), RoundedCornerShape(12.dp))
                             .clickable { 
-                                val toDownload = chapters.filter { !downloadedChapters.contains(it.sourceUrl) }
-                                if (toDownload.isNotEmpty() && !isCurrentlyDownloading) {
-                                    viewModel.downloadAllChapters(context, toDownload)
+                                if (isCurrentlyDownloading) {
+                                    com.example.wammy.util.DownloadManager.cancelDownload(safeManga.sourceUrl)
+                                } else {
+                                    val toDownload = chapters.filter { !downloadedChapters.contains(it.sourceUrl) }
+                                    if (toDownload.isNotEmpty()) {
+                                        viewModel.downloadAllChapters(context, toDownload)
+                                    }
                                 }
                             }
                             .padding(vertical = 12.dp),
@@ -370,7 +374,7 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                             modifier = Modifier.size(22.dp)
                         )
                         Spacer(modifier = Modifier.height(6.dp))
-                        Text(if (isDownloaded) "Cached" else if (isCurrentlyDownloading) "Caching..." else "Not Cached", color = Color.LightGray, fontSize = 12.sp)
+                        Text(if (isDownloaded) "Cached" else if (isCurrentlyDownloading) "Cancel" else "Not Cached", color = if (isCurrentlyDownloading) Color(0xFFFF6B6B) else Color.LightGray, fontSize = 12.sp)
                     }
                     
                     // Info / WebView Button
