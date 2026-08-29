@@ -27,7 +27,8 @@ data class MangaEntity(
     val downloaded: Boolean = false,
     val isNovel: Boolean = false,
     val novelPkgName: String? = null,
-    val novelApkFile: String? = null
+    val novelApkFile: String? = null,
+    val readingMode: Int = 0 // 0=RTL, 1=LTR, 2=WEBTOON
 )
 
 @Entity(

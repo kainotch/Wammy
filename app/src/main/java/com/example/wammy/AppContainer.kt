@@ -26,7 +26,13 @@ object AppContainer {
 
     fun init(context: Context) {
         appContext = context.applicationContext
-        val MIGRATION_8_9 = object : androidx.room.migration.Migration(8, 9) {
+        val MIGRATION_9_10 = object : androidx.room.migration.Migration(9, 10) {
+    override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE manga ADD COLUMN readingMode INTEGER NOT NULL DEFAULT 0")
+    }
+}
+
+val MIGRATION_8_9 = object : androidx.room.migration.Migration(8, 9) {
             override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
                 database.execSQL("ALTER TABLE manga ADD COLUMN isNovel INTEGER NOT NULL DEFAULT 0")
                 database.execSQL("ALTER TABLE manga ADD COLUMN novelPkgName TEXT")
@@ -38,7 +44,7 @@ object AppContainer {
             WammyDatabase::class.java,
             "wammy.db"
         )
-        .addMigrations(MIGRATION_8_9)
+        .addMigrations(MIGRATION_8_9, MIGRATION_9_10)
         .fallbackToDestructiveMigration()
         .build()
 

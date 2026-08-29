@@ -72,6 +72,7 @@ class ReaderViewModel : ViewModel() {
         currentChapterIndex = startIndex
         sourceId = source
         activeManga = manga
+        _readingMode.value = ReadingMode.values()[manga.readingMode.coerceIn(0, ReadingMode.values().size - 1)]
         loadCurrentChapter()
     }
 
@@ -348,6 +349,18 @@ class ReaderViewModel : ViewModel() {
 
     fun setReadingMode(mode: ReadingMode) {
         _readingMode.value = mode
+        val manga = activeManga ?: return
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val existing = AppContainer.database.mangaDao().getMangaByUrl(manga.sourceUrl)
+            if (existing != null) {
+                AppContainer.database.mangaDao().insertManga(existing.copy(readingMode = mode.ordinal))
+                activeManga = existing.copy(readingMode = mode.ordinal)
+            } else {
+                val newManga = manga.copy(readingMode = mode.ordinal, id = 0)
+                AppContainer.database.mangaDao().insertManga(newManga)
+                activeManga = newManga
+            }
+        }
     }
     
     fun updatePageState(index: Int, newState: PageState) {
