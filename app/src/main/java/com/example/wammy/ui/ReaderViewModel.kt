@@ -156,91 +156,112 @@ class ReaderViewModel : ViewModel() {
             val chapter = chapters[currentChapterIndex]
             val manga = activeManga ?: return@launch
             
-            val cacheDir = File(AppContainer.appContext.cacheDir, "reader_cache/${manga.sourceUrl.hashCode()}_${chapter.sourceUrl.hashCode()}")
+            val cacheDir = java.io.File(AppContainer.appContext.cacheDir, "reader_cache/${manga.sourceUrl.hashCode()}_${chapter.sourceUrl.hashCode()}")
             if (!cacheDir.exists()) cacheDir.mkdirs()
 
-            // Iterate and download
-            while (true) {
-                val currentList = _pages.value
-                // Find the first page that is queued or error
-                val targetPage = currentList.firstOrNull { it.state == PageState.QUEUE } ?: currentList.firstOrNull { it.state == PageState.ERROR } ?: break
-                
-                // Update state to LOADING
-                updatePageState(targetPage.index, PageState.DOWNLOAD_IMAGE)
+            val claimMutex = kotlinx.coroutines.sync.Mutex()
 
-                try {
-                    val finalFile = File(cacheDir, "page_${targetPage.index}.jpg")
-                    
-                    if (finalFile.exists() && finalFile.length() > 0) {
-                        _pages.update { list ->
-                            list.map { if (it.index == targetPage.index) it.copy(state = PageState.READY, url = "file://${finalFile.absolutePath}") else it }
-                        }
-                        continue
-                    }
-
-                    if (targetPage.sourcePage != null && targetPage.sourcePage.imageUrl == null) {
-                        try {
-                            var parsed = source?.getImageUrl(targetPage.sourcePage)
-                            if (parsed != null && !parsed.startsWith("http")) {
-                                parsed = (source?.baseUrl ?: "") + if (parsed.startsWith("/")) parsed else "/$parsed"
-                            }
-                            targetPage.sourcePage.imageUrl = parsed
-                        } catch (e: Exception) {
-                            e.printStackTrace()
-                        }
-                    }
-
-                    if (targetPage.sourcePage != null && targetPage.sourcePage.imageUrl != null) {
-                        var imgUrl = targetPage.sourcePage.imageUrl!!
-                        if (!imgUrl.startsWith("http")) {
-                            imgUrl = (source?.baseUrl ?: "") + if (imgUrl.startsWith("/")) imgUrl else "/$imgUrl"
-                            targetPage.sourcePage.imageUrl = imgUrl
-                        }
-                    }
-
-                    val finalImageUrlToDownload = targetPage.sourcePage?.imageUrl ?: targetPage.url
-
-                    android.util.Log.d("WammyReader", "Attempting to download page ${targetPage.index} with URL: ${targetPage.sourcePage?.imageUrl ?: finalImageUrlToDownload}")
-                    val response = if (source != null && targetPage.sourcePage != null && targetPage.sourcePage.imageUrl != null) {
-                        try {
-                            source.getImage(targetPage.sourcePage)
-                        } catch (e: Exception) {
-                            val reqUrl = if (finalImageUrlToDownload.startsWith("http")) finalImageUrlToDownload else (source.baseUrl) + if (finalImageUrlToDownload.startsWith("/")) finalImageUrlToDownload else "/$finalImageUrlToDownload"
-                            val builder = okhttp3.Request.Builder().url(reqUrl)
-                            targetPage.headers?.forEach { (k, v) -> builder.addHeader(k, v) }
-                            client.newCall(builder.build()).execute()
-                        }
-                    } else {
-                        val reqUrl = if (finalImageUrlToDownload.startsWith("http")) finalImageUrlToDownload else (source?.baseUrl ?: "") + if (finalImageUrlToDownload.startsWith("/")) finalImageUrlToDownload else "/${finalImageUrlToDownload}"
-                        val builder = okhttp3.Request.Builder().url(reqUrl)
-                        targetPage.headers?.forEach { (k, v) -> builder.addHeader(k, v) }
-                        client.newCall(builder.build()).execute()
-                    }
-                    if (response.isSuccessful) {
-                        val tmpFile = File(cacheDir, "page_${targetPage.index}.tmp")
-                        response.body?.byteStream()?.use { input ->
-                            tmpFile.outputStream().use { output ->
-                                input.copyTo(output)
+            // Launch a worker pool of 3 concurrent downloaders to mimic Mihon/Tachiyomi
+            val workers = List(3) {
+                launch {
+                    while (true) {
+                        var targetPage: com.example.wammy.ui.ReaderPage? = null
+                        
+                        claimMutex.withLock {
+                            val currentList = _pages.value
+                            targetPage = currentList.firstOrNull { it.state == PageState.QUEUE } ?: currentList.firstOrNull { it.state == PageState.ERROR }
+                            if (targetPage != null) {
+                                _pages.update { list ->
+                                    list.map { if (it.index == targetPage!!.index) it.copy(state = PageState.DOWNLOAD_IMAGE) else it }
+                                }
                             }
                         }
-                        tmpFile.renameTo(finalFile)
-                        _pages.update { list ->
-                            list.map { if (it.index == targetPage.index) it.copy(state = PageState.READY, url = "file://${finalFile.absolutePath}") else it }
+
+                        if (targetPage == null) {
+                            kotlinx.coroutines.delay(500)
+                            // check if all pages are READY
+                            if (_pages.value.all { it.state == PageState.READY }) break
+                            continue
                         }
-                    } else {
-                        android.util.Log.e("WammyReader", "Network response was not successful: ${response.code} for URL: ${response.request.url}")
-                        response.close()
-                        if (targetPage.sourcePage != null) targetPage.sourcePage.imageUrl = null
-                        updatePageState(targetPage.index, PageState.ERROR)
-                        kotlinx.coroutines.delay(2000) // wait before retry
+
+                        try {
+                            val finalFile = java.io.File(cacheDir, "page_${targetPage!!.index}.jpg")
+                            
+                            if (finalFile.exists() && finalFile.length() > 0) {
+                                _pages.update { list ->
+                                    list.map { if (it.index == targetPage!!.index) it.copy(state = PageState.READY, url = "file://${finalFile.absolutePath}") else it }
+                                }
+                                continue
+                            }
+
+                            if (targetPage!!.sourcePage != null && targetPage!!.sourcePage!!.imageUrl == null) {
+                                try {
+                                    var parsed = source?.getImageUrl(targetPage!!.sourcePage!!)
+                                    if (parsed != null && !parsed.startsWith("http")) {
+                                        parsed = (source?.baseUrl ?: "") + if (parsed.startsWith("/")) parsed else "/$parsed"
+                                    }
+                                    targetPage!!.sourcePage!!.imageUrl = parsed
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+
+                            if (targetPage!!.sourcePage != null && targetPage!!.sourcePage!!.imageUrl != null) {
+                                var imgUrl = targetPage!!.sourcePage!!.imageUrl!!
+                                if (!imgUrl.startsWith("http")) {
+                                    imgUrl = (source?.baseUrl ?: "") + if (imgUrl.startsWith("/")) imgUrl else "/$imgUrl"
+                                    targetPage!!.sourcePage!!.imageUrl = imgUrl
+                                }
+                            }
+
+                            val finalImageUrlToDownload = targetPage!!.sourcePage?.imageUrl ?: targetPage!!.url
+
+                            android.util.Log.d("WammyReader", "Attempting to download page ${targetPage!!.index} with URL: ${targetPage!!.sourcePage?.imageUrl ?: finalImageUrlToDownload}")
+                            val response = if (source != null && targetPage!!.sourcePage != null && targetPage!!.sourcePage!!.imageUrl != null) {
+                                try {
+                                    source.getImage(targetPage!!.sourcePage!!)
+                                } catch (e: Exception) {
+                                    val reqUrl = if (finalImageUrlToDownload.startsWith("http")) finalImageUrlToDownload else (source.baseUrl) + if (finalImageUrlToDownload.startsWith("/")) finalImageUrlToDownload else "/$finalImageUrlToDownload"
+                                    val builder = okhttp3.Request.Builder().url(reqUrl)
+                                    targetPage!!.headers?.forEach { (k, v) -> builder.addHeader(k, v) }
+                                    client.newCall(builder.build()).execute()
+                                }
+                            } else {
+                                val reqUrl = if (finalImageUrlToDownload.startsWith("http")) finalImageUrlToDownload else (source?.baseUrl ?: "") + if (finalImageUrlToDownload.startsWith("/")) finalImageUrlToDownload else "/${finalImageUrlToDownload}"
+                                val builder = okhttp3.Request.Builder().url(reqUrl)
+                                targetPage!!.headers?.forEach { (k, v) -> builder.addHeader(k, v) }
+                                client.newCall(builder.build()).execute()
+                            }
+                            
+                            if (response.isSuccessful) {
+                                val tmpFile = java.io.File(cacheDir, "page_${targetPage!!.index}.tmp")
+                                response.body?.byteStream()?.use { input ->
+                                    tmpFile.outputStream().use { output ->
+                                        input.copyTo(output)
+                                    }
+                                }
+                                tmpFile.renameTo(finalFile)
+                                _pages.update { list ->
+                                    list.map { if (it.index == targetPage!!.index) it.copy(state = PageState.READY, url = "file://${finalFile.absolutePath}") else it }
+                                }
+                            } else {
+                                android.util.Log.e("WammyReader", "Network response was not successful: ${response.code} for URL: ${response.request.url}")
+                                response.close()
+                                if (targetPage!!.sourcePage != null) targetPage!!.sourcePage!!.imageUrl = null
+                                updatePageState(targetPage!!.index, PageState.ERROR)
+                                kotlinx.coroutines.delay(2000) // wait before retry
+                            }
+                        } catch (e: Exception) {
+                            android.util.Log.e("WammyReader", "Exception in pageLoaderJob for index ${targetPage!!.index}", e)
+                            if (targetPage!!.sourcePage != null) targetPage!!.sourcePage!!.imageUrl = null
+                            updatePageState(targetPage!!.index, PageState.ERROR)
+                            kotlinx.coroutines.delay(2000) // wait before retry
+                        }
                     }
-                } catch (e: Exception) {
-                    android.util.Log.e("WammyReader", "Exception in pageLoaderJob for index ${targetPage.index}", e)
-                    if (targetPage.sourcePage != null) targetPage.sourcePage.imageUrl = null
-                    updatePageState(targetPage.index, PageState.ERROR)
-                    kotlinx.coroutines.delay(2000) // wait before retry
                 }
             }
+            
+            workers.forEach { it.join() }
         }
     }
 
