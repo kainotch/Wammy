@@ -484,41 +484,10 @@ CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
         var showSettingsSheet by remember { mutableStateOf(false) }
         
         if (showSettingsSheet) {
-            ModalBottomSheet(
-                onDismissRequest = { showSettingsSheet = false },
-                containerColor = Color(0xFF1E1E28), // Tsundoku dark theme style
-                dragHandle = { BottomSheetDefaults.DragHandle() }
-            ) {
-                Column(
-                    modifier = Modifier
-                        
-                        .padding(horizontal = 24.dp, vertical = 16.dp)
-                ) {
-                    Text("Reading Mode", color = Color.White, style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(bottom = 16.dp))
-                    Row(
-                        modifier = Modifier,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Button(
-                            onClick = { viewModel.setReadingModeOverride(com.example.wammy.data.prefs.ReadingMode.WEBTOON); showSettingsSheet = false },
-                            colors = ButtonDefaults.buttonColors(containerColor = if (readingMode == com.example.wammy.data.prefs.ReadingMode.WEBTOON) Color(0xFFB388FF) else Color(0xFF2E2E3A), contentColor = if (readingMode == com.example.wammy.data.prefs.ReadingMode.WEBTOON) Color(0xFF0D0D1A) else Color.White)
-                        ) { Text("Webtoon") }
-                        Button(
-                            onClick = { viewModel.setReadingModeOverride(com.example.wammy.data.prefs.ReadingMode.LTR); showSettingsSheet = false },
-                            colors = ButtonDefaults.buttonColors(containerColor = if (readingMode == com.example.wammy.data.prefs.ReadingMode.LTR) Color(0xFFB388FF) else Color(0xFF2E2E3A), contentColor = if (readingMode == com.example.wammy.data.prefs.ReadingMode.LTR) Color(0xFF0D0D1A) else Color.White)
-                        ) { Text("LTR") }
-                        Button(
-                            onClick = { viewModel.setReadingModeOverride(com.example.wammy.data.prefs.ReadingMode.RTL); showSettingsSheet = false },
-                            colors = ButtonDefaults.buttonColors(containerColor = if (readingMode == com.example.wammy.data.prefs.ReadingMode.RTL) Color(0xFFB388FF) else Color(0xFF2E2E3A), contentColor = if (readingMode == com.example.wammy.data.prefs.ReadingMode.RTL) Color(0xFF0D0D1A) else Color.White)
-                        ) { Text("RTL") }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    // Color filter buttons removed because filters are now managed via ReaderPreferences
-                    Spacer(modifier = Modifier.height(32.dp))
-                }
-            }
+            ReaderSettingsSheet(
+                viewModel = viewModel,
+                onDismissRequest = { showSettingsSheet = false }
+            )
         }
 
         // Always-on Page Counter in immersive mode
