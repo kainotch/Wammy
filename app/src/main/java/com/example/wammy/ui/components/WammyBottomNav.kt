@@ -13,9 +13,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 
 enum class Screen(val title: String, val icon: ImageVector) {
-    Home("Home", Icons.Default.Home),
-    History("History", Icons.Default.Refresh),
     Library("Library", Icons.Default.Bookmarks),
+    History("History", Icons.Default.Refresh),
+    Home("Discover", Icons.Default.Home),
     Browse("Browse", Icons.Default.Explore),
     Settings("Settings", Icons.Default.Settings)
 }

@@ -40,7 +40,7 @@ import com.example.wammy.ui.screens.SettingsScreen
 @Composable
 fun WammyApp() {
     val context = LocalContext.current
-    var currentScreen by remember { mutableStateOf(if (NetworkUtils.isOnline(context)) Screen.Home else Screen.Library) }
+    var currentScreen by remember { mutableStateOf(Screen.Library) }
     
     // Hoisted scroll states to survive DetailsScreen overlay recompositions
     val historyListState = rememberLazyListState()
@@ -73,7 +73,7 @@ val homeViewModel: HomeViewModel = viewModel()
     
     val isSearching by homeViewModel.isSearching.collectAsState()
 
-    BackHandler(enabled = selectedChapter != null || selectedMangaId != null || selectedBrowseSourceId != null || selectedFolderId != null  || showDataStorage || showAbout || showStatistics || (currentScreen == Screen.Home && isSearching) || currentScreen != Screen.Home) {
+    BackHandler(enabled = selectedChapter != null || selectedMangaId != null || selectedBrowseSourceId != null || selectedFolderId != null  || showDataStorage || showAbout || showStatistics || (currentScreen == Screen.Home && isSearching) || currentScreen != Screen.Library) {
         if (selectedChapter != null) {
             selectedChapter = null
         } else if (selectedMangaId != null) {
@@ -92,8 +92,8 @@ val homeViewModel: HomeViewModel = viewModel()
             showDataStorage = false
         } else if (currentScreen == Screen.Home && isSearching) {
             homeViewModel.toggleSearch()
-        } else if (currentScreen != Screen.Home) {
-            currentScreen = Screen.Home
+        } else if (currentScreen != Screen.Library) {
+            currentScreen = Screen.Library
         }
     }
 
