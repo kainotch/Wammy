@@ -175,7 +175,7 @@ class ReaderViewModel : ViewModel() {
                             // Mihon behavior: Prioritize pages closest to the user's current view (currentPageIndex)
                             // We sort QUEUE pages by their absolute distance to currentPageIndex, then fall back to ERROR pages.
                             targetPage = currentList
-                                .filter { it.state == PageState.QUEUE || it.state == PageState.ERROR }
+                                .filter { it.state == PageState.QUEUE }
                                 .minByOrNull { kotlin.math.abs(it.index - currentPageIndex) }
                             if (targetPage != null) {
                                 _pages.update { list ->
@@ -389,6 +389,16 @@ class ReaderViewModel : ViewModel() {
         }
     }
     
+    fun retryPage(index: Int) {
+        _pages.update { currentPages ->
+            currentPages.map { page ->
+                if (page.index == index && page.state == PageState.ERROR) {
+                    page.copy(state = PageState.QUEUE)
+                } else page
+            }
+        }
+    }
+
     fun updatePageState(index: Int, newState: PageState) {
         _pages.update { currentPages ->
             currentPages.map { if (it.index == index) it.copy(state = newState) else it }

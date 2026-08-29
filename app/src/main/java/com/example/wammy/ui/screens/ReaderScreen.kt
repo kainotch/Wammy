@@ -229,10 +229,10 @@ ReadingMode.WEBTOON -> {
                                     contentAlignment = Alignment.Center
                                 ) {
                                     if (imageUrl.state == com.example.wammy.ui.PageState.ERROR) {
-                                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { viewModel.retryPage(imageUrl.index) }.padding(16.dp)) {
                                             Text("Error Loading Page", color = Color.Red, style = MaterialTheme.typography.titleMedium)
                                             Spacer(modifier = Modifier.height(8.dp))
-                                            Text("Retrying in background...", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                                            Text("Tap to Retry", color = Color.White, style = MaterialTheme.typography.bodySmall, modifier = Modifier.background(Color.DarkGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)).padding(8.dp))
                                         }
                                     } else {
                                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -287,6 +287,7 @@ CompositionLocalProvider(LocalLayoutDirection provides layoutDirection) {
                                     contentScale = ContentScale.Fit,
                                     modifier = Modifier.fillMaxSize(),
                                     filterMode = colorFilter,
+                                    onRetry = { viewModel.retryPage(pages[page].index) },
                                     onTap = { zone ->
                                         if (zone == TapZone.CENTER) {
                                             showOverlay = !showOverlay
@@ -548,7 +549,8 @@ fun ZoomableImage(
     contentScale: ContentScale, 
     modifier: Modifier, 
     filterMode: com.example.wammy.ui.ColorFilterMode,
-    onTap: (com.example.wammy.ui.screens.TapZone) -> Unit
+    onTap: (com.example.wammy.ui.screens.TapZone) -> Unit,
+    onRetry: () -> Unit = {}
 ) {
     androidx.compose.foundation.layout.BoxWithConstraints(modifier = modifier.fillMaxSize()) {
         val width = constraints.maxWidth
@@ -603,10 +605,10 @@ fun ZoomableImage(
                 contentAlignment = Alignment.Center
             ) {
                 if (model.state == com.example.wammy.ui.PageState.ERROR) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.clickable { onRetry() }.padding(16.dp)) {
                         Text("Error Loading Page", color = Color.Red, style = MaterialTheme.typography.titleMedium)
                         Spacer(modifier = Modifier.height(8.dp))
-                        Text("Retrying in background...", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                        Text("Tap to Retry", color = Color.White, style = MaterialTheme.typography.bodySmall, modifier = Modifier.background(Color.DarkGray, shape = androidx.compose.foundation.shape.RoundedCornerShape(4.dp)).padding(8.dp))
                     }
                 } else {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
