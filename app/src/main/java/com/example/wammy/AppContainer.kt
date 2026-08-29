@@ -47,15 +47,16 @@ val MIGRATION_8_9 = object : androidx.room.migration.Migration(8, 9) {
         }
         val MIGRATION_11_12 = object : androidx.room.migration.Migration(11, 12) {
             override fun migrate(database: androidx.sqlite.db.SupportSQLiteDatabase) {
-                // Add orientation column
-                database.execSQL("ALTER TABLE MangaEntity ADD COLUMN orientation INTEGER NOT NULL DEFAULT 0")
+                // Add orientation column (try-catch in case column already exists from partial migration)
+                try {
+                    database.execSQL("ALTER TABLE manga ADD COLUMN orientation INTEGER NOT NULL DEFAULT 0")
+                } catch (_: Exception) { /* column already exists */ }
                 
                 // Migrate existing readingMode values:
                 // Old: 0=RTL, 1=LTR, 2=WEBTOON
                 // New: 0=DEFAULT, 1=LTR, 2=RTL, 3=VERTICAL, 4=WEBTOON, 5=CONTINUOUS_VERTICAL
-                database.execSQL("UPDATE MangaEntity SET readingMode = 2 WHERE readingMode = 0") // RTL -> RTL
-                database.execSQL("UPDATE MangaEntity SET readingMode = 1 WHERE readingMode = 1") // LTR -> LTR (no-op, but for clarity)
-                database.execSQL("UPDATE MangaEntity SET readingMode = 4 WHERE readingMode = 2") // WEBTOON -> WEBTOON
+                database.execSQL("UPDATE manga SET readingMode = 2 WHERE readingMode = 0") // RTL -> RTL
+                database.execSQL("UPDATE manga SET readingMode = 4 WHERE readingMode = 2") // WEBTOON -> WEBTOON
             }
         }
         database = Room.databaseBuilder(
