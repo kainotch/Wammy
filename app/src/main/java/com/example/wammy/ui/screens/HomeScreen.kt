@@ -69,6 +69,8 @@ fun HomeScreen(viewModel: HomeViewModel, onMangaClick: (String) -> Unit, onSourc
     val isSearching by viewModel.isSearching.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val availableSources by viewModel.availableSources.collectAsState()
+    val isLoadingMore by viewModel.isLoadingMore.collectAsState()
+    val hasMoreExtensions by viewModel.hasMoreExtensions.collectAsState()
 
     androidx.compose.material3.pulltorefresh.PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -307,12 +309,40 @@ fun HomeScreen(viewModel: HomeViewModel, onMangaClick: (String) -> Unit, onSourc
                 }
             } else {
                 itemsIndexed(latestManga) { index, manga ->
-                    if (index >= latestManga.lastIndex - 2) {
-                        LaunchedEffect(index) {
+                    if (index >= latestManga.lastIndex - 3) {
+                        LaunchedEffect(latestManga.size) {
                             viewModel.loadNextExtension()
                         }
                     }
                     MangaGridItem(manga, onMangaClick)
+                }
+                
+                // Loading footer when more extensions are being fetched
+                if (isLoadingMore || hasMoreExtensions) {
+                    item(span = { GridItemSpan(2) }) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(24.dp),
+                                    strokeWidth = 2.dp,
+                                    color = androidx.compose.material3.MaterialTheme.colorScheme.primary
+                                )
+                                Text(
+                                    "Loading more sources...",
+                                    color = Color.Gray,
+                                    fontSize = 13.sp
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }

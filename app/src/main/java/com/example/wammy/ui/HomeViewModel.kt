@@ -42,6 +42,12 @@ class HomeViewModel : ViewModel() {
     private var isLoadingExtension = false
     private val _loadedExtensions = mutableSetOf<Long>()
 
+    private val _isLoadingMore = MutableStateFlow(false)
+    val isLoadingMore: StateFlow<Boolean> = _isLoadingMore.asStateFlow()
+
+    private val _hasMoreExtensions = MutableStateFlow(true)
+    val hasMoreExtensions: StateFlow<Boolean> = _hasMoreExtensions.asStateFlow()
+
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
     
@@ -187,6 +193,7 @@ class HomeViewModel : ViewModel() {
             _isLoading.value = true
             nextExtensionIndex = 0
             _loadedExtensions.clear()
+            _hasMoreExtensions.value = AppContainer.extensionManager.activeSources.isNotEmpty()
             try {
                 // Fetch from MangaDex first
                 val mdResults = try {
@@ -199,6 +206,8 @@ class HomeViewModel : ViewModel() {
                 e.printStackTrace()
             } finally {
                 _isLoading.value = false
+                // Auto-start loading the first extension after MangaDex is done
+                loadNextExtension()
             }
         }
     }
@@ -206,7 +215,11 @@ class HomeViewModel : ViewModel() {
     fun loadNextExtension() {
         if (isLoadingExtension) return
         val sources = AppContainer.extensionManager.activeSources
-        if (nextExtensionIndex >= sources.size) return
+        if (nextExtensionIndex >= sources.size) {
+            _hasMoreExtensions.value = false
+            _isLoadingMore.value = false
+            return
+        }
         
         val source = sources[nextExtensionIndex]
         nextExtensionIndex++
@@ -218,9 +231,10 @@ class HomeViewModel : ViewModel() {
         }
         
         isLoadingExtension = true
+        _isLoadingMore.value = true
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
             try {
-                val page = kotlinx.coroutines.withTimeoutOrNull(10000) {
+                val page = kotlinx.coroutines.withTimeoutOrNull(8000) {
                     source.getPopularManga(1)
                 }
                 if (page != null) {
@@ -241,13 +255,19 @@ class HomeViewModel : ViewModel() {
                     }.take(10)
                     
                     _loadedExtensions.add(source.id)
-                    val currentList = _latestManga.value
-                    _latestManga.value = currentList + mapped
+                    kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Main) {
+                        _latestManga.value = _latestManga.value + mapped
+                    }
+                } else {
+                    android.util.Log.w("HomeViewModel", "Extension ${source.name} timed out, skipping")
                 }
             } catch (e: Throwable) {
-                // Ignore errors from individual extensions
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                android.util.Log.w("HomeViewModel", "Extension ${source.name} failed: ${e.message}")
             } finally {
                 isLoadingExtension = false
+                _isLoadingMore.value = nextExtensionIndex < sources.size
+                _hasMoreExtensions.value = nextExtensionIndex < sources.size
             }
         }
     }
