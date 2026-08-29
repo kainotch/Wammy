@@ -201,16 +201,15 @@ class ReaderViewModel : ViewModel() {
                                 continue
                             }
 
-                            if (targetPage!!.sourcePage != null && targetPage!!.sourcePage!!.imageUrl == null) {
-                                var parsed = source?.getImageUrl(targetPage!!.sourcePage!!)
-                                if (parsed != null && !parsed.startsWith("http")) {
-                                    parsed = (source?.baseUrl ?: "") + if (parsed.startsWith("/")) parsed else "/$parsed"
-                                }
-                                targetPage!!.sourcePage!!.imageUrl = parsed
-                            }
-
                             var response: okhttp3.Response? = null
                             try {
+                                if (targetPage!!.sourcePage != null && targetPage!!.sourcePage!!.imageUrl == null) {
+                                    var parsed = source?.getImageUrl(targetPage!!.sourcePage!!)
+                                    if (parsed != null && !parsed.startsWith("http")) {
+                                        parsed = (source?.baseUrl ?: "") + if (parsed.startsWith("/")) parsed else "/$parsed"
+                                    }
+                                    targetPage!!.sourcePage!!.imageUrl = parsed
+                                }
                                 if (source != null && targetPage!!.sourcePage != null) {
                                     // 1. Mihon strictly relies on source.getImage() and relies on its interceptors to handle URLs and errors.
                                     android.util.Log.d("WammyReader", "Attempting to download page ${targetPage!!.index} via extension source.getImage")
