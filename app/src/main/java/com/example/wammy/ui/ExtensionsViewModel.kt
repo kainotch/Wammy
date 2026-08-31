@@ -71,10 +71,11 @@ class ExtensionsViewModel : ViewModel() {
         }
     }
 
-    fun uninstallExtension(packageName: String) {
+    fun uninstallExtension(packageName: String, onUninstalled: () -> Unit = {}) {
         viewModelScope.launch {
             AppContainer.extensionManager.uninstallExtension(packageName)
             _installedPackageNames.value = _installedPackageNames.value - packageName
+            onUninstalled()
         }
     }
 

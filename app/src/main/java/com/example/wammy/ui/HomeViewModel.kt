@@ -110,6 +110,11 @@ class HomeViewModel : ViewModel() {
     private val _availableSources = kotlinx.coroutines.flow.MutableStateFlow<List<BrowseSourceItem>>(emptyList())
     val availableSources: kotlinx.coroutines.flow.StateFlow<List<BrowseSourceItem>> = _availableSources.asStateFlow()
 
+    fun removeExtensionData(packageName: String) {
+        val sourceIds = AppContainer.extensionManager.activeSources.filter { it.javaClass.name.startsWith(packageName) }.map { it.id }.toSet()
+        _latestManga.value = _latestManga.value.filter { it.sourceId !in sourceIds }
+    }
+
     fun refreshAvailableSources() {
         val sources = mutableListOf<BrowseSourceItem>()
         // Always add MangaDex as a built-in source

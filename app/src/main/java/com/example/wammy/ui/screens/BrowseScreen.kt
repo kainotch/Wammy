@@ -145,6 +145,7 @@ fun BrowseScreen(
             } else {
                 // ─── Extensions Tab ───
                 ExtensionsTab(
+                    homeViewModel = homeViewModel,
                     extViewModel = extViewModel,
                     searchQuery = searchQuery,
                     isLoading = isLoading,
@@ -325,6 +326,7 @@ fun SourceRow(source: BrowseSourceItem, isPinned: Boolean, onPin: () -> Unit, on
 // ═══════════════════════════════════════════════════════════════
 @Composable
 fun ExtensionsTab(
+    homeViewModel: HomeViewModel,
     extViewModel: ExtensionsViewModel,
     searchQuery: String,
     isLoading: Boolean,
