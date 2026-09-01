@@ -272,6 +272,12 @@ object DownloadManager {
         jobs[manga.sourceUrl] = job
     }
 
+    fun cancelAllDownloads() {
+        jobs.values.forEach { it.cancel() }
+        jobs.clear()
+        _downloads.value = emptyMap()
+    }
+
     fun cancelDownload(mangaUrl: String) {
         jobs[mangaUrl]?.cancel()
         jobs.remove(mangaUrl)
