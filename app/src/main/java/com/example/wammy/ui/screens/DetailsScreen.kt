@@ -382,7 +382,7 @@ fun DetailsScreen(viewModel: DetailsViewModel, onBack: () -> Unit, showDownloade
                             modifier = Modifier.size(22.dp)
                         )
                         Spacer(modifier = Modifier.height(6.dp))
-                        Text(if (isDownloaded) "Cached" else if (isCurrentlyDownloading) "Cancel all" else "Not Cached", color = if (isCurrentlyDownloading) Color(0xFFFF6B6B) else Color.LightGray, fontSize = 12.sp)
+                        Text(if (isCurrentlyDownloading) "Cancel all" else if (isDownloaded) "Cached" else "Not Cached", color = if (isCurrentlyDownloading) Color(0xFFFF6B6B) else Color.LightGray, fontSize = 12.sp)
                     }
                     
                     // Info / WebView Button

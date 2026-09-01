@@ -275,6 +275,7 @@ object DownloadManager {
     fun cancelAllDownloads() {
         jobs.values.forEach { it.cancel() }
         jobs.clear()
+        okHttpClient.dispatcher.cancelAll()
         _downloads.value = emptyMap()
     }
 
