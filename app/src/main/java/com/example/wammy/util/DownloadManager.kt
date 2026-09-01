@@ -89,13 +89,13 @@ object DownloadManager {
 
         val notificationId = manga.sourceUrl.hashCode()
 
-        _downloads.value = _downloads.value + (manga.sourceUrl to DownloadJob(
+        updateDownloads(_downloads.value + (manga.sourceUrl to DownloadJob(
             manga = manga,
             totalChapters = chapters.size,
             downloadedChapters = 0,
             currentChapterName = chapters.firstOrNull()?.name ?: "",
             queuedChapterUrls = chapters.map { it.sourceUrl }
-        ))
+        )))
 
         val builder = NotificationCompat.Builder(AppContainer.appContext, "wammy_downloads")
             .setSmallIcon(android.R.drawable.stat_sys_download)
@@ -265,7 +265,7 @@ object DownloadManager {
                     .setOngoing(false)
                 notificationManager.notify(notificationId, builder.build())
             } finally {
-                _downloads.value = _downloads.value - manga.sourceUrl
+                updateDownloads(_downloads.value - manga.sourceUrl)
                 jobs.remove(manga.sourceUrl)
             }
         }
@@ -276,12 +276,12 @@ object DownloadManager {
         jobs.values.forEach { it.cancel() }
         jobs.clear()
         okHttpClient.dispatcher.cancelAll()
-        _downloads.value = emptyMap()
+        updateDownloads(emptyMap())
     }
 
     fun cancelDownload(mangaUrl: String) {
         jobs[mangaUrl]?.cancel()
         jobs.remove(mangaUrl)
-        _downloads.value = _downloads.value - mangaUrl
+        updateDownloads(_downloads.value - mangaUrl)
     }
 }

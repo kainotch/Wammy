@@ -82,6 +82,7 @@ val MIGRATION_8_9 = object : androidx.room.migration.Migration(8, 9) {
         cacheManager = com.example.wammy.data.backup.CacheManager(context)
         themePreferences = com.example.wammy.theme.ThemePreferences(context)
         storagePreferences = com.example.wammy.theme.StoragePreferences(context)
+        readerPreferences = com.example.wammy.data.prefs.ReaderPreferences(context)
 
         val extRetrofit = Retrofit.Builder()
             .baseUrl("https://raw.githubusercontent.com/")
