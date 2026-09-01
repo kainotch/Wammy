@@ -180,7 +180,7 @@ object DownloadManager {
                         } else null
 
                         pages.forEachIndexed { index, imageUrl ->
-                            if (!isActive) return@forEachIndexed
+                            if (!isActive) throw kotlinx.coroutines.CancellationException("Download cancelled")
                             if (imageUrl.isBlank()) return@forEachIndexed
                             try {
                                 val reqBuilder = Request.Builder().url(imageUrl)
