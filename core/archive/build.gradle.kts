@@ -1,4 +1,5 @@
-﻿plugins {
+
+plugins {
     alias(mihonx.plugins.android.library)
     alias(mihonx.plugins.spotless)
 
