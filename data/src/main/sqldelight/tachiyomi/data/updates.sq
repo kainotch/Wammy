@@ -1,0 +1,96 @@
+import kotlin.Boolean;
+
+-- Direct JOIN queries for updates (no cache table needed)
+
+CREATE INDEX IF NOT EXISTS chapters_updates_read_idx ON chapters(read, date_fetch DESC, manga_id, date_upload);
+CREATE INDEX IF NOT EXISTS chapters_updates_all_idx ON chapters(date_fetch DESC, manga_id, date_upload);
+
+-- Use FROM chapters driving table so SQLite scans the chapters index
+-- in date_fetch DESC order and can LIMIT-stop early.
+getRecentUpdates:
+SELECT
+    M._id AS mangaId,
+    M.title AS mangaTitle,
+    C._id AS chapterId,
+    C.name AS chapterName,
+    C.scanlator,
+    C.url AS chapterUrl,
+    C.read,
+    C.bookmark,
+    C.last_page_read,
+    M.source,
+    M.favorite,
+    M.thumbnail_url AS thumbnailUrl,
+    M.cover_last_modified AS coverLastModified,
+    C.date_upload AS dateUpload,
+    C.date_fetch AS dateFetch,
+    ES.scanlator AS excludedScanlator
+FROM chapters C
+INNER JOIN mangas M ON M._id = C.manga_id
+LEFT JOIN excluded_scanlators ES ON C.manga_id = ES.manga_id AND C.scanlator = ES.scanlator
+WHERE M.favorite = 1
+AND C.date_fetch > M.date_added
+AND C.date_upload > :after
+AND (:filterUnread IS NULL OR C.read != :filterUnread)
+AND (:filterStarted IS NULL OR (CASE WHEN :filterStarted THEN C.last_page_read > 0 ELSE C.last_page_read = 0 END))
+AND (:filterBookmarked IS NULL OR C.bookmark = :filterBookmarked)
+AND (:hideExcludedScanlators = 0 OR ES.scanlator IS NULL)
+AND (
+    -- includedEmpty being true expresses "don't care" state and bypasses the membership filter
+    :includedEmpty
+    OR EXISTS (
+        SELECT 1 FROM mangas_categories
+        WHERE mangas_categories.manga_id = M._id
+        AND COALESCE(mangas_categories.category_id, 0) IN :includedCategories
+    )
+    OR (0 IN :includedCategories AND NOT EXISTS (
+        SELECT 1 FROM mangas_categories mc WHERE mc.manga_id = M._id)
+    )
+)
+AND (
+    -- excludedEmpty being true expresses "don't care" state and bypasses the membership filter
+    :excludedEmpty
+    OR (
+        NOT EXISTS (
+            SELECT 1 FROM mangas_categories
+            WHERE mangas_categories.manga_id = M._id
+            AND COALESCE(mangas_categories.category_id, 0) IN :excludedCategories
+        )
+        AND (
+            0 NOT IN :excludedCategories
+            OR EXISTS (SELECT 1 FROM mangas_categories WHERE mangas_categories.manga_id = M._id)
+        )
+    )
+)
+ORDER BY C.date_fetch DESC
+LIMIT :limit
+OFFSET :offset;
+
+getUpdatesByReadStatus:
+SELECT
+    M._id AS mangaId,
+    M.title AS mangaTitle,
+    C._id AS chapterId,
+    C.name AS chapterName,
+    C.scanlator,
+    C.url AS chapterUrl,
+    C.read,
+    C.bookmark,
+    C.last_page_read,
+    M.source,
+    M.favorite,
+    M.thumbnail_url AS thumbnailUrl,
+    M.cover_last_modified AS coverLastModified,
+    C.date_upload AS dateUpload,
+    C.date_fetch AS dateFetch,
+    ES.scanlator AS excludedScanlator
+FROM chapters C
+INNER JOIN mangas M ON M._id = C.manga_id
+LEFT JOIN excluded_scanlators ES ON C.manga_id = ES.manga_id AND C.scanlator = ES.scanlator
+WHERE C.read = :read
+AND C.date_upload > :after
+AND M.favorite = 1
+AND C.date_fetch > M.date_added
+ORDER BY C.date_fetch DESC
+LIMIT :limit
+OFFSET :offset;

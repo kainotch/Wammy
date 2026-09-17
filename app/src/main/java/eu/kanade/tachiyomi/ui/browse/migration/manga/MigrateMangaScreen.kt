@@ -1,0 +1,250 @@
+package eu.kanade.tachiyomi.ui.browse.migration.manga
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.SelectAll
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.SmallExtendedFloatingActionButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.animateFloatingActionButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.compose.viewModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import eu.kanade.presentation.components.AppBar
+import eu.kanade.presentation.manga.components.BaseMangaListItem
+import eu.kanade.presentation.util.Screen
+import eu.kanade.tachiyomi.ui.manga.MangaScreen
+import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.coroutines.flow.collectLatest
+import mihon.feature.migration.config.MigrationConfigScreen
+import tachiyomi.core.common.i18n.stringResource
+import tachiyomi.domain.manga.model.Manga
+import tachiyomi.i18n.MR
+import tachiyomi.i18n.novel.TDMR
+import tachiyomi.presentation.core.components.FastScrollLazyColumn
+import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.screens.EmptyScreen
+import tachiyomi.presentation.core.screens.LoadingScreen
+import tachiyomi.presentation.core.util.selectedBackground
+import tachiyomi.presentation.core.util.shouldExpandFAB
+
+data class MigrateMangaScreen(
+    private val sourceId: Long,
+) : Screen() {
+
+    @Composable
+    override fun Content() {
+        val context = LocalContext.current
+        val navigator = LocalNavigator.currentOrThrow
+        val viewModel = viewModel<MigrateMangaViewModel>(
+            factory = MigrateMangaViewModel.Factory,
+            extras = CreationExtras {
+                set(MigrateMangaViewModel.SOURCE_ID_KEY, sourceId)
+            },
+        )
+
+        val state by viewModel.state.collectAsState()
+
+        if (state.isLoading) {
+            LoadingScreen()
+            return
+        }
+
+        BackHandler(enabled = state.selectionMode) {
+            viewModel.clearSelection()
+        }
+
+        val lazyListState = rememberLazyListState()
+
+        Scaffold(
+            topBar = { scrollBehavior ->
+                AppBar(
+                    title = state.source!!.name,
+                    navigateUp = {
+                        if (state.selectionMode) {
+                            viewModel.clearSelection()
+                        } else {
+                            navigator.pop()
+                        }
+                    },
+                    actionModeCounter = state.selection.size,
+                    onCancelActionMode = { viewModel.clearSelection() },
+                    actionModeActions = {
+                        var showMenu by androidx.compose.runtime.remember {
+                            androidx.compose.runtime.mutableStateOf(false)
+                        }
+                        IconButton(onClick = { viewModel.selectAll() }) {
+                            Icon(
+                                imageVector = Icons.Outlined.SelectAll,
+                                contentDescription = stringResource(MR.strings.action_select_all),
+                            )
+                        }
+                        IconButton(onClick = { showMenu = true }) {
+                            Icon(imageVector = Icons.Default.MoreVert, contentDescription = "More")
+                        }
+                        androidx.compose.material3.DropdownMenu(
+                            expanded = showMenu,
+                            onDismissRequest = { showMenu = false },
+                        ) {
+                            androidx.compose.material3.DropdownMenuItem(
+                                text = { Text(text = stringResource(MR.strings.action_quick_migrate)) },
+                                onClick = {
+                                    showMenu = false
+                                    viewModel.showQuickMigrateDialog()
+                                },
+                            )
+                        }
+                    },
+                    scrollBehavior = scrollBehavior,
+                )
+            },
+            floatingActionButton = {
+                SmallExtendedFloatingActionButton(
+                    text = { Text(text = stringResource(MR.strings.migrationConfigScreen_continueButtonText)) },
+                    icon = {
+                        Icon(imageVector = Icons.AutoMirrored.Outlined.ArrowForward, contentDescription = null)
+                    },
+                    onClick = {
+                        val selection = state.selection
+                        viewModel.clearSelection()
+                        navigator.push(MigrationConfigScreen(selection))
+                    },
+                    expanded = lazyListState.shouldExpandFAB(),
+                    modifier = Modifier.animateFloatingActionButton(
+                        visible = state.selectionMode,
+                        alignment = Alignment.BottomEnd,
+                    ),
+                )
+            },
+        ) { contentPadding ->
+            if (state.isEmpty) {
+                EmptyScreen(
+                    stringRes = MR.strings.empty_screen,
+                    modifier = Modifier.padding(contentPadding),
+                )
+                return@Scaffold
+            }
+
+            MigrateMangaContent(
+                lazyListState = lazyListState,
+                contentPadding = contentPadding,
+                state = state,
+                onClickItem = viewModel::toggleSelection,
+                onClickCover = { navigator.push(MangaScreen(it.id)) },
+            )
+        }
+
+        when (val dialog = state.dialog) {
+            is MigrateMangaViewModel.Dialog.QuickMigrateSourcePicker -> {
+                QuickMigrateSourcePickerDialog(
+                    defaultIsNovel = viewModel.isSourceNovel,
+                    getSources = { viewModel.getAvailableSources(it) },
+                    onSourceSelected = { viewModel.checkQuickMigrate(it) },
+                    onDismissRequest = { viewModel.dismissDialog() },
+                )
+            }
+            is MigrateMangaViewModel.Dialog.QuickMigrateConfirm -> {
+                QuickMigrateConfirmDialog(
+                    sourceName = dialog.sourceName,
+                    targetSourceName = dialog.targetSourceName,
+                    totalCount = dialog.totalCount,
+                    skipCount = dialog.skipCount,
+                    onConfirm = { categoryName, removeSkipped ->
+                        viewModel.executeQuickMigrate(dialog.targetSourceId, categoryName, removeSkipped)
+                    },
+                    onDismissRequest = { viewModel.dismissDialog() },
+                )
+            }
+            is MigrateMangaViewModel.Dialog.QuickMigrateProgress -> {
+                QuickMigrateProgressDialog(
+                    progress = dialog.progress,
+                    onCancel = { viewModel.cancelQuickMigrate() },
+                )
+            }
+            null -> {}
+        }
+
+        LaunchedEffect(Unit) {
+            viewModel.events.collectLatest { event ->
+                when (event) {
+                    MigrationMangaEvent.FailedFetchingFavorites -> {
+                        context.toast(MR.strings.internal_error)
+                    }
+                    MigrationMangaEvent.QuickMigrateAlreadyRunning -> {
+                        context.toast(TDMR.strings.quick_migrate_already_running)
+                    }
+                    is MigrationMangaEvent.QuickMigrateComplete -> {
+                        context.toast(
+                            if (event.removedCount > 0) {
+                                context.stringResource(
+                                    TDMR.strings.quick_migrate_complete_removed,
+                                    event.count,
+                                    event.removedCount,
+                                )
+                            } else {
+                                context.stringResource(MR.strings.quick_migrate_complete, event.count)
+                            },
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    @Composable
+    private fun MigrateMangaContent(
+        lazyListState: LazyListState,
+        contentPadding: PaddingValues,
+        state: MigrateMangaViewModel.State,
+        onClickItem: (Manga) -> Unit,
+        onClickCover: (Manga) -> Unit,
+    ) {
+        FastScrollLazyColumn(
+            state = lazyListState,
+            contentPadding = contentPadding,
+        ) {
+            items(state.titles) { manga ->
+                MigrateMangaItem(
+                    manga = manga,
+                    isSelected = manga.id in state.selection,
+                    onClickItem = onClickItem,
+                    onClickCover = onClickCover,
+                )
+            }
+        }
+    }
+
+    @Composable
+    private fun MigrateMangaItem(
+        manga: Manga,
+        isSelected: Boolean,
+        onClickItem: (Manga) -> Unit,
+        onClickCover: (Manga) -> Unit,
+        modifier: Modifier = Modifier,
+    ) {
+        BaseMangaListItem(
+            modifier = modifier.selectedBackground(isSelected),
+            manga = manga,
+            onClickItem = { onClickItem(manga) },
+            onClickCover = { onClickCover(manga) },
+        )
+    }
+}

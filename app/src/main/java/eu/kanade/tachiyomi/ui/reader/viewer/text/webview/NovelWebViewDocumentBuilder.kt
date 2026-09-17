@@ -1,0 +1,288 @@
+﻿@file:Suppress("ktlint:standard:max-line-length")
+
+package eu.kanade.tachiyomi.ui.reader.viewer.text.webview
+
+import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
+import eu.kanade.tachiyomi.ui.reader.viewer.text.shared.ProcessedContent
+import eu.kanade.tachiyomi.ui.reader.viewer.text.shared.ThemeUtils
+import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.NovelWebViewChapterMeta.CHAPTER_DIVIDER_CLASS
+import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.NovelWebViewChapterMeta.CHAPTER_ID_ATTR
+import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.NovelWebViewChapterMeta.CHAPTER_NUMBER_ATTR
+import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.NovelWebViewChapterMeta.CHAPTER_PATH_ATTR
+import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.NovelWebViewChapterMeta.CHAPTER_TAG_NAME
+import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.NovelWebViewChapterMeta.CHAPTER_TITLE_ATTR
+import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.NovelWebViewChapterMeta.CHAPTER_URL_ATTR
+import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.NovelWebViewChapterMeta.WAMMY_CHAPTER_ATTR
+import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.NovelWebViewChapterMeta.WAMMY_CHAPTERS_CONTAINER_ID
+import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.NovelWebViewChapterMeta.htmlAttributeEscape
+import eu.kanade.tachiyomi.ui.reader.viewer.text.webview.NovelWebViewChapterMeta.quoteForJson
+
+internal object NovelWebViewDocumentBuilder {
+
+    data class DocumentInput(
+        val processed: ProcessedContent,
+        val chapter: ReaderChapter?,
+        val style: NovelWebViewStyler.CustomStylePayload,
+        val themeTokens: ThemeUtils.ThemeTokens,
+        val wammyScript: String,
+        val infiniteScrollEnabled: Boolean,
+        val blockMedia: Boolean,
+    )
+
+    fun assemble(input: DocumentInput): String {
+        val chapterModel = input.chapter?.chapter
+        val chapterId = chapterModel?.id ?: -1L
+        val chapterName = chapterModel?.name.orEmpty()
+        val chapterNumber = chapterModel?.chapter_number ?: -1f
+        val chapterPath = chapterModel?.url.orEmpty()
+
+        val chapterDivider = buildChapterDivider(chapterId, chapterName, chapterNumber, chapterPath, input)
+        val (chapterWrapperStart, chapterWrapperEnd) = buildChapterWrapper(
+            chapterId,
+            chapterName,
+            chapterNumber,
+            chapterPath,
+            input,
+        )
+
+        val mediaBlockCss = if (input.blockMedia) {
+            "img, video, audio, source, svg, image { display: none !important; }"
+        } else {
+            ""
+        }
+
+        val finalContent = if (input.processed.isPlainText) {
+            // Per-paragraph <p> (textContent-set, never parsed as markup) instead of one <pre>, so
+            // plain text exposes the same block elements the copy/quote paragraph-index counter walks.
+            val paragraphsJsonArray = input.processed.text
+                .split(Regex("\n{2,}"))
+                .filter { it.isNotEmpty() }
+                .joinToString(",", prefix = "[", postfix = "]") { quoteForJson(it) }
+            """
+                <div class="$PLAIN_TEXT_CLASS" $ATTR_DATA_PLAIN_TEXT="1"></div>
+                <script>
+                    (function() {
+                        var container = document.querySelector('.$PLAIN_TEXT_CLASS');
+                        var paragraphs = $paragraphsJsonArray;
+                        var frag = document.createDocumentFragment();
+                        for (var i = 0; i < paragraphs.length; i++) {
+                            var p = document.createElement('p');
+                            p.style.whiteSpace = 'pre-wrap';
+                            p.style.wordBreak = 'break-word';
+                            p.style.overflowWrap = 'anywhere';
+                            p.textContent = paragraphs[i];
+                            frag.appendChild(p);
+                        }
+                        container.appendChild(frag);
+                    })();
+                </script>
+            """.trimIndent()
+        } else {
+            extractBodyOrFallback(input.processed.text)
+        }
+
+        val chapterDividerCss = if (input.infiniteScrollEnabled) {
+            """.wammy-chapter-divider {
+                        height: 1px;
+                        margin: 32px auto;
+                        padding: 0;
+                        border: none;
+                        border-top: 1px solid currentColor;
+                        opacity: 0.4;
+                        width: 60%;
+                    }"""
+        } else {
+            ""
+        }
+
+        val escapedInitialStyle = input.style.css.escapeForStyleTag()
+        val hideHeadingCss = if (input.style.hideChapterTitle) {
+            "$CHAPTER_TAG_NAME h1:first-of-type, $CHAPTER_TAG_NAME h2:first-of-type, " +
+                "$CHAPTER_TAG_NAME h3:first-of-type, $CHAPTER_TAG_NAME h4:first-of-type, " +
+                "$CHAPTER_TAG_NAME h5:first-of-type, $CHAPTER_TAG_NAME h6:first-of-type " +
+                "{ display: none !important; }"
+        } else {
+            ""
+        }
+
+        val escapedThemeCss = input.themeTokens.cssVariables.escapeForStyleTag()
+        val escapedThemeJson = input.themeTokens.jsObject
+            .replace("\\", "\\\\")
+            .replace("</script>", "<\\/script>")
+            .replace("</Script>", "<\\/Script>")
+            .replace("</SCRIPT>", "<\\/SCRIPT>")
+        val themeExposureScript = "window.WammyTheme = $escapedThemeJson;"
+
+        return """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta charset="UTF-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                <style>
+                    $escapedThemeCss
+                    $chapterDividerCss
+                    wammy-chapter {
+                        display: block;
+                        contain: content;
+                    }
+                    /* body keeps the user's margin (that's the paged reading gutter) but still needs
+                       its own overflow:hidden - its box is only pageWidth wide, so without this the
+                       overflowing multicol columns bleed text into the margin on either side. */
+                    html.wammy-paged {
+                        height: 100%;
+                        overflow: hidden;
+                        margin: 0;
+                    }
+                    html.wammy-paged body {
+                        overflow: hidden;
+                    }
+                    html.wammy-paged #$WAMMY_CHAPTERS_CONTAINER_ID {
+                        column-gap: 0;
+                        column-fill: auto;
+                        height: 100%;
+                        box-sizing: border-box;
+                        will-change: transform;
+                        transition: transform 220ms ease;
+                    }
+                    /* Suppressed via JS (transition: none) around any non-user-turn transform change
+                       (restore, resize/rotation repagination, chapter append) - see setTransform(). */
+                    html.wammy-paged #$WAMMY_CHAPTERS_CONTAINER_ID.wammy-paged-no-transition {
+                        transition: none;
+                    }
+                    html.wammy-paged img,
+                    html.wammy-paged table,
+                    html.wammy-paged pre,
+                    html.wammy-paged blockquote,
+                    html.wammy-paged figure {
+                        break-inside: avoid;
+                    }
+                    /* The infinite-scroll chapter-boundary marker (chapterDividerCss above) renders
+                       as a visible hr-like line in continuous mode; in paged mode it would show up
+                       as a stray horizontal line mid-page instead of a clean boundary, so keep it
+                       invisible here regardless of infinite scroll. */
+                    html.wammy-paged .$CHAPTER_DIVIDER_CLASS {
+                        visibility: hidden !important;
+                        height: 0 !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
+                        border: none !important;
+                    }
+                    /* Pull-to-refresh-style edge badge - icon only, no chapter title text. */
+                    .wammy-paged-chapter-transition {
+                        position: fixed;
+                        top: 0;
+                        bottom: 0;
+                        width: 72px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        opacity: 0;
+                        pointer-events: none;
+                        transition: opacity 150ms ease;
+                        z-index: 2147483647;
+                    }
+                    .wammy-paged-chapter-transition[data-side="start"] { left: 0; }
+                    .wammy-paged-chapter-transition[data-side="end"] { right: 0; }
+                    .wammy-paged-chapter-transition.wammy-visible {
+                        opacity: 1;
+                    }
+                    .wammy-paged-transition-badge {
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        background: rgba(128, 128, 128, 0.4);
+                        color: inherit;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    }
+                    img {
+                        max-width: 100%;
+                        height: auto;
+                        display: block;
+                        margin: 8px auto;
+                        min-height: 100px;
+                        background: rgba(150, 150, 150, 0.2) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 50 50"><circle cx="25" cy="25" r="20" fill="none" stroke="%23888" stroke-width="5" stroke-dasharray="31.4 31.4"><animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite"/></circle></svg>') no-repeat center center;
+                    }
+                    video {
+                        max-width: 100%;
+                        height: auto;
+                    }
+                    $hideHeadingCss
+                    $mediaBlockCss
+                </style>
+                <style id="wammy-custom-style">$escapedInitialStyle</style>
+                <script>${input.wammyScript}</script>
+                <script>$themeExposureScript</script>
+            </head>
+            <body>
+                $chapterDivider
+                $chapterWrapperStart
+                $finalContent
+                $chapterWrapperEnd
+            </body>
+            </html>
+        """.trimIndent()
+    }
+
+    @Suppress("ktlint:standard:max-line-length")
+    private fun buildChapterDivider(
+        chapterId: Long,
+        chapterName: String,
+        chapterNumber: Float,
+        chapterPath: String,
+        input: DocumentInput,
+    ): String {
+        if (chapterId == -1L || !input.infiniteScrollEnabled) return ""
+        val absoluteUrl = NovelWebViewChapterMeta
+            .toAbsoluteChapterUrl(chapterPath, input.chapter?.chapter?.url)
+            .htmlAttributeEscape()
+        val name = chapterName.htmlAttributeEscape()
+        val path = chapterPath.htmlAttributeEscape()
+        // visibility:hidden (not display:none) so the first chapter's boundary marker still
+        // generates a layout box: getBoundingClientRect().top on a display:none element is always 0,
+        // which made updateChapterBoundaries record startOffset = scrollY (the scroll position at
+        // requery time) instead of the chapter's true top, zeroing progress and misattributing
+        // scroll to the wrong chapter whenever a reflow re-queried mid-scroll.
+        return """<div class="$CHAPTER_DIVIDER_CLASS" $CHAPTER_ID_ATTR="$chapterId" $CHAPTER_TITLE_ATTR="$name" $CHAPTER_NUMBER_ATTR="$chapterNumber" $CHAPTER_PATH_ATTR="$path" $CHAPTER_URL_ATTR="$absoluteUrl" style="visibility:hidden;height:0;margin:0;padding:0;border:none;"></div>"""
+    }
+
+    private fun buildChapterWrapper(
+        chapterId: Long,
+        chapterName: String,
+        chapterNumber: Float,
+        chapterPath: String,
+        input: DocumentInput,
+    ): Pair<String, String> {
+        if (chapterId == -1L) return "" to ""
+        val absoluteUrl = NovelWebViewChapterMeta
+            .toAbsoluteChapterUrl(chapterPath, input.chapter?.chapter?.url)
+            .htmlAttributeEscape()
+        val name = chapterName.htmlAttributeEscape()
+        val path = chapterPath.htmlAttributeEscape()
+
+        @Suppress("ktlint:standard:max-line-length")
+        val start = """<$CHAPTER_TAG_NAME $CHAPTER_ID_ATTR="$chapterId" $CHAPTER_TITLE_ATTR="$name" $CHAPTER_NUMBER_ATTR="$chapterNumber" $CHAPTER_PATH_ATTR="$path" $CHAPTER_URL_ATTR="$absoluteUrl" $WAMMY_CHAPTER_ATTR="1">"""
+        val end = "</$CHAPTER_TAG_NAME>"
+        return start to end
+    }
+
+    internal fun extractBodyOrFallback(html: String): String = try {
+        val doc = org.jsoup.Jsoup.parse(html)
+        val body = doc.body()
+        when {
+            body.hasText() -> body.html()
+            body.children().isNotEmpty() -> body.html()
+            else -> html
+        }
+    } catch (_: Exception) {
+        html
+    }
+
+    internal fun String.escapeForStyleTag(): String =
+        replace(Regex("</style>", RegexOption.IGNORE_CASE)) { "<\\/" + it.value.substring(2) }
+
+    const val PLAIN_TEXT_CLASS = "wammy-plain-text"
+    const val ATTR_DATA_PLAIN_TEXT = "data-wammy-plain-text"
+}

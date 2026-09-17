@@ -1,0 +1,1697 @@
+@file:Suppress("ktlint:standard:max-line-length")
+
+package eu.kanade.presentation.more.settings.screen
+
+import android.annotation.SuppressLint
+import android.content.ActivityNotFoundException
+import android.content.Intent
+import android.provider.Settings
+import android.webkit.WebStorage
+import android.webkit.WebView
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.DriveFileMove
+import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.Clear
+import androidx.compose.material.icons.outlined.ContentPaste
+import androidx.compose.material.icons.outlined.FileOpen
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import eu.kanade.domain.base.BasePreferences
+import eu.kanade.domain.extension.interactor.TrustExtension
+import eu.kanade.presentation.more.settings.Preference
+import eu.kanade.presentation.more.settings.screen.advanced.ClearDatabaseScreen
+import eu.kanade.presentation.more.settings.screen.debug.DebugInfoScreen
+import eu.kanade.tachiyomi.data.database.DatabaseMaintenanceJob
+import eu.kanade.tachiyomi.data.download.DownloadCache
+import eu.kanade.tachiyomi.data.library.MetadataUpdateJob
+import eu.kanade.tachiyomi.data.storage.QuotesPortableMigrator
+import eu.kanade.tachiyomi.data.storage.TranslationsPortableMigrator
+import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.NetworkPreferences
+import eu.kanade.tachiyomi.network.PREF_DOH_360
+import eu.kanade.tachiyomi.network.PREF_DOH_ADGUARD
+import eu.kanade.tachiyomi.network.PREF_DOH_ALIDNS
+import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
+import eu.kanade.tachiyomi.network.PREF_DOH_CONTROLD
+import eu.kanade.tachiyomi.network.PREF_DOH_DNSPOD
+import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
+import eu.kanade.tachiyomi.network.PREF_DOH_MULLVAD
+import eu.kanade.tachiyomi.network.PREF_DOH_NJALLA
+import eu.kanade.tachiyomi.network.PREF_DOH_QUAD101
+import eu.kanade.tachiyomi.network.PREF_DOH_QUAD9
+import eu.kanade.tachiyomi.network.PREF_DOH_SHECAN
+import eu.kanade.tachiyomi.ui.more.OnboardingScreen
+import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
+import eu.kanade.tachiyomi.util.CrashLogUtil
+import eu.kanade.tachiyomi.util.system.GLUtil
+import eu.kanade.tachiyomi.util.system.copyToClipboard
+import eu.kanade.tachiyomi.util.system.isReleaseBuildType
+import eu.kanade.tachiyomi.util.system.isShizukuInstalled
+import eu.kanade.tachiyomi.util.system.powerManager
+import eu.kanade.tachiyomi.util.system.setDefaultSettings
+import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.coroutines.launch
+import logcat.LogPriority
+import okhttp3.Headers
+import tachiyomi.core.common.util.lang.launchNonCancellable
+import tachiyomi.core.common.util.lang.withUIContext
+import tachiyomi.core.common.util.system.ImageUtil
+import tachiyomi.core.common.util.system.logcat
+import tachiyomi.data.DatabaseMaintenance
+import tachiyomi.domain.category.interactor.GetCategories
+import tachiyomi.domain.category.interactor.SetMangaCategories
+import tachiyomi.domain.category.model.Category
+import tachiyomi.domain.download.service.NovelDownloadPreferences
+import tachiyomi.domain.library.service.LibraryPreferences
+import tachiyomi.domain.manga.interactor.ResetViewerFlags
+import tachiyomi.domain.manga.model.MangaUpdate
+import tachiyomi.domain.manga.repository.MangaRepository
+import tachiyomi.domain.translation.repository.TranslatedChapterRepository
+import tachiyomi.i18n.MR
+import tachiyomi.i18n.novel.TDMR
+import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.collectAsState
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import java.io.File
+import tachiyomi.core.common.i18n.stringResource as contextStringResource
+
+object SettingsAdvancedScreen : SearchableSettings {
+
+    @ReadOnlyComposable
+    @Composable
+    override fun getTitleRes() = MR.strings.pref_category_advanced
+
+    @Composable
+    override fun getPreferences(): List<Preference> {
+        val scope = rememberCoroutineScope()
+        val context = LocalContext.current
+        val navigator = LocalNavigator.currentOrThrow
+
+        val basePreferences = remember { Injekt.get<BasePreferences>() }
+        val networkPreferences = remember { Injekt.get<NetworkPreferences>() }
+        val libraryPreferences = remember { Injekt.get<LibraryPreferences>() }
+        val novelDownloadPreferences = remember { Injekt.get<NovelDownloadPreferences>() }
+
+        val libraryPageSize by libraryPreferences.experimentalLibraryPageSize.collectAsState()
+
+        return listOf(
+            Preference.PreferenceItem.TextPreference(
+                title = stringResource(MR.strings.pref_dump_crash_logs),
+                subtitle = stringResource(MR.strings.pref_dump_crash_logs_summary),
+                onClick = {
+                    scope.launch {
+                        CrashLogUtil(context).dumpLogs()
+                    }
+                },
+            ),
+            Preference.PreferenceItem.SwitchPreference(
+                preference = networkPreferences.verboseLogging,
+                title = stringResource(MR.strings.pref_verbose_logging),
+                subtitle = stringResource(MR.strings.pref_verbose_logging_summary),
+                onValueChanged = {
+                    context.toast(MR.strings.requires_app_restart)
+                    true
+                },
+            ),
+            Preference.PreferenceItem.SwitchPreference(
+                preference = libraryPreferences.showMangaSourceName,
+                title = stringResource(TDMR.strings.pref_show_manga_source_name),
+                subtitle = stringResource(TDMR.strings.pref_show_manga_source_name_summary),
+            ),
+            Preference.PreferenceItem.SwitchPreference(
+                preference = libraryPreferences.experimentalLibraryPagination,
+                title = stringResource(TDMR.strings.pref_experimental_library_pagination),
+                subtitle = stringResource(TDMR.strings.pref_experimental_library_pagination_summary),
+                onValueChanged = {
+                    context.toast(MR.strings.requires_app_restart)
+                    true
+                },
+            ),
+            Preference.PreferenceItem.SliderPreference(
+                value = libraryPageSize,
+                valueRange = 50..10000 step 500,
+                steps = 18,
+                title = stringResource(TDMR.strings.pref_experimental_library_page_size),
+                subtitle = stringResource(TDMR.strings.pref_experimental_library_page_size_summary, libraryPageSize),
+                valueString = libraryPageSize.toString(),
+                enabled = libraryPreferences.experimentalLibraryPagination.get(),
+                onValueChanged = {
+                    libraryPreferences.experimentalLibraryPageSize.set(it)
+                    context.toast(MR.strings.requires_app_restart)
+                },
+            ),
+            Preference.PreferenceItem.TextPreference(
+                title = stringResource(MR.strings.pref_debug_info),
+                onClick = { navigator.push(DebugInfoScreen()) },
+            ),
+            Preference.PreferenceItem.TextPreference(
+                title = stringResource(MR.strings.pref_onboarding_guide),
+                onClick = { navigator.push(OnboardingScreen()) },
+            ),
+            Preference.PreferenceItem.TextPreference(
+                title = stringResource(MR.strings.pref_manage_notifications),
+                onClick = {
+                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    }
+                    context.startActivity(intent)
+                },
+            ),
+            getBackgroundActivityGroup(),
+            getDataGroup(),
+            getNetworkGroup(networkPreferences = networkPreferences),
+            getLibraryGroup(libraryPreferences = libraryPreferences),
+            getReaderGroup(basePreferences = basePreferences),
+            getNovelReaderGroup(),
+            getExtensionsGroup(basePreferences = basePreferences),
+            getMassImportGroup(novelDownloadPreferences = novelDownloadPreferences),
+        )
+    }
+
+    @Composable
+    private fun getMassImportGroup(
+        novelDownloadPreferences: NovelDownloadPreferences,
+    ): Preference.PreferenceGroup {
+        return Preference.PreferenceGroup(
+            title = stringResource(TDMR.strings.pref_category_mass_import),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = novelDownloadPreferences.massImportSeparateFilePerBatch(),
+                    title = stringResource(TDMR.strings.pref_mass_import_separate_file_per_batch),
+                    subtitle = stringResource(TDMR.strings.pref_mass_import_separate_file_per_batch_summary),
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = novelDownloadPreferences.massImportSplitByDomain(),
+                    title = stringResource(TDMR.strings.pref_mass_import_split_by_domain),
+                    subtitle = stringResource(TDMR.strings.pref_mass_import_split_by_domain_summary),
+                ),
+            ),
+        )
+    }
+
+    @Composable
+    private fun getNovelReaderGroup(): Preference.PreferenceGroup {
+        val readerPreferences = remember { Injekt.get<ReaderPreferences>() }
+        val devToolsEnabled by readerPreferences.novelWebViewDevTools.collectAsState()
+
+        return Preference.PreferenceGroup(
+            title = stringResource(TDMR.strings.pref_category_novel_webview),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = readerPreferences.novelWebViewDevTools,
+                    title = stringResource(TDMR.strings.pref_novel_webview_devtools),
+                    subtitle = stringResource(TDMR.strings.pref_novel_webview_devtools_summary),
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = readerPreferences.novelConsoleErrorToast,
+                    title = stringResource(TDMR.strings.pref_novel_console_error_toast),
+                    subtitle = stringResource(TDMR.strings.pref_novel_console_error_toast_summary),
+                    enabled = devToolsEnabled,
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = readerPreferences.novelTtsLegacyNotification,
+                    title = stringResource(TDMR.strings.pref_novel_tts_legacy_notification),
+                    subtitle = stringResource(TDMR.strings.pref_novel_tts_legacy_notification_summary),
+                ),
+            ),
+        )
+    }
+
+    @Composable
+    private fun getBackgroundActivityGroup(): Preference.PreferenceGroup {
+        val context = LocalContext.current
+        val uriHandler = LocalUriHandler.current
+
+        return Preference.PreferenceGroup(
+            title = stringResource(MR.strings.label_background_activity),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_disable_battery_optimization),
+                    subtitle = stringResource(MR.strings.pref_disable_battery_optimization_summary),
+                    onClick = {
+                        val packageName: String = context.packageName
+                        if (!context.powerManager.isIgnoringBatteryOptimizations(packageName)) {
+                            try {
+                                @SuppressLint("BatteryLife")
+                                val intent = Intent().apply {
+                                    action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                                    data = "package:$packageName".toUri()
+                                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                                }
+                                context.startActivity(intent)
+                            } catch (e: ActivityNotFoundException) {
+                                context.toast(MR.strings.battery_optimization_setting_activity_not_found)
+                            }
+                        } else {
+                            context.toast(MR.strings.battery_optimization_disabled)
+                        }
+                    },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = "Don't kill my app!",
+                    subtitle = stringResource(MR.strings.about_dont_kill_my_app),
+                    onClick = { uriHandler.openUri("https://dontkillmyapp.com/") },
+                ),
+            ),
+        )
+    }
+
+    private fun allowedNormalizeSourceIds(): Set<Long> =
+        Injekt.get<tachiyomi.domain.source.service.SourceManager>().getAll()
+            .filter { it is eu.kanade.tachiyomi.jsplugin.source.JsSource || it is eu.kanade.tachiyomi.source.custom.CustomNovelSource }
+            .map { it.id }
+            .toSet()
+
+    @Composable
+    private fun getDataGroup(): Preference.PreferenceGroup {
+        val context = LocalContext.current
+        val navigator = LocalNavigator.currentOrThrow
+        val scope = rememberCoroutineScope()
+        val libraryPreferences = remember { Injekt.get<LibraryPreferences>() }
+        var showDeleteTranslationsDialog by remember { mutableStateOf(false) }
+        var portableMigrationRunning by remember { mutableStateOf(false) }
+        var showNormalizeUrlsDialog by remember { mutableStateOf(false) }
+        var showRemoveDuplicatesDialog by remember { mutableStateOf(false) }
+        var removeDoubleSlashes by remember { mutableStateOf(true) }
+        var duplicateUrls by remember { mutableStateOf<List<MangaRepository.DuplicateUrlInfo>>(emptyList()) }
+        var showDuplicatesDialog by remember { mutableStateOf(false) }
+        var showMoveToCategoryDialog by remember { mutableStateOf(false) }
+        var categories by remember { mutableStateOf<List<Category>>(emptyList()) }
+        var isDeleting by remember { mutableStateOf(false) }
+        var showBulkRemovalDialog by remember { mutableStateOf(false) }
+        var showResetSettingsDialog by remember { mutableStateOf(false) }
+
+        // Load categories when category-based dialogs are shown
+        if ((showMoveToCategoryDialog || showBulkRemovalDialog) && categories.isEmpty()) {
+            scope.launch {
+                categories = Injekt.get<GetCategories>().await()
+            }
+        }
+
+        if (showDeleteTranslationsDialog) {
+            AlertDialog(
+                onDismissRequest = { showDeleteTranslationsDialog = false },
+                title = { Text(text = stringResource(MR.strings.pref_delete_all_translations)) },
+                text = {
+                    Text(text = stringResource(MR.strings.pref_delete_all_translations_confirm))
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            scope.launch {
+                                Injekt.get<TranslatedChapterRepository>().deleteAll()
+                                context.toast(MR.strings.pref_all_translations_deleted)
+                                showDeleteTranslationsDialog = false
+                            }
+                        },
+                    ) {
+                        Text(text = stringResource(MR.strings.action_delete))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDeleteTranslationsDialog = false }) {
+                        Text(text = stringResource(MR.strings.action_cancel))
+                    }
+                },
+            )
+        }
+
+        if (showResetSettingsDialog) {
+            AlertDialog(
+                onDismissRequest = { showResetSettingsDialog = false },
+                title = { Text(text = stringResource(MR.strings.pref_reset_settings)) },
+                text = {
+                    Text(text = stringResource(MR.strings.pref_reset_settings_confirm))
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            scope.launch {
+                                val prefsDir = File(context.applicationInfo.dataDir, "shared_prefs")
+                                if (prefsDir.exists()) {
+                                    prefsDir.listFiles()?.forEach { file ->
+                                        val prefName = file.nameWithoutExtension
+                                        // Skip source-specific preferences
+                                        if (prefName.startsWith("source_")) return@forEach
+                                        context.getSharedPreferences(prefName, 0)
+                                            .edit()
+                                            .clear()
+                                            .apply()
+                                    }
+                                }
+                                showResetSettingsDialog = false
+                                val intent = context.packageManager.getLaunchIntentForPackage(context.packageName)
+                                intent?.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+                                context.startActivity(intent)
+                                Runtime.getRuntime().exit(0)
+                            }
+                        },
+                    ) {
+                        Text(text = stringResource(MR.strings.pref_reset_settings_action))
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showResetSettingsDialog = false }) {
+                        Text(text = stringResource(MR.strings.action_cancel))
+                    }
+                },
+            )
+        }
+
+        // Move to category dialog
+        if (showMoveToCategoryDialog && categories.isNotEmpty()) {
+            AlertDialog(
+                onDismissRequest = { showMoveToCategoryDialog = false },
+                title = { Text(text = "Move Duplicates to Category") },
+                text = {
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        Text(text = "Select a category to move ${duplicateUrls.size} duplicates to:")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        categories.forEach { category ->
+                            TextButton(
+                                onClick = {
+                                    scope.launch {
+                                        val setCategories = Injekt.get<SetMangaCategories>()
+
+                                        // Use manga IDs directly from duplicate info
+                                        val mangaIds = duplicateUrls.map { it.mangaId }
+
+                                        // Batch set categories (if supported) or do sequentially
+                                        mangaIds.forEach { mangaId ->
+                                            setCategories.await(mangaId, listOf(category.id))
+                                        }
+
+                                        context.toast("Moved ${mangaIds.size} novels to ${category.name}")
+                                        showMoveToCategoryDialog = false
+                                    }
+                                },
+                                modifier = Modifier.fillMaxWidth(),
+                            ) {
+                                Text(text = category.name)
+                            }
+                        }
+                    }
+                },
+                confirmButton = {},
+                dismissButton = {
+                    TextButton(onClick = { showMoveToCategoryDialog = false }) {
+                        Text(text = stringResource(MR.strings.action_cancel))
+                    }
+                },
+            )
+        }
+        if (showDuplicatesDialog && duplicateUrls.isNotEmpty()) {
+            AlertDialog(
+                onDismissRequest = { showDuplicatesDialog = false },
+                title = { Text(text = "Duplicate URLs Found (${duplicateUrls.size})") },
+                text = {
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        Text(text = "The following novels would have duplicate URLs after normalization:")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row {
+                            TextButton(
+                                onClick = {
+                                    scope.launch {
+                                        isDeleting = true
+                                        val mangaRepo = Injekt.get<MangaRepository>()
+
+                                        // Use manga IDs directly for deletion (unfavorite)
+                                        val updates = duplicateUrls.map { info ->
+                                            MangaUpdate(id = info.mangaId, favorite = false)
+                                        }
+
+                                        // Batch update all at once
+                                        if (updates.isNotEmpty()) {
+                                            mangaRepo.updateAll(updates)
+                                        }
+
+                                        context.toast("Deleted ${updates.size} duplicate novels")
+                                        isDeleting = false
+                                        duplicateUrls = emptyList()
+                                        showDuplicatesDialog = false
+                                    }
+                                },
+                                enabled = !isDeleting,
+                            ) {
+                                Icon(Icons.Filled.Delete, contentDescription = null)
+                                Text(text = "Delete All")
+                            }
+                            TextButton(
+                                onClick = { showMoveToCategoryDialog = true },
+                                enabled = !isDeleting,
+                            ) {
+                                Icon(Icons.Filled.DriveFileMove, contentDescription = null)
+                                Text(text = "Move to Category")
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        duplicateUrls.take(20).forEach { info ->
+                            Text(
+                                text = "• ${info.title}\n  ${info.oldUrl} → ${info.normalizedUrl}",
+                                style = MaterialTheme.typography.bodySmall,
+                            )
+                        }
+                        if (duplicateUrls.size > 20) {
+                            Text(text = "... and ${duplicateUrls.size - 20} more")
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = { showDuplicatesDialog = false }) {
+                        Text(text = "OK")
+                    }
+                },
+            )
+        }
+
+        if (showNormalizeUrlsDialog) {
+            AlertDialog(
+                onDismissRequest = { showNormalizeUrlsDialog = false },
+                title = { Text(text = "Normalize manga URLs") },
+                text = {
+                    Column {
+                        Text(text = "This will clean up manga URLs from JS-plugin and custom sources:")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(text = "• Remove trailing slashes")
+                        Text(text = "• Remove URL fragments (#...)")
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Checkbox(
+                                checked = removeDoubleSlashes,
+                                onCheckedChange = { removeDoubleSlashes = it },
+                            )
+                            Text(text = "Remove double slashes (//)")
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            scope.launch {
+                                val result = Injekt.get<tachiyomi.domain.manga.repository.MangaRepository>()
+                                    .normalizeAllUrlsAdvanced(removeDoubleSlashes, allowedNormalizeSourceIds())
+                                duplicateUrls = result.second
+                                if (duplicateUrls.isNotEmpty()) {
+                                    showDuplicatesDialog = true
+                                }
+                                context.toast("Normalized ${result.first} manga URLs")
+                                showNormalizeUrlsDialog = false
+                            }
+                        },
+                    ) {
+                        Text(text = "Normalize")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showNormalizeUrlsDialog = false }) {
+                        Text(text = stringResource(MR.strings.action_cancel))
+                    }
+                },
+            )
+        }
+
+        if (showRemoveDuplicatesDialog) {
+            var removeDupDoubleSlashes by remember { mutableStateOf(true) }
+            var isRemoving by remember { mutableStateOf(false) }
+            var removedDuplicates by remember { mutableStateOf<List<Triple<String, String, String>>>(emptyList()) }
+            var showRemovedList by remember { mutableStateOf(false) }
+
+            if (showRemovedList && removedDuplicates.isNotEmpty()) {
+                AlertDialog(
+                    onDismissRequest = {
+                        showRemovedList = false
+                        removedDuplicates = emptyList()
+                    },
+                    title = { Text(text = "Removed ${removedDuplicates.size} duplicates") },
+                    text = {
+                        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                            Text(text = "The following novels were unfavorited:")
+                            Spacer(modifier = Modifier.height(8.dp))
+                            removedDuplicates.take(50).forEach { (title, oldUrl, normalizedUrl) ->
+                                Text(
+                                    text = "• $title\n  $oldUrl",
+                                    style = MaterialTheme.typography.bodySmall,
+                                )
+                            }
+                            if (removedDuplicates.size > 50) {
+                                Text(text = "... and ${removedDuplicates.size - 50} more")
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            showRemovedList = false
+                            removedDuplicates = emptyList()
+                            showRemoveDuplicatesDialog = false
+                        }) {
+                            Text(text = "OK")
+                        }
+                    },
+                )
+            } else {
+                AlertDialog(
+                    onDismissRequest = { if (!isRemoving) showRemoveDuplicatesDialog = false },
+                    title = { Text(text = "Remove duplicate URL entries") },
+                    text = {
+                        Column {
+                            Text(
+                                text = "This will unfavorite manga entries that would have duplicate URLs after normalization.",
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(text = "For each group of duplicates, only the first entry will be kept.")
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                            ) {
+                                Checkbox(
+                                    checked = removeDupDoubleSlashes,
+                                    onCheckedChange = { removeDupDoubleSlashes = it },
+                                    enabled = !isRemoving,
+                                )
+                                Text(text = "Also check for double slashes (//)")
+                            }
+                            if (isRemoving) {
+                                Spacer(modifier = Modifier.height(8.dp))
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                                    Text(text = "Removing duplicates...")
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            TextButton(
+                                onClick = {
+                                    scope.launch {
+                                        isRemoving = true
+                                        val result = Injekt.get<MangaRepository>()
+                                            .normalizeAllUrlsAdvanced(removeDupDoubleSlashes, allowedNormalizeSourceIds())
+                                        isRemoving = false
+
+                                        duplicateUrls = result.second
+                                        if (duplicateUrls.isNotEmpty()) {
+                                            showMoveToCategoryDialog = true
+                                            showRemoveDuplicatesDialog = false
+                                        } else {
+                                            context.toast("No duplicates found")
+                                        }
+                                    }
+                                },
+                                enabled = !isRemoving,
+                            ) {
+                                Text(text = "Move to Category")
+                            }
+                            TextButton(
+                                onClick = {
+                                    scope.launch {
+                                        isRemoving = true
+                                        val result = Injekt.get<MangaRepository>()
+                                            .removePotentialDuplicates(removeDupDoubleSlashes, allowedNormalizeSourceIds())
+                                        isRemoving = false
+                                        if (result.first > 0) {
+                                            removedDuplicates = result.second
+                                            showRemovedList = true
+                                            context.toast("Removed ${result.first} duplicate entries")
+                                        } else {
+                                            context.toast("No duplicates found")
+                                            showRemoveDuplicatesDialog = false
+                                        }
+                                    }
+                                },
+                                enabled = !isRemoving,
+                            ) {
+                                Text(text = "Remove Duplicates")
+                            }
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(
+                            onClick = { showRemoveDuplicatesDialog = false },
+                            enabled = !isRemoving,
+                        ) {
+                            Text(text = stringResource(MR.strings.action_cancel))
+                        }
+                    },
+                )
+            }
+        }
+
+        // Bulk URL processing dialog
+        if (showBulkRemovalDialog) {
+            // Queue-based approach to handle large files without memory issues
+            var pendingUrls by remember { mutableStateOf("") }
+            var urlText by remember { mutableStateOf("") }
+            var isRemoving by remember { mutableStateOf(false) }
+            var removedCount by remember { mutableStateOf(0) }
+            var errorCount by remember { mutableStateOf(0) }
+            var moveToCategoryMode by remember { mutableStateOf(false) }
+            var selectedCategoryId by remember { mutableStateOf<Long?>(null) }
+            var categoryDropdownExpanded by remember { mutableStateOf(false) }
+
+            val pendingUrlCount = remember(pendingUrls) {
+                if (pendingUrls.isBlank()) 0 else pendingUrls.lines().filter { it.isNotBlank() }.size
+            }
+
+            // File picker for URL list
+            val filePickerLauncher = rememberLauncherForActivityResult(
+                contract = androidx.activity.result.contract.ActivityResultContracts.OpenMultipleDocuments(),
+                onResult = { uris ->
+                    if (uris.isEmpty()) return@rememberLauncherForActivityResult
+
+                    var loadedFiles = 0
+                    val mergedBuilder = StringBuilder()
+                    uris.forEach { uri ->
+                        try {
+                            var fileHadContent = false
+                            context.contentResolver.openInputStream(uri)
+                                ?.bufferedReader()
+                                ?.useLines { lines ->
+                                    lines.forEach { rawLine ->
+                                        val line = rawLine.trim()
+                                        if (line.isNotBlank()) {
+                                            if (mergedBuilder.isNotEmpty()) {
+                                                mergedBuilder.append('\n')
+                                            }
+                                            mergedBuilder.append(line)
+                                            fileHadContent = true
+                                        }
+                                    }
+                                }
+
+                            if (fileHadContent) {
+                                loadedFiles++
+                            }
+                        } catch (e: Exception) {
+                            logcat(LogPriority.ERROR, e) { "Error reading file: $uri" }
+                        }
+                    }
+
+                    if (mergedBuilder.isNotEmpty()) {
+                        val merged = mergedBuilder.toString()
+                        pendingUrls = if (pendingUrls.isBlank()) merged else "$pendingUrls\n$merged"
+                        val newCount = merged.lines().count { it.isNotBlank() }
+                        val totalCount = pendingUrls.lines().count { it.isNotBlank() }
+                        context.toast("Added $newCount URLs from $loadedFiles file(s) (Total: $totalCount)")
+                    } else {
+                        context.toast("No readable URLs found in selected files")
+                    }
+                },
+            )
+
+            val userCategories = remember(categories) {
+                categories
+                    .asSequence()
+                    .filterNot(Category::isSystemCategory)
+                    .filter { it.contentType != Category.CONTENT_TYPE_MANGA }
+                    .toList()
+            }
+            val selectedCategory = userCategories.firstOrNull { it.id == selectedCategoryId }
+            val defaultCategoryName = stringResource(MR.strings.default_category)
+            val selectedCategoryName = if (selectedCategoryId == null) {
+                defaultCategoryName
+            } else {
+                selectedCategory?.name ?: defaultCategoryName
+            }
+
+            AlertDialog(
+                onDismissRequest = { if (!isRemoving) showBulkRemovalDialog = false },
+                title = {
+                    Text(
+                        text = if (moveToCategoryMode) {
+                            "Bulk Move to Category by URL"
+                        } else {
+                            "Bulk Remove by URL"
+                        },
+                    )
+                },
+                text = {
+                    Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            TextButton(
+                                onClick = { moveToCategoryMode = false },
+                                enabled = !isRemoving,
+                            ) {
+                                Icon(Icons.Filled.Delete, contentDescription = null, modifier = Modifier.size(18.dp))
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Remove")
+                            }
+                            TextButton(
+                                onClick = { moveToCategoryMode = true },
+                                enabled = !isRemoving,
+                            ) {
+                                Icon(
+                                    Icons.Filled.DriveFileMove,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Move to Category")
+                            }
+                        }
+
+                        if (moveToCategoryMode) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(text = "Target category:")
+                            Spacer(modifier = Modifier.height(4.dp))
+                            if (userCategories.isEmpty()) {
+                                Text(
+                                    text = "No categories available.",
+                                    color = MaterialTheme.colorScheme.error,
+                                )
+                            } else {
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    OutlinedTextField(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        readOnly = true,
+                                        enabled = false,
+                                        value = selectedCategoryName,
+                                        onValueChange = {},
+                                        label = { Text("Category") },
+                                        trailingIcon = {
+                                            Icon(
+                                                imageVector = Icons.Outlined.ArrowDropDown,
+                                                contentDescription = null,
+                                            )
+                                        },
+                                        colors = OutlinedTextFieldDefaults.colors(
+                                            disabledTextColor = MaterialTheme.colorScheme.onSurface,
+                                            disabledBorderColor = MaterialTheme.colorScheme.outline,
+                                            disabledLabelColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            disabledTrailingIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        ),
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .clickable { categoryDropdownExpanded = true },
+                                    )
+
+                                    DropdownMenu(
+                                        expanded = categoryDropdownExpanded,
+                                        onDismissRequest = { categoryDropdownExpanded = false },
+                                        modifier = Modifier.heightIn(max = 260.dp),
+                                    ) {
+                                        DropdownMenuItem(
+                                            text = { Text(defaultCategoryName) },
+                                            onClick = {
+                                                selectedCategoryId = null
+                                                categoryDropdownExpanded = false
+                                            },
+                                        )
+                                        userCategories.forEach { category ->
+                                            DropdownMenuItem(
+                                                text = { Text(category.name) },
+                                                onClick = {
+                                                    selectedCategoryId = category.id
+                                                    categoryDropdownExpanded = false
+                                                },
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+
+                        Text(
+                            text = if (moveToCategoryMode) {
+                                "Enter URLs to move to selected category:"
+                            } else {
+                                "Enter URLs to remove from library:"
+                            },
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        // Text field for manual entry
+                        androidx.compose.material3.OutlinedTextField(
+                            value = urlText,
+                            onValueChange = { urlText = it },
+                            modifier = Modifier.fillMaxWidth().height(120.dp),
+                            placeholder = { Text("https://example.com/novel/123\nhttps://example.com/novel/456") },
+                            enabled = !isRemoving,
+                        )
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            // Add to queue button
+                            TextButton(
+                                onClick = {
+                                    if (urlText.isNotBlank()) {
+                                        pendingUrls = if (pendingUrls.isBlank()) urlText else "$pendingUrls\n$urlText"
+                                        urlText = ""
+                                        context.toast("Added URLs to queue (Total: $pendingUrlCount)")
+                                    }
+                                },
+                                enabled = !isRemoving && urlText.isNotBlank(),
+                            ) {
+                                Icon(
+                                    Icons.Outlined.ContentPaste,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Add to Queue")
+                            }
+
+                            // Load from file button
+                            TextButton(
+                                onClick = { filePickerLauncher.launch(arrayOf("text/*", "*/*")) },
+                                enabled = !isRemoving,
+                            ) {
+                                Icon(
+                                    Icons.Outlined.FileOpen,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text("Load Files")
+                            }
+                        }
+
+                        // Queue status
+                        if (pendingUrlCount > 0) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            androidx.compose.material3.Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                colors = androidx.compose.material3.CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                ),
+                            ) {
+                                Row(
+                                    modifier = Modifier.padding(12.dp).fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                ) {
+                                    Text(
+                                        text = "Queue: $pendingUrlCount URLs",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    )
+                                    IconButton(
+                                        onClick = {
+                                            pendingUrls = ""
+                                            removedCount = 0
+                                            errorCount = 0
+                                        },
+                                        enabled = !isRemoving,
+                                    ) {
+                                        Icon(
+                                            Icons.Outlined.Clear,
+                                            contentDescription = "Clear queue",
+                                            tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Results
+                        if (removedCount > 0 || errorCount > 0) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = buildString {
+                                    append("Removed: $removedCount")
+                                    if (errorCount > 0) append(" | Errors: $errorCount")
+                                },
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            scope.launch {
+                                isRemoving = true
+                                removedCount = 0
+                                errorCount = 0
+                                try {
+                                    if (moveToCategoryMode && selectedCategoryId == null) {
+                                        context.toast("Select a target category first")
+                                        isRemoving = false
+                                        return@launch
+                                    }
+
+                                    val mangaRepo = Injekt.get<MangaRepository>()
+                                    val setMangaCategories = Injekt.get<SetMangaCategories>()
+
+                                    val chunkSize = 50
+                                    val favorites = mangaRepo.getFavoriteIdAndUrl()
+                                    val allMatchedIds = mutableSetOf<Long>()
+
+                                    fun processChunk(urlChunk: List<String>) {
+                                        try {
+                                            val toUnfavorite = mutableSetOf<Long>()
+
+                                            for (url in urlChunk) {
+                                                try {
+                                                    // Extract path from URL
+                                                    val uri = java.net.URI(url)
+                                                    val path =
+                                                        uri.path?.removePrefix("/")?.removeSuffix("/") ?: continue
+
+                                                    // Find all favorite manga matching this URL pattern
+                                                    val matchingIds = favorites.filter { (_, mangaUrl) ->
+                                                        val mangaPath = try {
+                                                            val mangaUri = java.net.URI(mangaUrl)
+                                                            mangaUri.path?.removePrefix("/")?.removeSuffix("/")
+                                                        } catch (e: Exception) {
+                                                            mangaUrl.removePrefix("/").removeSuffix("/")
+                                                        }
+
+                                                        // Match if paths are similar (contains or equals)
+                                                        mangaPath != null &&
+                                                            (
+                                                                mangaPath == path || mangaPath.contains(path) ||
+                                                                    path.contains(mangaPath)
+                                                                )
+                                                    }.map { it.first }
+
+                                                    toUnfavorite.addAll(matchingIds)
+                                                } catch (e: Exception) {
+                                                    logcat(LogPriority.ERROR, e) { "Error processing URL: $url" }
+                                                    errorCount++
+                                                }
+                                            }
+
+                                            allMatchedIds.addAll(toUnfavorite)
+                                        } catch (e: Exception) {
+                                            logcat(LogPriority.ERROR, e) { "Error processing chunk" }
+                                            errorCount += urlChunk.size
+                                        }
+                                    }
+
+                                    var validUrlCount = 0
+                                    val buffer = ArrayList<String>(chunkSize)
+
+                                    pendingUrls
+                                        .lineSequence()
+                                        .forEach { rawLine ->
+                                            rawLine.split(',', ';')
+                                                .asSequence()
+                                                .map { it.trim() }
+                                                .filter { it.startsWith("http://") || it.startsWith("https://") }
+                                                .forEach { url ->
+                                                    validUrlCount++
+                                                    buffer.add(url)
+                                                    if (buffer.size >= chunkSize) {
+                                                        val chunk = buffer.toList()
+                                                        buffer.clear()
+                                                        processChunk(chunk)
+                                                    }
+                                                }
+                                        }
+
+                                    if (buffer.isNotEmpty()) {
+                                        processChunk(buffer.toList())
+                                        buffer.clear()
+                                    }
+
+                                    if (validUrlCount == 0) {
+                                        context.toast("No valid URLs to process")
+                                        isRemoving = false
+                                        return@launch
+                                    }
+
+                                    if (allMatchedIds.isNotEmpty()) {
+                                        if (moveToCategoryMode) {
+                                            setMangaCategories.add(allMatchedIds.toList(), listOf(selectedCategoryId!!))
+                                            removedCount = allMatchedIds.size
+                                        } else {
+                                            val updates = allMatchedIds.map { MangaUpdate(id = it, favorite = false) }
+                                            mangaRepo.updateAll(updates)
+                                            removedCount = allMatchedIds.size
+                                        }
+                                    }
+
+                                    withUIContext {
+                                        context.toast(
+                                            buildString {
+                                                if (moveToCategoryMode) {
+                                                    val categoryName = selectedCategory?.name ?: "selected category"
+                                                    append("Moved $removedCount entries to $categoryName")
+                                                } else {
+                                                    append("Removed $removedCount entries")
+                                                }
+                                                if (errorCount > 0) append(" ($errorCount errors)")
+                                            },
+                                        )
+                                    }
+
+                                    // Clear queue after successful processing
+                                    pendingUrls = ""
+                                } catch (e: Exception) {
+                                    logcat(LogPriority.ERROR, e) { "Bulk removal failed" }
+                                    withUIContext {
+                                        context.toast("Error: ${e.message}")
+                                    }
+                                } finally {
+                                    isRemoving = false
+                                }
+                            }
+                        },
+                        enabled =
+                        !isRemoving && pendingUrlCount > 0 && (!moveToCategoryMode || selectedCategoryId != null),
+                    ) {
+                        if (isRemoving) {
+                            CircularProgressIndicator(modifier = Modifier.size(16.dp))
+                        } else {
+                            Text(
+                                text = if (moveToCategoryMode) {
+                                    "Move ($pendingUrlCount)"
+                                } else {
+                                    "Remove ($pendingUrlCount)"
+                                },
+                            )
+                        }
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = { showBulkRemovalDialog = false },
+                        enabled = !isRemoving,
+                    ) {
+                        Text(text = stringResource(MR.strings.action_cancel))
+                    }
+                },
+            )
+        }
+
+        return Preference.PreferenceGroup(
+            title = stringResource(MR.strings.label_data),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_invalidate_download_cache),
+                    subtitle = stringResource(MR.strings.pref_invalidate_download_cache_summary),
+                    onClick = {
+                        Injekt.get<DownloadCache>().invalidateCache()
+                        context.toast(MR.strings.download_cache_invalidated)
+                    },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_clear_database),
+                    subtitle = stringResource(MR.strings.pref_clear_database_summary),
+                    onClick = { navigator.push(ClearDatabaseScreen()) },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_db_statistics),
+                    subtitle = stringResource(MR.strings.pref_db_statistics_subtitle),
+                    onClick = {
+                        scope.launch {
+                            try {
+                                val stats = Injekt.get<DatabaseMaintenance>().getDetailedDatabaseStats()
+
+                                val totalSize = (stats["total_size_bytes"] as? Long) ?: 0L
+                                val freelistSize = (stats["freelist_size_bytes"] as? Long) ?: 0L
+
+                                @Suppress("UNCHECKED_CAST")
+                                val tableCounts = (stats["table_row_counts"] as? Map<String, Long>) ?: emptyMap()
+
+                                @Suppress("UNCHECKED_CAST")
+                                val tableSizes = (stats["table_sizes_bytes"] as? Map<String, Long>) ?: emptyMap()
+
+                                @Suppress("UNCHECKED_CAST")
+                                val indexSizes = (stats["index_sizes_bytes"] as? Map<String, Long>) ?: emptyMap()
+                                val avgChapterBytes = (stats["avg_chapter_text_bytes"] as? Double) ?: 0.0
+                                val avgDescBytes = (stats["avg_manga_description_bytes"] as? Double) ?: 0.0
+
+                                fun formatSize(bytes: Long): String = when {
+                                    bytes >= 1024 * 1024 * 1024 -> "%.2f GB".format(bytes / (1024.0 * 1024.0 * 1024.0))
+                                    bytes >= 1024 * 1024 -> "%.2f MB".format(bytes / (1024.0 * 1024.0))
+                                    bytes >= 1024 -> "%.2f KB".format(bytes / 1024.0)
+                                    else -> "$bytes B"
+                                }
+
+                                val report = buildString {
+                                    appendLine("=== Database Statistics ===")
+                                    appendLine("Total size: ${formatSize(totalSize)}")
+                                    appendLine("Freelist (reclaimable): ${formatSize(freelistSize)}")
+                                    appendLine()
+                                    appendLine("--- Row Counts ---")
+                                    tableCounts.entries.sortedByDescending { it.value }.forEach { (table, count) ->
+                                        appendLine("$table: ${"%,d".format(count)}")
+                                    }
+                                    if (tableSizes.isNotEmpty()) {
+                                        appendLine()
+                                        appendLine("--- Table Sizes ---")
+                                        tableSizes.entries.sortedByDescending { it.value }.forEach { (table, size) ->
+                                            appendLine("$table: ${formatSize(size)}")
+                                        }
+                                    }
+                                    if (indexSizes.isNotEmpty()) {
+                                        appendLine()
+                                        appendLine("--- Index Sizes ---")
+                                        val totalIndexSize = indexSizes.values.sum()
+                                        appendLine("Total indexes: ${formatSize(totalIndexSize)}")
+                                        indexSizes.entries.sortedByDescending {
+                                            it.value
+                                        }.take(10).forEach { (idx, size) ->
+                                            appendLine("$idx: ${formatSize(size)}")
+                                        }
+                                    }
+                                    appendLine()
+                                    appendLine("--- Averages ---")
+                                    appendLine("Avg chapter text: %.1f bytes".format(avgChapterBytes))
+                                    appendLine("Avg manga description: %.1f bytes".format(avgDescBytes))
+
+                                    // Size estimation breakdown
+                                    val chapterCount = tableCounts["chapters"] ?: 0L
+                                    val mangaCount = tableCounts["mangas"] ?: 0L
+                                    if (chapterCount > 0) {
+                                        appendLine()
+                                        appendLine("--- Estimated Breakdown ---")
+                                        // Each chapter row ~= fixed columns (~80 bytes) + text data
+                                        val estChapterRowSize = 80 + avgChapterBytes
+                                        val estChapterTableSize = (chapterCount * estChapterRowSize).toLong()
+                                        appendLine("Chapters data: ~${formatSize(estChapterTableSize)}")
+
+                                        // 6 indexes on chapters table, each ~16-40 bytes per row
+                                        val estChapterIndexSize = chapterCount * 150 // ~150 bytes per row for all indexes
+                                        appendLine("Chapter indexes: ~${formatSize(estChapterIndexSize)}")
+
+                                        if (avgDescBytes > 0 && mangaCount > 0) {
+                                            val estMangaSize = (mangaCount * (200 + avgDescBytes)).toLong()
+                                            appendLine("Manga data: ~${formatSize(estMangaSize)}")
+                                        }
+                                    }
+                                }
+
+                                withUIContext {
+                                    context.copyToClipboard("Database Stats", report)
+                                    context.toast("Statistics copied to clipboard")
+                                }
+                                logcat(LogPriority.INFO) { report }
+                            } catch (e: Exception) {
+                                logcat(LogPriority.ERROR, e) { "Failed to get database stats" }
+                                withUIContext {
+                                    context.toast("Error: ${e.message}")
+                                }
+                            }
+                        }
+                    },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_db_maintenance),
+                    subtitle = stringResource(MR.strings.pref_db_maintenance_subtitle),
+                    onClick = {
+                        if (DatabaseMaintenanceJob.isRunning(context)) {
+                            context.toast(context.contextStringResource(TDMR.strings.db_maintenance_already_running))
+                        } else {
+                            DatabaseMaintenanceJob.start(context)
+                            context.toast(context.contextStringResource(TDMR.strings.db_maintenance_started))
+                        }
+                    },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_normalize_urls),
+                    subtitle = stringResource(MR.strings.pref_normalize_urls_subtitle),
+                    onClick = { showNormalizeUrlsDialog = true },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_remove_duplicate_urls),
+                    subtitle = stringResource(MR.strings.pref_remove_duplicate_urls_subtitle),
+                    onClick = { showRemoveDuplicatesDialog = true },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_delete_all_translations),
+                    subtitle = stringResource(MR.strings.pref_delete_all_translations_subtitle),
+                    onClick = { showDeleteTranslationsDialog = true },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_migrate_quotes_portable),
+                    subtitle = stringResource(MR.strings.pref_migrate_quotes_portable_subtitle),
+                    onClick = {
+                        if (!portableMigrationRunning) {
+                            portableMigrationRunning = true
+                            scope.launch {
+                                val count = try {
+                                    QuotesPortableMigrator.run()
+                                } catch (e: Exception) {
+                                    logcat(LogPriority.ERROR, e)
+                                    withUIContext { context.toast(MR.strings.pref_portable_migration_error) }
+                                    return@launch
+                                } finally {
+                                    portableMigrationRunning = false
+                                }
+                                withUIContext {
+                                    context.toast(
+                                        context.contextStringResource(MR.strings.pref_portable_migration_done, count),
+                                    )
+                                }
+                            }
+                        }
+                    },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_migrate_translations_portable),
+                    subtitle = stringResource(MR.strings.pref_migrate_translations_portable_subtitle),
+                    onClick = {
+                        if (!portableMigrationRunning) {
+                            portableMigrationRunning = true
+                            scope.launch {
+                                val count = try {
+                                    TranslationsPortableMigrator.run()
+                                } catch (e: Exception) {
+                                    logcat(LogPriority.ERROR, e)
+                                    withUIContext { context.toast(MR.strings.pref_portable_migration_error) }
+                                    return@launch
+                                } finally {
+                                    portableMigrationRunning = false
+                                }
+                                withUIContext {
+                                    context.toast(
+                                        context.contextStringResource(MR.strings.pref_portable_migration_done, count),
+                                    )
+                                }
+                            }
+                        }
+                    },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_clear_temp_files),
+                    subtitle = stringResource(MR.strings.pref_clear_temp_files_subtitle),
+                    onClick = {
+                        scope.launch {
+                            var clearedSize = 0L
+                            try {
+                                // Clear network cache
+                                val networkCacheDir = File(context.cacheDir, "network_cache")
+                                if (networkCacheDir.exists()) {
+                                    clearedSize +=
+                                        networkCacheDir.walkTopDown().filter { it.isFile }.sumOf { it.length() }
+                                    networkCacheDir.deleteRecursively()
+                                }
+
+                                // Clear epub export temp files
+                                context.cacheDir.listFiles()?.filter { it.name.startsWith("epub_export_") }?.forEach {
+                                    clearedSize += it.walkTopDown().filter { f -> f.isFile }.sumOf { f -> f.length() }
+                                    it.deleteRecursively()
+                                }
+
+                                // Clear mass import temp files
+                                context.cacheDir.listFiles()?.filter { it.name.startsWith("mass_import_") }?.forEach {
+                                    clearedSize += it.length()
+                                    it.delete()
+                                }
+
+                                // Clear font temp files
+                                context.cacheDir.listFiles()?.filter {
+                                    it.name.startsWith("font_") &&
+                                        it.extension == "ttf"
+                                }?.forEach {
+                                    clearedSize += it.length()
+                                    it.delete()
+                                }
+
+                                // Clear update error files
+                                context.cacheDir.listFiles()?.filter { it.name.contains("update_errors") }?.forEach {
+                                    clearedSize += it.length()
+                                    it.delete()
+                                }
+
+                                // Clear translation temp (.tmp) files
+                                try {
+                                    val translationRepo = Injekt.get<TranslatedChapterRepository>()
+                                    clearedSize += translationRepo.clearTmpFiles()
+                                } catch (_: Exception) { }
+
+                                val sizeString = when {
+                                    clearedSize >= 1024 * 1024 -> "%.2f MB".format(clearedSize / (1024.0 * 1024.0))
+                                    clearedSize >= 1024 -> "%.2f KB".format(clearedSize / 1024.0)
+                                    else -> "$clearedSize bytes"
+                                }
+                                withUIContext {
+                                    context.toast(
+                                        context.contextStringResource(MR.strings.pref_temp_files_cleared, sizeString),
+                                    )
+                                }
+                            } catch (e: Exception) {
+                                logcat(LogPriority.ERROR, e)
+                                withUIContext {
+                                    context.toast(MR.strings.pref_temp_files_error)
+                                }
+                            }
+                        }
+                    },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_bulk_remove_url),
+                    subtitle = stringResource(MR.strings.pref_bulk_remove_url_subtitle),
+                    onClick = { showBulkRemovalDialog = true },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = "Normalize tags",
+                    subtitle = "Trims whitespace and removes duplicate tags (case-insensitive)",
+                    onClick = {
+                        scope.launch {
+                            val count = Injekt.get<MangaRepository>().normalizeAllTags()
+                            withUIContext {
+                                context.toast("Normalized tags for $count novels")
+                            }
+                        }
+                    },
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = libraryPreferences.normalizeTagsOnUpdate,
+                    title = "Normalize tags when updating entry",
+                    subtitle = "Apply the same normalization automatically when entry details are " +
+                        "fetched/updated or tags are edited",
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = "Reset settings to default",
+                    subtitle = "Resets all app settings to their default values (library data is preserved)",
+                    onClick = { showResetSettingsDialog = true },
+                ),
+            ),
+        )
+    }
+
+    @Composable
+    private fun getNetworkGroup(
+        networkPreferences: NetworkPreferences,
+    ): Preference.PreferenceGroup {
+        val context = LocalContext.current
+        val networkHelper = remember { Injekt.get<NetworkHelper>() }
+
+        val userAgentPref = networkPreferences.defaultUserAgent
+        val userAgent by userAgentPref.collectAsState()
+
+        return Preference.PreferenceGroup(
+            title = stringResource(MR.strings.label_network),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_clear_cookies),
+                    onClick = {
+                        networkHelper.cookieJar.removeAll()
+                        context.toast(MR.strings.cookies_cleared)
+                    },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_clear_webview_data),
+                    onClick = {
+                        try {
+                            WebView(context).run {
+                                setDefaultSettings()
+                                clearCache(true)
+                                clearFormData()
+                                clearHistory()
+                                clearSslPreferences()
+                            }
+                            WebStorage.getInstance().deleteAllData()
+                            context.applicationInfo?.dataDir?.let { File("$it/app_webview/").deleteRecursively() }
+                            context.toast(MR.strings.webview_data_deleted)
+                        } catch (e: Throwable) {
+                            logcat(LogPriority.ERROR, e)
+                            context.toast(MR.strings.cache_delete_error)
+                        }
+                    },
+                ),
+                Preference.PreferenceItem.ListPreference(
+                    preference = networkPreferences.dohProvider,
+                    entries = mapOf(
+                        -1 to stringResource(MR.strings.disabled),
+                        PREF_DOH_CLOUDFLARE to "Cloudflare",
+                        PREF_DOH_GOOGLE to "Google",
+                        PREF_DOH_ADGUARD to "AdGuard",
+                        PREF_DOH_QUAD9 to "Quad9",
+                        PREF_DOH_ALIDNS to "AliDNS",
+                        PREF_DOH_DNSPOD to "DNSPod",
+                        PREF_DOH_360 to "360",
+                        PREF_DOH_QUAD101 to "Quad 101",
+                        PREF_DOH_MULLVAD to "Mullvad",
+                        PREF_DOH_CONTROLD to "Control D",
+                        PREF_DOH_NJALLA to "Njalla",
+                        PREF_DOH_SHECAN to "Shecan",
+                    ),
+                    title = stringResource(MR.strings.pref_dns_over_https),
+                    onValueChanged = {
+                        context.toast(MR.strings.requires_app_restart)
+                        true
+                    },
+                ),
+                Preference.PreferenceItem.EditTextPreference(
+                    preference = userAgentPref,
+                    title = stringResource(MR.strings.pref_user_agent_string),
+                    onValueChanged = {
+                        try {
+                            // OkHttp checks for valid values internally
+                            Headers.Builder().add("User-Agent", it)
+                            context.toast(MR.strings.requires_app_restart)
+                        } catch (_: IllegalArgumentException) {
+                            context.toast(MR.strings.error_user_agent_string_invalid)
+                            return@EditTextPreference false
+                        }
+                        true
+                    },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_reset_user_agent_string),
+                    enabled = remember(userAgent) { userAgent != userAgentPref.defaultValue() },
+                    onClick = {
+                        userAgentPref.delete()
+                        context.toast(MR.strings.requires_app_restart)
+                    },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(TDMR.strings.pref_clear_rate_limit_history),
+                    subtitle = stringResource(TDMR.strings.pref_clear_rate_limit_history_summary),
+                    onClick = {
+                        networkHelper.rateLimitInterceptor.clearState()
+                        context.toast(TDMR.strings.rate_limit_history_cleared)
+                    },
+                ),
+            ),
+        )
+    }
+
+    @Composable
+    private fun getLibraryGroup(
+        libraryPreferences: LibraryPreferences,
+    ): Preference.PreferenceGroup {
+        val scope = rememberCoroutineScope()
+        val context = LocalContext.current
+
+        return Preference.PreferenceGroup(
+            title = stringResource(MR.strings.label_library),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_refresh_library_covers),
+                    onClick = { MetadataUpdateJob.startNow(context) },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_reset_viewer_flags),
+                    subtitle = stringResource(MR.strings.pref_reset_viewer_flags_summary),
+                    onClick = {
+                        scope.launchNonCancellable {
+                            val success = Injekt.get<ResetViewerFlags>().await()
+                            withUIContext {
+                                val message = if (success) {
+                                    MR.strings.pref_reset_viewer_flags_success
+                                } else {
+                                    MR.strings.pref_reset_viewer_flags_error
+                                }
+                                context.toast(message)
+                            }
+                        }
+                    },
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = libraryPreferences.updateMangaTitles,
+                    title = stringResource(MR.strings.pref_update_library_manga_titles),
+                    subtitle = stringResource(MR.strings.pref_update_library_manga_titles_summary),
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = libraryPreferences.disallowNonAsciiFilenames,
+                    title = stringResource(MR.strings.pref_disallow_non_ascii_filenames),
+                    subtitle = stringResource(MR.strings.pref_disallow_non_ascii_filenames_details),
+                ),
+
+            ),
+        )
+    }
+
+    @Composable
+    private fun getReaderGroup(
+        basePreferences: BasePreferences,
+    ): Preference.PreferenceGroup {
+        val context = LocalContext.current
+        val chooseColorProfile = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.OpenDocument(),
+        ) { uri ->
+            uri?.let {
+                val flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                context.contentResolver.takePersistableUriPermission(uri, flags)
+                basePreferences.displayProfile.set(uri.toString())
+            }
+        }
+        return Preference.PreferenceGroup(
+            title = stringResource(MR.strings.pref_category_reader),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.ListPreference(
+                    preference = basePreferences.hardwareBitmapThreshold,
+                    entries = GLUtil.CUSTOM_TEXTURE_LIMIT_OPTIONS
+                        .mapIndexed { index, option ->
+                            val display = if (index == 0) {
+                                stringResource(MR.strings.pref_hardware_bitmap_threshold_default, option)
+                            } else {
+                                option.toString()
+                            }
+                            option to display
+                        }
+                        .toMap(),
+                    title = stringResource(MR.strings.pref_hardware_bitmap_threshold),
+                    subtitleProvider = { value, options ->
+                        stringResource(MR.strings.pref_hardware_bitmap_threshold_summary, options[value].orEmpty())
+                    },
+                    enabled = !ImageUtil.HARDWARE_BITMAP_UNSUPPORTED &&
+                        GLUtil.DEVICE_TEXTURE_LIMIT > GLUtil.SAFE_TEXTURE_LIMIT,
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = basePreferences.alwaysDecodeLongStripWithSSIV,
+                    title = stringResource(MR.strings.pref_always_decode_long_strip_with_ssiv_2),
+                    subtitle = stringResource(MR.strings.pref_always_decode_long_strip_with_ssiv_summary),
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.pref_display_profile),
+                    subtitle = basePreferences.displayProfile.get(),
+                    onClick = {
+                        chooseColorProfile.launch(arrayOf("*/*"))
+                    },
+                ),
+            ),
+        )
+    }
+
+    @Composable
+    private fun getExtensionsGroup(
+        basePreferences: BasePreferences,
+    ): Preference.PreferenceGroup {
+        val context = LocalContext.current
+        val uriHandler = LocalUriHandler.current
+        val extensionInstallerPref = basePreferences.extensionInstaller
+        var shizukuMissing by rememberSaveable { mutableStateOf(false) }
+        val trustExtension = remember { Injekt.get<TrustExtension>() }
+
+        if (shizukuMissing) {
+            val dismiss = { shizukuMissing = false }
+            AlertDialog(
+                onDismissRequest = dismiss,
+                title = { Text(text = stringResource(MR.strings.ext_installer_shizuku)) },
+                text = { Text(text = stringResource(MR.strings.ext_installer_shizuku_unavailable_dialog)) },
+                dismissButton = {
+                    TextButton(onClick = dismiss) {
+                        Text(text = stringResource(MR.strings.action_cancel))
+                    }
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            dismiss()
+                            uriHandler.openUri("https://shizuku.rikka.app/download")
+                        },
+                    ) {
+                        Text(text = stringResource(MR.strings.action_ok))
+                    }
+                },
+            )
+        }
+        return Preference.PreferenceGroup(
+            title = stringResource(MR.strings.label_extensions),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.ListPreference(
+                    preference = extensionInstallerPref,
+                    entries = extensionInstallerPref.entries
+                        .filter {
+                            // TODO: allow private option in stable versions once URL handling is more fleshed out
+                            if (isReleaseBuildType) {
+                                it != BasePreferences.ExtensionInstaller.PRIVATE
+                            } else {
+                                true
+                            }
+                        }
+                        .associateWith { stringResource(it.titleRes) },
+                    title = stringResource(MR.strings.ext_installer_pref),
+                    onValueChanged = {
+                        if (it == BasePreferences.ExtensionInstaller.SHIZUKU &&
+                            !context.isShizukuInstalled
+                        ) {
+                            shizukuMissing = true
+                            false
+                        } else {
+                            true
+                        }
+                    },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.ext_revoke_trust),
+                    onClick = {
+                        trustExtension.revokeAll()
+                        context.toast(MR.strings.requires_app_restart)
+                    },
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = basePreferences.jsPluginNativeCheerio,
+                    title = stringResource(TDMR.strings.pref_js_plugin_native_cheerio),
+                    subtitle = stringResource(TDMR.strings.pref_js_plugin_native_cheerio_summary),
+                ),
+            ),
+        )
+    }
+}

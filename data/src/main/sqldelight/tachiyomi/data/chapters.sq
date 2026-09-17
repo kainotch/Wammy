@@ -1,0 +1,238 @@
+import kotlin.Boolean;
+import kotlinx.serialization.json.JsonObject;
+
+CREATE TABLE chapters(
+    _id INTEGER NOT NULL PRIMARY KEY,
+    manga_id INTEGER NOT NULL,
+    url TEXT NOT NULL,
+    name TEXT NOT NULL,
+    scanlator TEXT,
+    read INTEGER AS Boolean NOT NULL,
+    bookmark INTEGER AS Boolean NOT NULL,
+    last_page_read INTEGER NOT NULL,
+    chapter_number REAL NOT NULL,
+    source_order INTEGER NOT NULL,
+    date_fetch INTEGER NOT NULL,
+    date_upload INTEGER NOT NULL,
+    last_modified_at INTEGER NOT NULL DEFAULT 0,
+    version INTEGER NOT NULL DEFAULT 0,
+    is_syncing INTEGER NOT NULL DEFAULT 0,
+    memo BLOB AS JsonObject NOT NULL DEFAULT '{}',
+    FOREIGN KEY(manga_id) REFERENCES mangas (_id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX chapters_library_aggregate_index ON chapters(manga_id, read, bookmark, date_upload, date_fetch);
+CREATE INDEX chapters_manga_scanlator_index ON chapters(manga_id, scanlator);
+CREATE INDEX chapters_read_progress_index ON chapters(manga_id, read, last_page_read) WHERE read = 1 OR last_page_read != 0;
+CREATE INDEX chapters_url_index ON chapters(url);
+
+CREATE TRIGGER update_last_modified_at_chapters
+AFTER UPDATE ON chapters
+FOR EACH ROW
+BEGIN
+  UPDATE chapters
+  SET last_modified_at = strftime('%s', 'now')
+  WHERE _id = new._id;
+END;
+
+CREATE TRIGGER update_chapter_and_manga_version AFTER UPDATE ON chapters
+WHEN new.is_syncing = 0 AND (
+    new.read != old.read OR
+    new.bookmark != old.bookmark OR
+    new.last_page_read != old.last_page_read
+)
+BEGIN
+    -- Update the chapter version
+    UPDATE chapters SET version = version + 1
+    WHERE _id = new._id;
+
+    -- Update the manga version
+    UPDATE mangas SET version = version + 1
+    WHERE _id = new.manga_id AND (SELECT is_syncing FROM mangas WHERE _id = new.manga_id) = 0;
+END;
+
+
+
+getChapterById:
+SELECT *
+FROM chapters
+WHERE _id = :id;
+
+getChaptersByIds:
+SELECT *
+FROM chapters
+WHERE _id IN :ids;
+
+getChaptersByMangaIdFiltered:
+SELECT C.*
+FROM chapters C
+LEFT JOIN excluded_scanlators ES
+ON C.manga_id = ES.manga_id
+AND C.scanlator = ES.scanlator
+WHERE C.manga_id = :mangaId
+AND ES.scanlator IS NULL;
+
+getChaptersByMangaIdUnfiltered:
+SELECT *
+FROM chapters
+WHERE manga_id = :mangaId;
+
+-- Backup-only: memo is returned as a raw BLOB (CAST bypasses the JsonObject column adapter) so
+-- backup doesn't decode+re-encode every chapter's memo JSON, which thrashed GC / OOMed on large
+-- libraries. The backup model stores memo as bytes anyway.
+getChaptersByMangaIdForBackup:
+SELECT url, name, scanlator, read, bookmark, last_page_read, chapter_number, source_order,
+    date_fetch, date_upload, last_modified_at, version, CAST(memo AS BLOB) AS memo
+FROM chapters
+WHERE manga_id = :mangaId;
+
+getScanlatorsByMangaId:
+SELECT scanlator
+FROM chapters
+WHERE manga_id = :mangaId;
+
+getBookmarkedChaptersByMangaId:
+SELECT *
+FROM chapters
+WHERE bookmark
+AND manga_id = :mangaId;
+
+getChapterByUrl:
+SELECT *
+FROM chapters
+WHERE url = :chapterUrl;
+
+getChapterByUrlAndMangaId:
+SELECT *
+FROM chapters
+WHERE url = :chapterUrl
+AND manga_id = :mangaId
+LIMIT 1;
+
+removeChaptersWithIds:
+DELETE FROM chapters
+WHERE _id IN :chapterIds;
+
+removeChaptersByMangaIds:
+DELETE FROM chapters
+WHERE manga_id IN :mangaIds;
+
+resetIsSyncing:
+UPDATE chapters
+SET is_syncing = 0
+WHERE is_syncing = 1;
+
+insert:
+INSERT INTO chapters(manga_id, url, name, scanlator, read, bookmark, last_page_read, chapter_number, source_order, date_fetch, date_upload, last_modified_at, version, is_syncing, memo)
+VALUES (:mangaId, :url, :name, :scanlator, :read, :bookmark, :lastPageRead, :chapterNumber, :sourceOrder, :dateFetch, :dateUpload, 0, :version, 0, :memo);
+
+insertReturningId:
+INSERT INTO chapters(manga_id, url, name, scanlator, read, bookmark, last_page_read, chapter_number, source_order, date_fetch, date_upload, last_modified_at, version, is_syncing, memo)
+VALUES (:mangaId, :url, :name, :scanlator, :read, :bookmark, :lastPageRead, :chapterNumber, :sourceOrder, :dateFetch, :dateUpload, 0, :version, 0, :memo)
+RETURNING _id;
+
+update:
+UPDATE chapters
+SET manga_id = coalesce(:mangaId, manga_id),
+    url = coalesce(:url, url),
+    name = coalesce(:name, name),
+    scanlator = coalesce(:scanlator, scanlator),
+    read = coalesce(:read, read),
+    bookmark = coalesce(:bookmark, bookmark),
+    last_page_read = coalesce(:lastPageRead, last_page_read),
+    chapter_number = coalesce(:chapterNumber, chapter_number),
+    source_order = coalesce(:sourceOrder, source_order),
+    date_fetch = coalesce(:dateFetch, date_fetch),
+    date_upload = coalesce(:dateUpload, date_upload),
+    version = coalesce(:version, version),
+    is_syncing = coalesce(:isSyncing, is_syncing),
+    memo = coalesce(:memo, memo)
+WHERE _id = :chapterId;
+
+selectLastInsertedRowId:
+SELECT last_insert_rowid();
+
+-- Find manga IDs where any chapter name contains the query
+findMangaIdsWithChapterNameMatching:
+SELECT DISTINCT manga_id
+FROM chapters
+WHERE name LIKE '%' || :query || '%' COLLATE NOCASE;
+ countFavoriteChapters:
+SELECT COUNT(*)
+FROM chapters C
+JOIN mangas M ON C.manga_id = M._id
+WHERE M.favorite = 1;
+
+-- Trigger: chapter inserted - update manga aggregate counts
+CREATE TRIGGER manga_agg_chapter_insert
+AFTER INSERT ON chapters
+WHEN (SELECT favorite FROM mangas WHERE _id = new.manga_id) = 1
+AND NOT EXISTS (
+    SELECT 1 FROM excluded_scanlators
+    WHERE manga_id = new.manga_id AND scanlator = new.scanlator
+)
+BEGIN
+    UPDATE mangas SET
+        total_count = total_count + 1,
+        read_count = read_count + new.read,
+        bookmark_count = bookmark_count + new.bookmark,
+        latest_upload = max(latest_upload, new.date_upload),
+        chapter_fetched_at = max(chapter_fetched_at, new.date_fetch)
+    WHERE _id = new.manga_id;
+END;
+
+-- Trigger: chapter read/bookmark changed - update manga aggregates
+CREATE TRIGGER manga_agg_chapter_update
+AFTER UPDATE OF read, bookmark ON chapters
+WHEN (SELECT favorite FROM mangas WHERE _id = new.manga_id) = 1
+AND NOT EXISTS (
+    SELECT 1 FROM excluded_scanlators
+    WHERE manga_id = new.manga_id AND scanlator = new.scanlator
+)
+BEGIN
+    UPDATE mangas SET
+        read_count = read_count + (new.read - old.read),
+        bookmark_count = bookmark_count + (new.bookmark - old.bookmark)
+    WHERE _id = new.manga_id;
+END;
+
+-- Trigger: chapter deleted - recompute aggregates for the manga
+CREATE TRIGGER manga_agg_chapter_delete
+AFTER DELETE ON chapters
+WHEN (SELECT favorite FROM mangas WHERE _id = old.manga_id) = 1
+AND (SELECT is_syncing FROM mangas WHERE _id = old.manga_id) = 0
+BEGIN
+    UPDATE mangas SET
+        total_count = coalesce((
+            SELECT count(*) FROM chapters
+            LEFT JOIN excluded_scanlators ON chapters.manga_id = excluded_scanlators.manga_id
+                AND chapters.scanlator = excluded_scanlators.scanlator
+            WHERE chapters.manga_id = old.manga_id AND excluded_scanlators.scanlator IS NULL
+        ), 0),
+        read_count = coalesce((
+            SELECT sum(read) FROM chapters
+            LEFT JOIN excluded_scanlators ON chapters.manga_id = excluded_scanlators.manga_id
+                AND chapters.scanlator = excluded_scanlators.scanlator
+            WHERE chapters.manga_id = old.manga_id AND excluded_scanlators.scanlator IS NULL
+        ), 0),
+        bookmark_count = coalesce((
+            SELECT sum(bookmark) FROM chapters
+            LEFT JOIN excluded_scanlators ON chapters.manga_id = excluded_scanlators.manga_id
+                AND chapters.scanlator = excluded_scanlators.scanlator
+            WHERE chapters.manga_id = old.manga_id AND excluded_scanlators.scanlator IS NULL
+        ), 0),
+        latest_upload = coalesce((
+            SELECT max(date_upload) FROM chapters
+            LEFT JOIN excluded_scanlators ON chapters.manga_id = excluded_scanlators.manga_id
+                AND chapters.scanlator = excluded_scanlators.scanlator
+            WHERE chapters.manga_id = old.manga_id AND excluded_scanlators.scanlator IS NULL
+        ), 0),
+        chapter_fetched_at = coalesce((
+            SELECT max(date_fetch) FROM chapters
+            LEFT JOIN excluded_scanlators ON chapters.manga_id = excluded_scanlators.manga_id
+                AND chapters.scanlator = excluded_scanlators.scanlator
+            WHERE chapters.manga_id = old.manga_id AND excluded_scanlators.scanlator IS NULL
+        ), 0)
+    WHERE _id = old.manga_id;
+END;

@@ -1,0 +1,120 @@
+package eu.kanade.tachiyomi.ui.library
+
+import eu.kanade.domain.manga.model.toSManga
+import eu.kanade.tachiyomi.source.getNameForMangaInfo
+import eu.kanade.tachiyomi.util.source.getMangaUrlOrNull
+import tachiyomi.domain.library.model.LibraryManga
+import tachiyomi.domain.source.service.SourceManager
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+
+data class LibraryItem(
+    val libraryManga: LibraryManga,
+    val downloadCount: Long = -1,
+    val unreadCount: Long = -1,
+    val isLocal: Boolean = false,
+    val sourceLanguage: String = "",
+) {
+    val id: Long = libraryManga.id
+
+    // Groups the flat badge fields into the Badges shape the grid UI reads.
+    val badges: Badges
+        get() = Badges(
+            downloadCount = downloadCount.toInt(),
+            unreadCount = unreadCount,
+            isLocal = isLocal,
+            sourceLanguage = sourceLanguage,
+        )
+
+    companion object {
+        private val sourceManager: SourceManager by lazy { Injekt.get() }
+    }
+
+    /**
+     * Gets the full URL by combining the source base URL with the manga URL path
+     */
+    val fullUrl: String by lazy {
+        val source = sourceManager.getOrStub(libraryManga.manga.source)
+        source.getMangaUrlOrNull(libraryManga.manga.toSManga()) ?: libraryManga.manga.url
+    }
+
+    /**
+     * Checks if a parsed query matches this manga.
+     *
+     * Author/artist/description matches are resolved via [metadataMatchIds] and chapter-name
+     * matches via [chapterMatchIds] because those fields are not loaded into the in-memory
+     * library list (they'd add strings per favorite on a large library).
+     */
+    fun matches(
+        spec: LibrarySearchSpec,
+        chapterMatchIds: Set<Long> = emptySet(),
+        metadataMatchIds: LibraryViewModel.MetadataMatchIds = LibraryViewModel.MetadataMatchIds(),
+        searchContent: Boolean = true,
+    ): Boolean {
+        val manga = libraryManga.manga
+        return when (spec.field) {
+            LibrarySearchSpec.Field.ID -> id == spec.term.toLongOrNull()
+            LibrarySearchSpec.Field.TITLE -> matchField(manga.title, spec.term, spec.termRegex, spec.useRegex)
+            LibrarySearchSpec.Field.AUTHOR -> metadataMatchIds.author.contains(id)
+            LibrarySearchSpec.Field.ARTIST -> metadataMatchIds.artist.contains(id)
+            LibrarySearchSpec.Field.DESCRIPTION -> metadataMatchIds.description.contains(id)
+            LibrarySearchSpec.Field.TAG ->
+                manga.genre?.any { matchField(it, spec.term, spec.termRegex, spec.useRegex) } ?: false
+            LibrarySearchSpec.Field.SOURCE -> matchField(sourceName, spec.term, spec.termRegex, spec.useRegex)
+            LibrarySearchSpec.Field.URL -> matchField(manga.url, spec.term, spec.termRegex, spec.useRegex)
+            LibrarySearchSpec.Field.CHAPTER -> chapterMatchIds.contains(id)
+            LibrarySearchSpec.Field.DEFAULT -> matchesDefault(spec, chapterMatchIds, metadataMatchIds, searchContent)
+        }
+    }
+
+    // Memoized: source resolution + name build is otherwise repeated per sub-term per item,
+    // which is wasteful when filtering a 200k library.
+    private val sourceName: String by lazy {
+        sourceManager.getOrStub(libraryManga.manga.source).getNameForMangaInfo()
+    }
+
+    private fun matchesDefault(
+        spec: LibrarySearchSpec,
+        chapterMatchIds: Set<Long>,
+        metadataMatchIds: LibraryViewModel.MetadataMatchIds,
+        searchContent: Boolean,
+    ): Boolean {
+        if (spec.subTerms.isEmpty()) return true
+        val manga = libraryManga.manga
+
+        // Every comma sub-term must match some in-memory field (negatable per sub-term). Author,
+        // artist and description aren't resident, so they're handled via the DB id-sets below.
+        // Tags/genre are gated behind the "descriptions and tags" content checkbox, mirroring how
+        // description is gated DB-side. An explicit tag:/genre: prefix bypasses this via Field.TAG.
+        val inMemoryMatch = spec.subTerms.all { sub ->
+            val hit = matchField(manga.title, sub.text, sub.regex, spec.useRegex) ||
+                (spec.searchByUrl && matchField(manga.url, sub.text, sub.regex, spec.useRegex)) ||
+                matchField(sourceName, sub.text, sub.regex, spec.useRegex) ||
+                (searchContent && (manga.genre?.any { matchField(it, sub.text, sub.regex, spec.useRegex) } ?: false))
+            if (sub.negate) !hit else hit
+        }
+        if (inMemoryMatch) return true
+
+        // Author/artist/description/alt-title/chapter live in the DB; their id-sets cover the whole query.
+        return metadataMatchIds.author.contains(id) ||
+            metadataMatchIds.artist.contains(id) ||
+            metadataMatchIds.description.contains(id) ||
+            metadataMatchIds.altTitle.contains(id) ||
+            chapterMatchIds.contains(id)
+    }
+
+    private fun matchField(text: String, term: String, regex: Regex?, useRegex: Boolean): Boolean {
+        return if (useRegex) {
+            regex?.containsMatchIn(text) ?: text.contains(term, ignoreCase = true)
+        } else {
+            text.contains(term, ignoreCase = true)
+        }
+    }
+
+    data class Badges(
+        val downloadCount: Int,
+        val unreadCount: Long,
+        val isLocal: Boolean,
+        val sourceLanguage: String,
+    )
+}

@@ -1,0 +1,5 @@
+-- Migration 21: Add is_novel column to sources table
+-- This allows stub sources to be marked as novel sources so they appear
+-- properly in migrate tabs and other novel-specific functionality.
+
+ALTER TABLE sources ADD COLUMN is_novel INTEGER AS Boolean NOT NULL DEFAULT 0;

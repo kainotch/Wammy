@@ -1,0 +1,185 @@
+package eu.kanade.tachiyomi.data.translation.engine
+
+import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.interceptor.rateLimitExempt
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import tachiyomi.domain.translation.model.LanguageCodes
+import tachiyomi.domain.translation.model.TranslationEngine
+import tachiyomi.domain.translation.model.TranslationResult
+import tachiyomi.domain.translation.service.TranslationPreferences
+import tachiyomi.domain.translation.service.TranslationPromptDefaults
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+
+/**
+ * DeepSeek AI translation engine.
+ * Uses the DeepSeek API which is compatible with OpenAI's format but more affordable.
+ */
+class DeepSeekTranslateEngine(
+    private val networkHelper: NetworkHelper = Injekt.get(),
+    private val preferences: TranslationPreferences = Injekt.get(),
+) : TranslationEngine {
+
+    private val client: OkHttpClient get() = networkHelper.client.rateLimitExempt()
+
+    override val id: Long = ENGINE_ID
+    override val name: String = "DeepSeek AI"
+    override val requiresApiKey: Boolean = true
+    override val isRateLimited: Boolean = true
+    override val isOffline: Boolean = false
+
+    override val supportedLanguages: List<Pair<String, String>> = LanguageCodes.COMMON_LANGUAGES
+
+    private val json = Json { ignoreUnknownKeys = true }
+
+    private val apiUrl = "https://api.deepseek.com/v1/chat/completions"
+
+    @Serializable
+    private data class ChatRequest(
+        val model: String = "deepseek-chat",
+        val messages: List<Message>,
+        val temperature: Double = 0.3,
+        @SerialName("max_tokens")
+        val maxTokens: Int = 4096,
+    )
+
+    @Serializable
+    private data class Message(
+        val role: String,
+        val content: String,
+    )
+
+    @Serializable
+    private data class ChatResponse(
+        val choices: List<Choice>,
+        val error: ErrorInfo? = null,
+    )
+
+    @Serializable
+    private data class Choice(
+        val message: Message,
+    )
+
+    @Serializable
+    private data class ErrorInfo(
+        val message: String,
+        val type: String? = null,
+        val code: String? = null,
+    )
+
+    override fun isConfigured(): Boolean {
+        return preferences.deepSeekApiKey().get().isNotBlank()
+    }
+
+    override suspend fun translate(
+        texts: List<String>,
+        sourceLanguage: String,
+        targetLanguage: String,
+    ): TranslationResult = withContext(Dispatchers.IO) {
+        val apiKey = preferences.deepSeekApiKey().get()
+
+        if (apiKey.isBlank()) {
+            return@withContext TranslationResult.Error(
+                "DeepSeek API key not configured",
+                TranslationResult.ErrorCode.API_KEY_MISSING,
+            )
+        }
+
+        try {
+            val translatedTexts = texts.map { text ->
+                translateSingleText(apiKey, text, sourceLanguage, targetLanguage)
+            }
+
+            TranslationResult.Success(translatedTexts)
+        } catch (e: TranslationException) {
+            TranslationResult.Error(e.message ?: "Translation failed", e.errorCode)
+        } catch (e: Exception) {
+            TranslationResult.Error(
+                e.message ?: "Unknown error",
+                TranslationResult.ErrorCode.UNKNOWN,
+            )
+        }
+    }
+
+    private suspend fun translateSingleText(
+        apiKey: String,
+        text: String,
+        sourceLanguage: String,
+        targetLanguage: String,
+    ): String {
+        val sourceLangName = LanguageCodes.getDisplayName(sourceLanguage)
+        val targetLangName = LanguageCodes.getDisplayName(targetLanguage)
+        val sourceLangDisplay = TranslationPromptDefaults.sourceLangDisplay(sourceLanguage, sourceLangName)
+
+        val systemPrompt = TranslationPromptDefaults.apply(
+            preferences.deepSeekSystemPrompt().get().ifBlank { TranslationPromptDefaults.DEFAULT_SYSTEM_PROMPT },
+            sourceLangDisplay,
+            targetLangName,
+        )
+        val userPrompt = TranslationPromptDefaults.apply(
+            preferences.deepSeekUserPrompt().get().ifBlank { TranslationPromptDefaults.DEFAULT_USER_PROMPT },
+            sourceLangDisplay,
+            targetLangName,
+            text,
+        )
+
+        val request = ChatRequest(
+            messages = listOf(
+                Message(role = "system", content = systemPrompt),
+                Message(role = "user", content = userPrompt),
+            ),
+        )
+
+        val requestBody = json.encodeToString(ChatRequest.serializer(), request)
+
+        val httpRequest = Request.Builder()
+            .url(apiUrl)
+            .post(requestBody.toRequestBody("application/json".toMediaType()))
+            .header("Authorization", "Bearer $apiKey")
+            .header("Content-Type", "application/json")
+            .build()
+
+        val response = client.newCall(httpRequest).execute()
+        val responseBody = response.use { it.body.string() }
+
+        if (!response.isSuccessful) {
+            val errorCode = when (response.code) {
+                401 -> TranslationResult.ErrorCode.API_KEY_INVALID
+                429 -> TranslationResult.ErrorCode.RATE_LIMITED
+                402 -> TranslationResult.ErrorCode.QUOTA_EXCEEDED
+                503 -> TranslationResult.ErrorCode.SERVICE_UNAVAILABLE
+                else -> TranslationResult.ErrorCode.UNKNOWN
+            }
+
+            val errorMessage = try {
+                val errorResponse = json.decodeFromString(ChatResponse.serializer(), responseBody)
+                errorResponse.error?.message ?: "HTTP ${response.code}"
+            } catch (e: Exception) {
+                "HTTP ${response.code}: $responseBody"
+            }
+
+            throw TranslationException(errorMessage, errorCode)
+        }
+
+        val chatResponse = json.decodeFromString(ChatResponse.serializer(), responseBody)
+        return chatResponse.choices.firstOrNull()?.message?.content
+            ?: throw TranslationException("Empty response from DeepSeek", TranslationResult.ErrorCode.UNKNOWN)
+    }
+
+    private class TranslationException(
+        message: String,
+        val errorCode: TranslationResult.ErrorCode,
+    ) : Exception(message)
+
+    companion object {
+        const val ENGINE_ID = 3L
+    }
+}

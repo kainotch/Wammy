@@ -1,0 +1,316 @@
+package eu.kanade.domain.manga.interactor
+
+import eu.kanade.domain.source.service.SourcePreferences
+import eu.kanade.tachiyomi.data.massimport.DeeplinkResolver
+import eu.kanade.tachiyomi.data.massimport.PackageManagerDeeplinkResolver
+import eu.kanade.tachiyomi.jsplugin.source.JsSource
+import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.isNovelSource
+import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.util.source.normalizeSourcePath
+import kotlinx.coroutines.Dispatchers
+import logcat.LogPriority
+import tachiyomi.core.common.util.system.logcat
+import tachiyomi.domain.manga.interactor.NetworkToLocalManga
+import tachiyomi.domain.manga.model.Manga
+import tachiyomi.domain.manga.repository.MangaRepository
+import tachiyomi.domain.source.service.SourceManager
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import java.net.URI
+import java.util.concurrent.ConcurrentHashMap
+
+/**
+ * Helper for the URL-based mass import flow. Provides URL parsing/analysis and per-URL novel
+ * resolution. The actual batched import is executed by
+ * [eu.kanade.tachiyomi.data.massimport.MassImportJob].
+ */
+class MassImport(
+    private val sourceManager: SourceManager = Injekt.get(),
+    private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
+    private val mangaRepository: MangaRepository = Injekt.get(),
+    private val sourcePreferences: SourcePreferences = Injekt.get(),
+    private val deeplinkResolverFactory: () -> DeeplinkResolver = { PackageManagerDeeplinkResolver() },
+) {
+    private val missingSourceHostLogCache = ConcurrentHashMap<String, Boolean>()
+
+    companion object {
+        private val GLUE_REGEX = Regex("(?<=[^\\s])(?=https?://)")
+        private val SCHEME_REGEX = Regex("^[a-zA-Z][a-zA-Z0-9+\\-.]*://")
+
+        // Shared tokenizer for every entry point so the "valid" count matches what the import
+        // walks. Splits on comma/semicolon/space/tab and de-glues separator-less URLs.
+        fun tokenizeLine(line: String): List<String> {
+            val trimmed = line.trim()
+            if (trimmed.isEmpty()) return emptyList()
+            return trimmed.replace(GLUE_REGEX, "\n")
+                .split('\n', ',', ';', ' ', '\t')
+                .map { it.trim() }
+                .filter { it.isNotEmpty() }
+        }
+    }
+
+    suspend fun resolveMangaUrl(url: String, path: String, source: CatalogueSource): Manga {
+        val inputUrl = normalizeSourcePath(source, path)
+        // No search-by-URL or slash-toggle fallbacks here: they never resolved anything reliably
+        // and their failures (e.g. UnknownHostException from a slash-less baseUrl + url concat)
+        // masked the real error from the direct details fetch. Deeplink-shaped URLs are already
+        // resolved to their canonical path by the caller before path is passed in here.
+        val sManga = source.getMangaUpdate(
+            eu.kanade.tachiyomi.source.model.SManga.create().apply {
+                this.url = inputUrl
+            },
+            emptyList(),
+            fetchDetails = true,
+            fetchChapters = false,
+        ).manga
+
+        try {
+            val resolvedUrl = runCatching { sManga.url }.getOrNull().orEmpty()
+            sManga.url = if (resolvedUrl.isBlank()) path else normalizeSourcePath(source, resolvedUrl)
+        } catch (_: UninitializedPropertyAccessException) {
+            sManga.url = path
+        }
+
+        try {
+            @Suppress("UNUSED_VARIABLE")
+            val titleCheck = sManga.title
+        } catch (_: UninitializedPropertyAccessException) {
+            throw Exception("Extension failed to parse novel title from $url")
+        }
+
+        return networkToLocalManga(sManga.toDomainManga(source.id, source.isNovelSource()))
+    }
+
+    private fun getAllSources(): List<CatalogueSource> {
+        return sourceManager.getAll().filterIsInstance<CatalogueSource>().filter { it is HttpSource || it is JsSource }
+    }
+
+    // Single source-matching algorithm shared by the analysis preview and the worker
+    // (MassImportJob delegates here) so the dialog's "valid" classification can't disagree with
+    // what the import actually resolves. Host + path-prefix match, not a raw string startsWith:
+    // startsWith broke on www./mirror-subdomain differences.
+    fun findMatchingSource(
+        url: String,
+        sources: List<CatalogueSource> = getAllSources(),
+        preferredSourceId: Long? = null,
+    ): CatalogueSource? {
+        val urlHost = try {
+            URI(url).host?.lowercase()?.removePrefix("www.")
+        } catch (_: Exception) {
+            null
+        }
+        val matchingSources = sources.filter { source ->
+            try {
+                val rawBase = getSourceBaseUrl(source)
+                val baseForUri = if (rawBase.startsWith("http")) rawBase else "https://$rawBase"
+                val baseUri = URI(baseForUri)
+                val baseHost = baseUri.host?.lowercase()?.removePrefix("www.")
+                val basePath = baseUri.path?.trimEnd('/')
+                if (baseHost.isNullOrEmpty() || urlHost.isNullOrEmpty()) return@filter false
+
+                val hostMatches = urlHost == baseHost ||
+                    urlHost.endsWith(".$baseHost") ||
+                    baseHost.endsWith(".$urlHost")
+                if (!hostMatches) return@filter false
+
+                if (!basePath.isNullOrBlank() && basePath != "/") {
+                    val urlPath = URI(url).path ?: ""
+                    urlPath.startsWith(basePath)
+                } else {
+                    true
+                }
+            } catch (_: Exception) {
+                false
+            }
+        }
+
+        if (matchingSources.isEmpty()) {
+            if (urlHost == null || missingSourceHostLogCache.putIfAbsent(urlHost, true) == null) {
+                logcat(LogPriority.WARN) { "MassImport: No source match for $url host=$urlHost" }
+            }
+            return null
+        }
+        if (matchingSources.size == 1) return matchingSources.first()
+
+        // Prefer the caller's source (e.g. the currently browsed source) when it matches.
+        if (preferredSourceId != null) {
+            matchingSources.firstOrNull { it.id == preferredSourceId }?.let { return it }
+        }
+
+        val enabledLanguages = sourcePreferences.enabledLanguages.get()
+        val disabledSources = sourcePreferences.disabledSources.get()
+        val enabledSources = matchingSources.filter {
+            it.lang in enabledLanguages && it.id.toString() !in disabledSources
+        }
+        val bestLangSources = if (enabledSources.isNotEmpty()) enabledSources else matchingSources
+        val kotlinSources = bestLangSources.filter { it !is JsSource }
+
+        return kotlinSources.firstOrNull() ?: bestLangSources.first()
+    }
+
+    fun getSourceBaseUrl(source: CatalogueSource): String {
+        return when (source) {
+            is HttpSource -> source.baseUrl
+            is JsSource -> source.baseUrl
+            else -> ""
+        }
+    }
+
+    fun extractPathFromUrl(url: String, baseUrl: String, source: CatalogueSource? = null): String {
+        // The source was already matched to this URL by the caller, so whenever the URL parses
+        // as an absolute URL just take its path + query. Comparing hosts here breaks on
+        // www./mirror-subdomain mismatches (e.g. sonicmtl.com vs www.sonicmtl.com) and used to
+        // leak the host into the path, producing requests like "https://www.sonicmtl.comsonicmtl.com/...".
+        val extractedPath = try {
+            val urlUri = URI(url)
+            if (urlUri.host != null) {
+                buildString {
+                    append(urlUri.rawPath ?: "")
+                    val q = urlUri.rawQuery
+                    if (!q.isNullOrBlank()) {
+                        append('?')
+                        append(q)
+                    }
+                }
+            } else {
+                extractPathFallback(url, baseUrl)
+            }
+        } catch (_: Exception) {
+            extractPathFallback(url, baseUrl)
+        }
+
+        val rawPath = source?.let { normalizeSourcePath(it, extractedPath) } ?: extractedPath
+        return normalizeUrl(rawPath)
+    }
+
+    /**
+     * String-based path extraction for URLs that [URI] can't parse. Preserves path casing and
+     * never leaks the host into the returned path even when it doesn't match [baseUrl].
+     */
+    private fun extractPathFallback(url: String, baseUrl: String): String {
+        val schemeRegex = Regex("^[a-zA-Z][a-zA-Z0-9+\\-.]*://")
+        val rawUrl = url.trim().replace(schemeRegex, "")
+        val normalizedUrl = rawUrl.removePrefix("www.")
+        val normalizedBase = baseUrl.trim().replace(schemeRegex, "")
+            .removePrefix("www.")
+            .removeSuffix("/")
+
+        if (normalizedUrl.startsWith(normalizedBase, ignoreCase = true)) {
+            return normalizedUrl.substring(normalizedBase.length)
+        }
+
+        // Host mismatch (mirror/subdomain): drop everything before the first slash.
+        val slashIndex = normalizedUrl.indexOf('/')
+        return if (slashIndex >= 0) normalizedUrl.substring(slashIndex) else normalizedUrl
+    }
+
+    fun normalizeUrl(url: String): String {
+        return url.trimEnd('/')
+            .substringBefore('#')
+            .replace(Regex("(?<!:)//+"), "/")
+    }
+
+    fun parseUrls(text: String): List<String> {
+        return text.lineSequence()
+            .flatMap { tokenizeLine(it).asSequence() }
+            .filter { it.startsWith("http://") || it.startsWith("https://") }
+            .distinctBy { urlDedupKey(it) }
+            .toList()
+    }
+
+    data class UrlAnalysisResult(
+        val validUrls: List<String>,
+        val invalidUrls: List<Pair<String, String>>,
+        val duplicateUrls: List<String>,
+        val alreadyInLibrary: List<String>,
+    ) {
+        val totalValid get() = validUrls.size
+    }
+
+    suspend fun analyzeUrls(text: String): UrlAnalysisResult = kotlinx.coroutines.withContext(Dispatchers.IO) {
+        val novelSources = getAllSources()
+        val deeplinkResolver = deeplinkResolverFactory()
+        val libraryUrlIndex = try {
+            mangaRepository.getFavoriteSourceAndUrl().toSet()
+        } catch (_: Exception) {
+            emptySet()
+        }
+
+        val rawLines = text.lineSequence().flatMap { tokenizeLine(it).asSequence() }
+        val validUrls = mutableListOf<String>()
+        val invalidUrls = mutableListOf<Pair<String, String>>()
+        val duplicateUrls = mutableListOf<String>()
+        val alreadyInLibrary = mutableListOf<String>()
+        val seenKeys = mutableSetOf<String>()
+
+        for (line in rawLines) {
+            if (!line.startsWith("http://") && !line.startsWith("https://")) {
+                invalidUrls.add(line to "Not a valid URL")
+                continue
+            }
+
+            val key = urlDedupKey(line)
+            if (key in seenKeys) {
+                duplicateUrls.add(line)
+                continue
+            }
+            seenKeys.add(key)
+
+            val source = findMatchingSource(line, novelSources)
+            if (source == null) {
+                invalidUrls.add(line to "No matching source")
+                continue
+            }
+            if (!deeplinkResolver.isDeeplinkUrl(source, line)) {
+                val path = extractPathFromUrl(line, getSourceBaseUrl(source), source)
+                if (libraryUrlIndex.contains(source.id to path)) {
+                    alreadyInLibrary.add(line)
+                    continue
+                }
+            }
+
+            validUrls.add(line)
+        }
+
+        UrlAnalysisResult(validUrls, invalidUrls, duplicateUrls, alreadyInLibrary)
+    }
+
+    private fun urlDedupKey(url: String): String {
+        return try {
+            val uri = URI(url.trim())
+            buildString {
+                append(uri.host?.lowercase() ?: "")
+                append(uri.rawPath?.trimEnd('/') ?: "")
+                val q = uri.rawQuery
+                if (!q.isNullOrBlank()) append('?').append(q)
+            }
+        } catch (_: Exception) {
+            // Unparseable URL: lowercase only the host, preserve case-sensitive path.
+            val noScheme = url.trim().replace(SCHEME_REGEX, "")
+            val slash = noScheme.indexOf('/')
+            val key = if (slash < 0) {
+                noScheme.lowercase()
+            } else {
+                noScheme.substring(0, slash).lowercase() + noScheme.substring(slash)
+            }
+            key.removeSuffix("/")
+        }
+    }
+}
+
+private fun eu.kanade.tachiyomi.source.model.SManga.toDomainManga(sourceId: Long, isNovel: Boolean = false): Manga {
+    return Manga.create().copy(
+        url = url,
+        title = title,
+        artist = artist,
+        author = author,
+        description = description,
+        genre = genre?.split(", ") ?: emptyList(),
+        status = status.toLong(),
+        thumbnailUrl = thumbnail_url,
+        initialized = initialized,
+        source = sourceId,
+        isNovel = isNovel,
+    )
+}

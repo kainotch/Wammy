@@ -1,0 +1,179 @@
+package eu.kanade.tachiyomi.data.export
+
+import android.content.Context
+import android.net.Uri
+import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.util.source.getMangaUrlOrNull
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import tachiyomi.domain.category.repository.CategoryRepository
+import tachiyomi.domain.manga.model.Manga
+import tachiyomi.domain.manga.repository.MangaRepository
+import tachiyomi.domain.source.service.SourceManager
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+
+object LibraryExporter {
+
+    data class ExportOptions(
+        val includeTitle: Boolean,
+        val includeAuthor: Boolean,
+        val includeArtist: Boolean,
+        val includeUrl: Boolean = false,
+        val includeChapterCount: Boolean = false,
+        val includeCategory: Boolean = false,
+        val includeIsNovel: Boolean = false,
+        val includeDescription: Boolean = false,
+        val includeTags: Boolean = false,
+    )
+
+    data class ExportProgress(
+        val current: Int,
+        val total: Int,
+        val currentTitle: String = "",
+    )
+
+    const val PAGE_SIZE = 500L
+
+    suspend fun exportToCsv(
+        context: Context,
+        uri: Uri,
+        total: Int,
+        loadPage: suspend (limit: Long, offset: Long) -> List<Manga>,
+        options: ExportOptions,
+        onProgress: (ExportProgress) -> Unit = {},
+        onExportComplete: () -> Unit,
+    ) {
+        withContext(Dispatchers.IO) {
+            context.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                outputStream.bufferedWriter().use { writer ->
+                    writeCsvData(writer, total, loadPage, options, onProgress)
+                }
+            }
+            onExportComplete()
+        }
+    }
+
+    private val escapeRequired = listOf("\r", "\n", "\"", ",")
+
+    private suspend fun writeCsvData(
+        writer: java.io.Writer,
+        total: Int,
+        loadPage: suspend (limit: Long, offset: Long) -> List<Manga>,
+        options: ExportOptions,
+        onProgress: (ExportProgress) -> Unit = {},
+    ) {
+        val sourceManager = Injekt.get<SourceManager>()
+        val getCategories = Injekt.get<tachiyomi.domain.category.interactor.GetCategories>()
+        val sourceById = mutableMapOf<Long, Source?>()
+
+        val categoryIdToName: Map<Long, String> = if (options.includeCategory) {
+            try {
+                getCategories.await().associate { it.id to it.name }
+            } catch (_: Exception) {
+                emptyMap()
+            }
+        } else {
+            emptyMap()
+        }
+
+        val mangaCategoryMap: Map<Long, List<Long>> = if (options.includeCategory) {
+            try {
+                val categoryRepo = Injekt.get<CategoryRepository>()
+                categoryRepo.getAllMangaCategoryPairs()
+                    .groupBy({ it.first }, { it.second })
+            } catch (_: Exception) {
+                emptyMap()
+            }
+        } else {
+            emptyMap()
+        }
+
+        val chapterCountMap: Map<Long, Long> = if (options.includeChapterCount) {
+            try {
+                val mangaRepo = Injekt.get<MangaRepository>()
+                mangaRepo.getFavoriteIdAndTotalCount().toMap()
+            } catch (_: Exception) {
+                emptyMap()
+            }
+        } else {
+            emptyMap()
+        }
+
+        val columns = mutableListOf<String>()
+        if (options.includeTitle) columns.add("Title")
+        if (options.includeAuthor) columns.add("Author")
+        if (options.includeArtist) columns.add("Artist")
+        if (options.includeCategory) columns.add("Categories")
+        if (options.includeIsNovel) columns.add("Is Novel")
+        if (options.includeDescription) columns.add("Description")
+        if (options.includeTags) columns.add("Tags")
+        if (options.includeUrl) columns.add("URL")
+        if (options.includeChapterCount) columns.add("Chapter Count")
+
+        writer.appendLine(columns.joinToString(","))
+
+        var processed = 0
+        var offset = 0L
+        while (true) {
+            val page = loadPage(PAGE_SIZE, offset)
+            if (page.isEmpty()) break
+            offset += page.size
+
+            for (manga in page) {
+                processed++
+                onProgress(ExportProgress(processed, total, manga.title))
+
+                val row = mutableListOf<String?>()
+                if (options.includeTitle) row.add(manga.title)
+                if (options.includeAuthor) row.add(manga.author)
+                if (options.includeArtist) row.add(manga.artist)
+
+                if (options.includeCategory) {
+                    val catIds = mangaCategoryMap[manga.id] ?: emptyList()
+                    val catNames = catIds.mapNotNull { categoryIdToName[it] }.joinToString("|")
+                    row.add(catNames)
+                }
+
+                if (options.includeIsNovel) {
+                    row.add(if (manga.isNovel) "Yes" else "No")
+                }
+
+                if (options.includeDescription) {
+                    row.add(manga.description?.take(5000) ?: "")
+                }
+
+                if (options.includeTags) {
+                    val tags = manga.genre?.joinToString(", ") ?: ""
+                    row.add(tags)
+                }
+
+                if (options.includeUrl) {
+                    val source = sourceById.getOrPut(manga.source) { sourceManager.get(manga.source) }
+                    val sManga = SManga.create().apply { url = manga.url }
+                    row.add(source?.getMangaUrlOrNull(sManga) ?: manga.url)
+                }
+
+                if (options.includeChapterCount) {
+                    val count = chapterCountMap[manga.id]?.toString() ?: ""
+                    row.add(count)
+                }
+
+                writer.appendLine(
+                    row.joinToString(",") { column ->
+                        if (column.isNullOrBlank()) {
+                            ""
+                        } else if (escapeRequired.any { column.contains(it) }) {
+                            column.replace("\"", "\"\"").let { "\"$it\"" }
+                        } else {
+                            column
+                        }
+                    },
+                )
+            }
+
+            if (page.size < PAGE_SIZE) break
+        }
+    }
+}

@@ -1,0 +1,221 @@
+package eu.kanade.presentation.history
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.DeleteSweep
+import androidx.compose.material.icons.outlined.GridView
+import androidx.compose.material.icons.outlined.ViewList
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
+import eu.kanade.presentation.components.AppBar
+import eu.kanade.presentation.components.AppBarActions
+import eu.kanade.presentation.components.AppBarTitle
+import eu.kanade.presentation.components.SearchToolbar
+import eu.kanade.presentation.components.relativeDateText
+import eu.kanade.presentation.history.components.HistoryItem
+import eu.kanade.presentation.theme.TachiyomiPreviewTheme
+import eu.kanade.tachiyomi.ui.history.HistoryFilter
+import eu.kanade.tachiyomi.ui.history.HistoryViewModel
+import kotlinx.datetime.LocalDate
+import tachiyomi.domain.history.model.HistoryWithRelations
+import tachiyomi.i18n.MR
+import tachiyomi.i18n.novel.TDMR
+import tachiyomi.presentation.core.components.FastScrollLazyColumn
+import tachiyomi.presentation.core.components.ListGroupHeader
+import tachiyomi.presentation.core.components.material.Scaffold
+import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.screens.EmptyScreen
+import tachiyomi.presentation.core.screens.LoadingScreen
+
+@Composable
+fun HistoryScreen(
+    state: HistoryViewModel.State,
+    snackbarHostState: SnackbarHostState,
+    showFilterChips: Boolean = true,
+    onSearchQueryChange: (String?) -> Unit,
+    onClickCover: (mangaId: Long) -> Unit,
+    onClickResume: (mangaId: Long, chapterId: Long) -> Unit,
+    onClickFavorite: (mangaId: Long) -> Unit,
+    onDialogChange: (HistoryViewModel.Dialog?) -> Unit,
+    onFilterSelected: (HistoryFilter) -> Unit,
+    onGroupByNovelChanged: (Boolean) -> Unit,
+    onLoadNextPage: () -> Unit,
+    showAllFilter: Boolean = true,
+    showMangaFilter: Boolean = true,
+) {
+    Scaffold(
+        topBar = { scrollBehavior ->
+            SearchToolbar(
+                titleContent = { AppBarTitle(stringResource(MR.strings.history)) },
+                searchQuery = state.searchQuery,
+                onChangeSearchQuery = onSearchQueryChange,
+                actions = {
+                    AppBarActions(
+                        listOf(
+                            AppBar.Action(
+                                title = if (state.groupByNovel) "List View" else "Last only",
+                                icon = if (state.groupByNovel) Icons.Outlined.ViewList else Icons.Outlined.GridView,
+                                onClick = { onGroupByNovelChanged(!state.groupByNovel) },
+                            ),
+                            AppBar.Action(
+                                title = stringResource(MR.strings.pref_clear_history),
+                                icon = Icons.Outlined.DeleteSweep,
+                                onClick = {
+                                    onDialogChange(HistoryViewModel.Dialog.DeleteAll)
+                                },
+                            ),
+                        ),
+                    )
+                },
+                scrollBehavior = scrollBehavior,
+            )
+        },
+        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+    ) { contentPadding ->
+        Column(
+            modifier = Modifier.padding(contentPadding),
+        ) {
+            if (showFilterChips) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    if (showAllFilter) {
+                        FilterChip(
+                            selected = state.filter == HistoryFilter.ALL,
+                            onClick = { onFilterSelected(HistoryFilter.ALL) },
+                            label = { Text(stringResource(MR.strings.all)) },
+                        )
+                    }
+                    if (showMangaFilter) {
+                        FilterChip(
+                            selected = state.filter == HistoryFilter.MANGA,
+                            onClick = { onFilterSelected(HistoryFilter.MANGA) },
+                            label = { Text(stringResource(TDMR.strings.label_manga)) },
+                        )
+                    }
+                    FilterChip(
+                        selected = state.filter == HistoryFilter.NOVELS,
+                        onClick = { onFilterSelected(HistoryFilter.NOVELS) },
+                        label = { Text(stringResource(TDMR.strings.label_novels)) },
+                    )
+                }
+            }
+
+            state.list.let {
+                if (it == null) {
+                    LoadingScreen()
+                } else if (it.isEmpty()) {
+                    val msg = if (!state.searchQuery.isNullOrEmpty()) {
+                        MR.strings.no_results_found
+                    } else {
+                        MR.strings.information_no_recent_manga
+                    }
+                    EmptyScreen(
+                        stringRes = msg,
+                    )
+                } else {
+                    HistoryScreenContent(
+                        history = it,
+                        onClickCover = { history -> onClickCover(history.mangaId) },
+                        onClickResume = { history -> onClickResume(history.mangaId, history.chapterId) },
+                        onClickDelete = { item -> onDialogChange(HistoryViewModel.Dialog.Delete(item)) },
+                        onClickFavorite = { history -> onClickFavorite(history.mangaId) },
+                        onLoadNextPage = onLoadNextPage,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HistoryScreenContent(
+    history: List<HistoryUiModel>,
+    onClickCover: (HistoryWithRelations) -> Unit,
+    onClickResume: (HistoryWithRelations) -> Unit,
+    onClickDelete: (HistoryWithRelations) -> Unit,
+    onClickFavorite: (HistoryWithRelations) -> Unit,
+    onLoadNextPage: () -> Unit,
+) {
+    FastScrollLazyColumn {
+        items(
+            items = history,
+            key = { "history-${it.hashCode()}" },
+            contentType = {
+                when (it) {
+                    is HistoryUiModel.Header -> "header"
+                    is HistoryUiModel.Item -> "item"
+                }
+            },
+        ) { item ->
+            when (item) {
+                is HistoryUiModel.Header -> {
+                    ListGroupHeader(
+                        modifier = Modifier.animateItem(),
+                        text = relativeDateText(item.date),
+                    )
+                }
+                is HistoryUiModel.Item -> {
+                    val value = item.item
+                    HistoryItem(
+                        modifier = Modifier.animateItem(),
+                        history = value,
+                        onClickCover = { onClickCover(value) },
+                        onClickResume = { onClickResume(value) },
+                        onClickDelete = { onClickDelete(value) },
+                        onClickFavorite = { onClickFavorite(value) },
+                    )
+                }
+            }
+        }
+        item(key = "history-load-more") {
+            LaunchedEffect(Unit) {
+                onLoadNextPage()
+            }
+        }
+    }
+}
+
+sealed interface HistoryUiModel {
+    data class Header(val date: LocalDate) : HistoryUiModel
+    data class Item(val item: HistoryWithRelations) : HistoryUiModel
+}
+
+@PreviewLightDark
+@Composable
+internal fun HistoryScreenPreviews(
+    @PreviewParameter(HistoryviewModelStateProvider::class)
+    historyState: HistoryViewModel.State,
+) {
+    TachiyomiPreviewTheme {
+        HistoryScreen(
+            state = historyState,
+            snackbarHostState = SnackbarHostState(),
+            onSearchQueryChange = {},
+            onClickCover = {},
+            onClickResume = { _, _ -> run {} },
+            onDialogChange = {},
+            onClickFavorite = {},
+            onFilterSelected = {},
+            onGroupByNovelChanged = {},
+            onLoadNextPage = {},
+            showMangaFilter = true,
+        )
+    }
+}

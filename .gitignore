@@ -1,0 +1,28 @@
+# Build files
+.gradle
+.kotlin
+build
+
+# IDE files
+*.iml
+.idea/*
+!.idea/icon.svg
+/captures
+
+# Configuration files
+keystore.properties
+local.properties
+
+# macOS specific files
+.DS_Store
+
+# Firebase config
+google-services.json
+
+# OS files
+*.log
+hs_err_*
+replay_pid*
+
+# Corrupted build artifacts
+presentation-core/build_corrupted_2/

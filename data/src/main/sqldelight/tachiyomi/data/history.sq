@@ -1,0 +1,186 @@
+import java.util.Date;
+
+CREATE TABLE history(
+    _id INTEGER NOT NULL PRIMARY KEY,
+    chapter_id INTEGER NOT NULL UNIQUE,
+    last_read INTEGER AS Date,
+    time_read INTEGER NOT NULL,
+    FOREIGN KEY(chapter_id) REFERENCES chapters (_id)
+    ON DELETE CASCADE
+);
+
+CREATE INDEX history_history_chapter_id_index ON history(chapter_id);
+-- Performance index for libraryView
+CREATE INDEX history_chapter_last_read_index ON history(chapter_id, last_read);
+CREATE INDEX idx_history_last_read ON history(last_read);
+
+getHistoryWithRelations:
+SELECT
+    history._id AS id,
+    mangas._id AS mangaId,
+    chapters._id AS chapterId,
+    mangas.title,
+    mangas.thumbnail_url AS thumbnailUrl,
+    mangas.source,
+    mangas.favorite,
+    mangas.cover_last_modified,
+    chapters.chapter_number AS chapterNumber,
+    ifnull(CAST(history.last_read AS INTEGER), 0) AS readAt,
+    history.time_read AS readDuration,
+    chapters.read AS chapterRead,
+    chapters.last_page_read AS lastPageRead,
+    mangas.is_novel AS isNovel
+FROM history
+JOIN chapters ON chapters._id = history.chapter_id
+JOIN mangas ON mangas._id = chapters.manga_id
+WHERE history.last_read > 0
+AND lower(mangas.title) LIKE ('%' || :query || '%')
+ORDER BY history.last_read DESC
+LIMIT :limit;
+
+-- Grouped query: one row per manga, keeping the most recently read chapter
+getHistoryWithRelationsGrouped:
+SELECT
+    history._id AS id,
+    mangas._id AS mangaId,
+    chapters._id AS chapterId,
+    mangas.title,
+    mangas.thumbnail_url AS thumbnailUrl,
+    mangas.source,
+    mangas.favorite,
+    mangas.cover_last_modified,
+    chapters.chapter_number AS chapterNumber,
+    ifnull(MAX(ifnull(CAST(history.last_read AS INTEGER), 0)), 0) AS readAt,
+    history.time_read AS readDuration,
+    chapters.read AS chapterRead,
+    chapters.last_page_read AS lastPageRead,
+    mangas.is_novel AS isNovel
+FROM history
+JOIN chapters ON chapters._id = history.chapter_id
+JOIN mangas ON mangas._id = chapters.manga_id
+WHERE history.last_read > 0
+AND lower(mangas.title) LIKE ('%' || :query || '%')
+GROUP BY mangas._id
+ORDER BY readAt DESC
+LIMIT :limit;
+
+-- Direct JOIN query for latest history entry
+getLatestHistory:
+SELECT
+    history._id AS id,
+    mangas._id AS mangaId,
+    chapters._id AS chapterId,
+    mangas.title,
+    mangas.thumbnail_url AS thumbnailUrl,
+    mangas.source,
+    mangas.favorite,
+    mangas.cover_last_modified,
+    chapters.chapter_number AS chapterNumber,
+    ifnull(CAST(history.last_read AS INTEGER), 0) AS readAt,
+    history.time_read AS readDuration,
+    chapters.read AS chapterRead,
+    chapters.last_page_read AS lastPageRead,
+    mangas.is_novel AS isNovel
+FROM history
+JOIN chapters ON chapters._id = history.chapter_id
+JOIN mangas ON mangas._id = chapters.manga_id
+WHERE history.last_read > 0
+ORDER BY history.last_read DESC
+LIMIT 1;
+
+getHistoryByMangaId:
+SELECT
+H._id,
+H.chapter_id,
+H.last_read,
+H.time_read
+FROM history H
+JOIN chapters C
+ON H.chapter_id = C._id
+WHERE C.manga_id = :mangaId AND C._id = H.chapter_id;
+
+getHistoryByChapterUrlAndMangaId:
+SELECT
+H._id,
+H.chapter_id,
+H.last_read,
+H.time_read
+FROM history H
+JOIN chapters C
+ON H.chapter_id = C._id
+WHERE C.url = :chapterUrl AND C.manga_id = :mangaId AND C._id = H.chapter_id
+LIMIT 1;
+
+resetHistoryById:
+UPDATE history
+SET last_read = 0
+WHERE _id = :historyId;
+
+resetHistoryByMangaId:
+UPDATE history
+SET last_read = 0
+WHERE _id IN (
+    SELECT H._id
+    FROM mangas M
+    INNER JOIN chapters C
+    ON M._id = C.manga_id
+    INNER JOIN history H
+    ON C._id = H.chapter_id
+    WHERE M._id = :mangaId
+);
+
+removeAllHistory:
+DELETE FROM history;
+
+removeResettedHistory:
+DELETE FROM history
+WHERE last_read = 0;
+
+upsert:
+INSERT INTO history(chapter_id, last_read, time_read)
+VALUES (:chapterId, :readAt, :time_read)
+ON CONFLICT(chapter_id)
+DO UPDATE
+SET
+    last_read = :readAt,
+    time_read = time_read + :time_read
+WHERE chapter_id = :chapterId;
+
+-- Accumulate read duration without moving last_read on an existing row. Used by novel readers,
+-- where the visible-chapter entry stamp owns recency; a leaving/pause flush that re-stamped
+-- last_read=now could outrank the chapter actually being read (e.g. after a hard kill).
+upsertTimeRead:
+INSERT INTO history(chapter_id, last_read, time_read)
+VALUES (:chapterId, :readAt, :time_read)
+ON CONFLICT(chapter_id)
+DO UPDATE
+SET time_read = time_read + :time_read
+WHERE chapter_id = :chapterId;
+
+getReadDuration:
+SELECT coalesce(sum(time_read), 0)
+FROM history;
+
+countDistinctManga:
+SELECT COUNT(DISTINCT C.manga_id)
+FROM history H
+JOIN chapters C ON H.chapter_id = C._id;
+
+-- Trigger: history inserted or updated - update manga last_read aggregate
+CREATE TRIGGER manga_agg_history_upsert
+AFTER INSERT ON history
+BEGIN
+    UPDATE mangas SET
+        last_read = max(last_read, ifnull(CAST(new.last_read AS INTEGER), 0))
+    WHERE _id = (SELECT manga_id FROM chapters WHERE _id = new.chapter_id)
+    AND favorite = 1;
+END;
+
+CREATE TRIGGER manga_agg_history_update
+AFTER UPDATE OF last_read ON history
+BEGIN
+    UPDATE mangas SET
+        last_read = max(last_read, ifnull(CAST(new.last_read AS INTEGER), 0))
+    WHERE _id = (SELECT manga_id FROM chapters WHERE _id = new.chapter_id)
+    AND favorite = 1;
+END;

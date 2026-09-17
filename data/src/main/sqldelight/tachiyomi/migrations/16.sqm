@@ -1,0 +1,3 @@
+ALTER TABLE mangas ADD COLUMN is_novel INTEGER AS kotlin.Boolean NOT NULL DEFAULT 0;
+
+CREATE INDEX mangas_is_novel_index ON mangas(is_novel);

@@ -1,0 +1,123 @@
+package eu.kanade.domain.chapter.interactor
+
+import eu.kanade.domain.download.interactor.DeleteDownload
+import eu.kanade.tachiyomi.data.track.source.SourceTrackerDispatcher
+import logcat.LogPriority
+import tachiyomi.core.common.util.lang.withNonCancellableContext
+import tachiyomi.core.common.util.system.logcat
+import tachiyomi.domain.chapter.model.Chapter
+import tachiyomi.domain.chapter.model.ChapterUpdate
+import tachiyomi.domain.chapter.repository.ChapterRepository
+import tachiyomi.domain.download.service.DownloadPreferences
+import tachiyomi.domain.manga.model.Manga
+import tachiyomi.domain.manga.repository.MangaRepository
+import tachiyomi.domain.source.service.SourceManager
+import tachiyomi.domain.translation.model.TranslationLocator
+import tachiyomi.domain.translation.repository.TranslatedChapterRepository
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+
+class SetReadStatus(
+    private val downloadPreferences: DownloadPreferences,
+    private val deleteDownload: DeleteDownload,
+    private val mangaRepository: MangaRepository,
+    private val chapterRepository: ChapterRepository,
+    private val translatedChapterRepository: TranslatedChapterRepository,
+    private val sourceManager: SourceManager,
+) {
+
+    private val sourceTrackerDispatcher: SourceTrackerDispatcher by lazy { Injekt.get() }
+
+    private val mapper = { chapter: Chapter, read: Boolean ->
+        ChapterUpdate(
+            read = read,
+            lastPageRead = if (!read) 0 else null,
+            id = chapter.id,
+        )
+    }
+
+    suspend fun await(read: Boolean, vararg chapters: Chapter): Result = withNonCancellableContext {
+        val chaptersToUpdate = chapters.filter {
+            when (read) {
+                true -> !it.read
+                false -> it.read || it.lastPageRead > 0
+            }
+        }
+        if (chaptersToUpdate.isEmpty()) {
+            return@withNonCancellableContext Result.NoChapters
+        }
+
+        try {
+            chapterRepository.updateAll(
+                chaptersToUpdate.map { mapper(it, read) },
+            )
+        } catch (e: Exception) {
+            logcat(LogPriority.ERROR, e)
+            return@withNonCancellableContext Result.InternalError(e)
+        }
+
+        if (read) {
+            chaptersToUpdate.groupBy { it.mangaId }.forEach { (mangaId, chapters) ->
+                val manga = mangaRepository.getMangaByIdOrNull(mangaId)
+                if (manga == null) {
+                    logcat(LogPriority.WARN) { "Skipping translation cleanup: manga $mangaId not found" }
+                } else {
+                    val sourceName = sourceManager.getOrStub(manga.source).toString()
+                    chapters.forEach { chapter ->
+                        try {
+                            translatedChapterRepository.deleteAllForChapter(
+                                TranslationLocator(sourceName, manga.title, chapter.name, chapter.url),
+                            )
+                        } catch (e: Exception) {
+                            logcat(LogPriority.WARN, e) { "Failed to delete translations for chapter ${chapter.id}" }
+                        }
+                    }
+                }
+            }
+        }
+
+        if (read && downloadPreferences.removeAfterMarkedAsRead.get()) {
+            chaptersToUpdate
+                .groupBy { it.mangaId }
+                .forEach { (mangaId, chapters) ->
+                    deleteDownload.awaitAll(
+                        manga = mangaRepository.getMangaById(mangaId),
+                        chapters = chapters.toTypedArray(),
+                    )
+                }
+        }
+
+        try {
+            chaptersToUpdate.groupBy { it.mangaId }.forEach { (mangaId, chapters) ->
+                val manga = mangaRepository.getMangaById(mangaId)
+                if (read) {
+                    sourceTrackerDispatcher.notifyChaptersRead(manga, chapters)
+                } else {
+                    sourceTrackerDispatcher.notifyChaptersUnread(manga, chapters)
+                }
+            }
+        } catch (e: Exception) {
+            logcat(LogPriority.WARN, e) { "SourceTrackerDispatcher fan-out failed" }
+        }
+
+        Result.Success
+    }
+
+    suspend fun await(mangaId: Long, read: Boolean): Result = withNonCancellableContext {
+        await(
+            read = read,
+            chapters = chapterRepository
+                .getChapterByMangaId(mangaId)
+                .toTypedArray(),
+        )
+    }
+
+    suspend fun await(manga: Manga, read: Boolean) =
+        await(manga.id, read)
+
+    sealed interface Result {
+        data object Success : Result
+        data object NoChapters : Result
+        data class InternalError(val error: Throwable) : Result
+    }
+}

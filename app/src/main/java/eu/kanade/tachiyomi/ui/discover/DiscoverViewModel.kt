@@ -1,0 +1,92 @@
+package eu.kanade.tachiyomi.ui.discover
+
+import androidx.lifecycle.viewModelScope
+import eu.kanade.domain.base.BasePreferences
+import eu.kanade.tachiyomi.jsplugin.JsPluginManager
+import eu.kanade.tachiyomi.source.CatalogueSource
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import tachiyomi.domain.source.service.SourceManager
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import eu.kanade.tachiyomi.source.isNovelSource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import tachiyomi.domain.manga.model.Manga
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import logcat.LogPriority
+import tachiyomi.core.common.util.system.logcat
+import mihon.core.viewmodel.StateViewModel
+import tachiyomi.domain.manga.interactor.NetworkToLocalManga
+
+data class DiscoverState(
+    val isLoading: Boolean = true,
+    val isNovel: Boolean = false,
+    val sources: List<CatalogueSource> = emptyList(),
+)
+
+class DiscoverViewModel(
+    val authManager: eu.kanade.tachiyomi.data.auth.AuthManager = Injekt.get(),
+    private val sourceManager: SourceManager = Injekt.get(),
+    private val jsPluginManager: JsPluginManager = Injekt.get(),
+    private val preferences: BasePreferences = Injekt.get(),
+    private val networkToLocalManga: NetworkToLocalManga = Injekt.get()
+) : StateViewModel<DiscoverState>(DiscoverState()) {
+
+    init {
+        viewModelScope.launch {
+            combine(
+                sourceManager.sources,
+                jsPluginManager.jsSources,
+                preferences.homeTabIsNovel.changes()
+            ) { apkSources, jsSources, isNovel ->
+                val allSources = (apkSources + jsSources).filterIsInstance<CatalogueSource>()
+                val filtered = allSources.filter { 
+                    it.isNovelSource() == isNovel && 
+                    it.id != tachiyomi.source.local.LocalSource.ID && 
+                    it.id != tachiyomi.source.local.LocalNovelSource.ID 
+                }
+                filtered to isNovel
+            }.collectLatest { (sources, isNovel) ->
+                mutableState.update { 
+                    it.copy(isLoading = false, sources = sources, isNovel = isNovel)
+                }
+            }
+        }
+    }
+
+    fun toggleNovel(isNovel: Boolean) {
+        preferences.homeTabIsNovel.set(isNovel)
+    }
+
+    suspend fun loadSourcePopular(source: CatalogueSource): List<Manga> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val page = source.getPopularManga(1)
+                page.mangas.map { sManga ->
+                    Manga.create().copy(
+                        source = source.id,
+                        url = sManga.url,
+                        title = sManga.title,
+                        thumbnailUrl = sManga.thumbnail_url,
+                        initialized = sManga.initialized,
+                        isNovel = source.isNovelSource()
+                    )
+                }
+            } catch (e: Exception) {
+                logcat(LogPriority.ERROR, e) { "Failed to load popular manga for source ${source.name}" }
+                emptyList()
+            }
+        }
+    }
+
+    suspend fun getNetworkToLocalManga(manga: Manga): Manga {
+        return withContext(Dispatchers.IO) {
+            networkToLocalManga(manga)
+        }
+    }
+}

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--suppress AndroidElementNotAllowed -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- Background - light theme -->
+    <item>
+        <shape>
+            <solid android:color="#E8E8EC" />
+        </shape>
+    </item>
+
+    <!-- Book icon centered -->
+    <item
+        android:gravity="center"
+        android:width="96dp"
+        android:height="96dp">
+        <vector
+            android:width="96dp"
+            android:height="96dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+            <!-- Book open icon -->
+            <path
+                android:fillColor="#B0B0B8"
+                android:pathData="M21,4H3C2.45,4 2,4.45 2,5v14c0,0.55 0.45,1 1,1h18c0.55,0 1,-0.45 1,-1V5C22,4.45 21.55,4 21,4zM20,18H4V6h16V18z"/>
+            <path
+                android:fillColor="#B0B0B8"
+                android:pathData="M12,6v12"/>
+            <path
+                android:strokeColor="#B0B0B8"
+                android:strokeWidth="0.5"
+                android:pathData="M12,6L12,18"/>
+            <!-- Left page lines -->
+            <path
+                android:fillColor="#C8C8D0"
+                android:pathData="M6,9h4v0.8H6zM6,11h4v0.8H6zM6,13h4v0.8H6zM6,15h3v0.8H6z"/>
+            <!-- Right page lines -->
+            <path
+                android:fillColor="#C8C8D0"
+                android:pathData="M14,9h4v0.8h-4zM14,11h4v0.8h-4zM14,13h4v0.8h-4zM14,15h3v0.8h-3z"/>
+        </vector>
+    </item>
+</layer-list>

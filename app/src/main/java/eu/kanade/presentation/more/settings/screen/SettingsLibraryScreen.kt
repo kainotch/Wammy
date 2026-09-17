@@ -1,0 +1,370 @@
+package eu.kanade.presentation.more.settings.screen
+
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.util.fastMap
+import androidx.core.content.ContextCompat
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.Navigator
+import cafe.adriel.voyager.navigator.currentOrThrow
+import eu.kanade.domain.source.interactor.SetMigrateSorting
+import eu.kanade.domain.source.service.SourcePreferences
+import eu.kanade.presentation.category.visualName
+import eu.kanade.presentation.more.settings.Preference
+import eu.kanade.presentation.more.settings.widget.TriStateListDialog
+import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.ui.category.CategoryScreen
+import kotlinx.coroutines.launch
+import tachiyomi.domain.category.interactor.GetCategories
+import tachiyomi.domain.category.interactor.ResetCategoryFlags
+import tachiyomi.domain.category.model.Category
+import tachiyomi.domain.library.service.LibraryPreferences
+import tachiyomi.domain.library.service.LibraryPreferences.Companion.DEVICE_CHARGING
+import tachiyomi.domain.library.service.LibraryPreferences.Companion.DEVICE_NETWORK_NOT_METERED
+import tachiyomi.domain.library.service.LibraryPreferences.Companion.DEVICE_ONLY_ON_WIFI
+import tachiyomi.domain.library.service.LibraryPreferences.Companion.MANGA_HAS_UNREAD
+import tachiyomi.domain.library.service.LibraryPreferences.Companion.MANGA_NON_COMPLETED
+import tachiyomi.domain.library.service.LibraryPreferences.Companion.MANGA_NON_READ
+import tachiyomi.domain.library.service.LibraryPreferences.Companion.MANGA_OUTSIDE_RELEASE_PERIOD
+import tachiyomi.domain.library.service.LibraryPreferences.Companion.MARK_DUPLICATE_CHAPTER_READ_EXISTING
+import tachiyomi.domain.library.service.LibraryPreferences.Companion.MARK_DUPLICATE_CHAPTER_READ_NEW
+import tachiyomi.i18n.MR
+import tachiyomi.i18n.novel.TDMR
+import tachiyomi.presentation.core.i18n.pluralStringResource
+import tachiyomi.presentation.core.i18n.stringResource
+import tachiyomi.presentation.core.util.collectAsState
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+
+object SettingsLibraryScreen : SearchableSettings {
+
+    override val supportsReset: Boolean get() = true
+
+    @Composable
+    @ReadOnlyComposable
+    override fun getTitleRes() = MR.strings.pref_category_library
+
+    @Composable
+    override fun getPreferences(): List<Preference> {
+        val getCategories = remember { Injekt.get<GetCategories>() }
+        val libraryPreferences = remember { Injekt.get<LibraryPreferences>() }
+        val sourcePreferences = remember { Injekt.get<SourcePreferences>() }
+        val allCategories by getCategories.subscribe().collectAsState(initial = emptyList())
+        val isJoined by libraryPreferences.joinedLibrary.changes().collectAsState(
+            initial = libraryPreferences.joinedLibrary.get(),
+        )
+
+        return listOf(
+            getCategoriesGroup(LocalNavigator.currentOrThrow, allCategories, libraryPreferences),
+            getGlobalUpdateGroup(allCategories, libraryPreferences),
+            getBehaviorGroup(libraryPreferences, sourcePreferences, isJoined),
+        )
+    }
+
+    @Composable
+    private fun getCategoriesGroup(
+        navigator: Navigator,
+        allCategories: List<Category>,
+        libraryPreferences: LibraryPreferences,
+    ): Preference.PreferenceGroup {
+        val scope = rememberCoroutineScope()
+        val userCategoriesCount = allCategories.filterNot(Category::isSystemCategory).size
+
+        // For default category
+        val ids = listOf(libraryPreferences.defaultCategory.defaultValue()) +
+            allCategories.fastMap { it.id.toInt() }
+        val labels = listOf(stringResource(MR.strings.default_category_summary)) +
+            allCategories.fastMap { it.visualName }
+
+        return Preference.PreferenceGroup(
+            title = stringResource(MR.strings.categories),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.action_edit_categories),
+                    subtitle = pluralStringResource(
+                        MR.plurals.num_categories,
+                        count = userCategoriesCount,
+                        userCategoriesCount,
+                    ),
+                    onClick = { navigator.push(CategoryScreen()) },
+                ),
+                Preference.PreferenceItem.ListPreference(
+                    preference = libraryPreferences.defaultCategory,
+                    entries = ids.zip(labels).toMap(),
+                    title = stringResource(MR.strings.default_category),
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = libraryPreferences.categorizedDisplaySettings,
+                    title = stringResource(MR.strings.categorized_display_settings),
+                    onValueChanged = {
+                        if (!it) {
+                            scope.launch {
+                                Injekt.get<ResetCategoryFlags>().await()
+                            }
+                        }
+                        true
+                    },
+                ),
+            ),
+        )
+    }
+
+    @Composable
+    private fun getGlobalUpdateGroup(
+        allCategories: List<Category>,
+        libraryPreferences: LibraryPreferences,
+    ): Preference.PreferenceGroup {
+        val context = LocalContext.current
+
+        val autoUpdateIntervalPref = libraryPreferences.autoUpdateInterval
+        val autoUpdateCategoriesPref = libraryPreferences.updateCategories
+        val autoUpdateCategoriesExcludePref = libraryPreferences.updateCategoriesExclude
+
+        val autoUpdateInterval by autoUpdateIntervalPref.collectAsState()
+
+        val included by autoUpdateCategoriesPref.collectAsState()
+        val excluded by autoUpdateCategoriesExcludePref.collectAsState()
+        var showCategoriesDialog by rememberSaveable { mutableStateOf(false) }
+        if (showCategoriesDialog) {
+            TriStateListDialog(
+                title = stringResource(MR.strings.categories),
+                message = stringResource(MR.strings.pref_library_update_categories_details),
+                items = allCategories,
+                initialChecked = included.mapNotNull { id -> allCategories.find { it.id.toString() == id } },
+                initialInversed = excluded.mapNotNull { id -> allCategories.find { it.id.toString() == id } },
+                itemLabel = { it.visualName },
+                onDismissRequest = { showCategoriesDialog = false },
+                onValueChanged = { newIncluded, newExcluded ->
+                    autoUpdateCategoriesPref.set(newIncluded.map { it.id.toString() }.toSet())
+                    autoUpdateCategoriesExcludePref.set(newExcluded.map { it.id.toString() }.toSet())
+                    showCategoriesDialog = false
+                },
+            )
+        }
+
+        return Preference.PreferenceGroup(
+            title = stringResource(MR.strings.pref_category_library_update),
+            preferenceItems = listOf(
+                Preference.PreferenceItem.ListPreference(
+                    preference = autoUpdateIntervalPref,
+                    entries = mapOf(
+                        0 to stringResource(MR.strings.update_never),
+                        12 to stringResource(MR.strings.update_12hour),
+                        24 to stringResource(MR.strings.update_24hour),
+                        48 to stringResource(MR.strings.update_48hour),
+                        72 to stringResource(MR.strings.update_72hour),
+                        168 to stringResource(MR.strings.update_weekly),
+                    ),
+                    title = stringResource(MR.strings.pref_library_update_interval),
+                    onValueChanged = {
+                        LibraryUpdateJob.setupTask(context, it)
+                        true
+                    },
+                ),
+                Preference.PreferenceItem.MultiSelectListPreference(
+                    preference = libraryPreferences.autoUpdateDeviceRestrictions,
+                    entries = mapOf(
+                        DEVICE_ONLY_ON_WIFI to stringResource(MR.strings.connected_to_wifi),
+                        DEVICE_NETWORK_NOT_METERED to stringResource(MR.strings.network_not_metered),
+                        DEVICE_CHARGING to stringResource(MR.strings.charging),
+                    ),
+                    title = stringResource(MR.strings.pref_library_update_restriction),
+                    subtitle = stringResource(MR.strings.restrictions),
+                    enabled = autoUpdateInterval > 0,
+                    onValueChanged = {
+                        // Post to event looper to allow the preference to be updated.
+                        ContextCompat.getMainExecutor(context).execute { LibraryUpdateJob.setupTask(context) }
+                        true
+                    },
+                ),
+                Preference.PreferenceItem.TextPreference(
+                    title = stringResource(MR.strings.categories),
+                    subtitle = getCategoriesLabel(
+                        allCategories = allCategories,
+                        included = included,
+                        excluded = excluded,
+                    ),
+                    onClick = { showCategoriesDialog = true },
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = libraryPreferences.autoUpdateMetadata,
+                    title = stringResource(MR.strings.pref_library_update_refresh_metadata),
+                    subtitle = stringResource(MR.strings.pref_library_update_refresh_metadata_summary),
+                ),
+                Preference.PreferenceItem.MultiSelectListPreference(
+                    preference = libraryPreferences.autoUpdateMangaRestrictions,
+                    entries = mapOf(
+                        MANGA_HAS_UNREAD to stringResource(MR.strings.pref_update_only_completely_read),
+                        MANGA_NON_READ to stringResource(MR.strings.pref_update_only_started),
+                        MANGA_NON_COMPLETED to stringResource(MR.strings.pref_update_only_non_completed),
+                        MANGA_OUTSIDE_RELEASE_PERIOD to stringResource(MR.strings.pref_update_only_in_release_period),
+                    ),
+                    title = stringResource(MR.strings.pref_library_update_smart_update),
+                ),
+                Preference.PreferenceItem.ListPreference(
+                    preference = libraryPreferences.skipUpdateTime,
+                    entries = mapOf(
+                        LibraryPreferences.SKIP_UPDATE_NONE to stringResource(TDMR.strings.skip_update_no_restriction),
+                        LibraryPreferences.SKIP_UPDATE_1_DAY to stringResource(TDMR.strings.skip_update_days, 1),
+                        LibraryPreferences.SKIP_UPDATE_3_DAYS to stringResource(TDMR.strings.skip_update_days, 3),
+                        LibraryPreferences.SKIP_UPDATE_7_DAYS to stringResource(TDMR.strings.skip_update_days, 7),
+                        LibraryPreferences.SKIP_UPDATE_14_DAYS to stringResource(TDMR.strings.skip_update_days, 14),
+                        LibraryPreferences.SKIP_UPDATE_30_DAYS to stringResource(TDMR.strings.skip_update_days, 30),
+                        LibraryPreferences.SKIP_UPDATE_60_DAYS to stringResource(TDMR.strings.skip_update_days, 60),
+                        LibraryPreferences.SKIP_UPDATE_90_DAYS to stringResource(TDMR.strings.skip_update_days, 90),
+                    ),
+                    title = stringResource(TDMR.strings.skip_recently_updated_title),
+                    subtitle = stringResource(TDMR.strings.skip_recently_updated_subtitle),
+                ),
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = libraryPreferences.newShowUpdatesCount,
+                    title = stringResource(MR.strings.pref_library_update_show_tab_badge),
+                ),
+            ),
+        )
+    }
+
+    @Composable
+    private fun getBehaviorGroup(
+        libraryPreferences: LibraryPreferences,
+        sourcePreferences: SourcePreferences,
+        isJoined: Boolean,
+    ): Preference.PreferenceGroup {
+        val preferenceItems = buildList {
+            add(
+                Preference.PreferenceItem.ListPreference(
+                    preference = libraryPreferences.swipeToStartAction,
+                    entries = mapOf(
+                        LibraryPreferences.ChapterSwipeAction.Disabled to
+                            stringResource(MR.strings.disabled),
+                        LibraryPreferences.ChapterSwipeAction.ToggleBookmark to
+                            stringResource(MR.strings.action_bookmark),
+                        LibraryPreferences.ChapterSwipeAction.ToggleRead to
+                            stringResource(MR.strings.action_mark_as_read),
+                        LibraryPreferences.ChapterSwipeAction.Download to
+                            stringResource(MR.strings.action_download),
+                    ),
+                    title = stringResource(MR.strings.pref_chapter_swipe_start),
+                ),
+            )
+            add(
+                Preference.PreferenceItem.ListPreference(
+                    preference = libraryPreferences.swipeToEndAction,
+                    entries = mapOf(
+                        LibraryPreferences.ChapterSwipeAction.Disabled to
+                            stringResource(MR.strings.disabled),
+                        LibraryPreferences.ChapterSwipeAction.ToggleBookmark to
+                            stringResource(MR.strings.action_bookmark),
+                        LibraryPreferences.ChapterSwipeAction.ToggleRead to
+                            stringResource(MR.strings.action_mark_as_read),
+                        LibraryPreferences.ChapterSwipeAction.Download to
+                            stringResource(MR.strings.action_download),
+                    ),
+                    title = stringResource(MR.strings.pref_chapter_swipe_end),
+                ),
+            )
+            add(
+                Preference.PreferenceItem.MultiSelectListPreference(
+                    preference = libraryPreferences.markDuplicateReadChapterAsRead,
+                    entries = mapOf(
+                        MARK_DUPLICATE_CHAPTER_READ_EXISTING to
+                            stringResource(MR.strings.pref_mark_duplicate_read_chapter_read_existing),
+                        MARK_DUPLICATE_CHAPTER_READ_NEW to
+                            stringResource(MR.strings.pref_mark_duplicate_read_chapter_read_new),
+                    ),
+                    title = stringResource(MR.strings.pref_mark_duplicate_read_chapter_read),
+                ),
+            )
+            add(
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = libraryPreferences.hideMissingChapters,
+                    title = stringResource(MR.strings.pref_hide_missing_chapter_indicators),
+                ),
+            )
+            add(
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = libraryPreferences.checkDuplicateEntryOnAdd,
+                    title = stringResource(TDMR.strings.pref_check_duplicate_on_add),
+                    subtitle = stringResource(TDMR.strings.pref_check_duplicate_on_add_summary),
+                ),
+            )
+            add(
+                Preference.PreferenceItem.ListPreference(
+                    preference = libraryPreferences.duplicateSortMode,
+                    entries = mapOf(
+                        LibraryPreferences.DuplicateSortMode.Alphabetical to
+                            stringResource(MR.strings.action_sort_alpha),
+                        LibraryPreferences.DuplicateSortMode.ChapterCount to
+                            stringResource(MR.strings.action_sort_total),
+                    ),
+                    title = stringResource(TDMR.strings.pref_duplicate_sort_mode),
+                ),
+            )
+            add(
+                Preference.PreferenceItem.ListPreference(
+                    preference = sourcePreferences.migrationSortingMode,
+                    entries = mapOf(
+                        SetMigrateSorting.Mode.ALPHABETICAL to stringResource(MR.strings.action_sort_alpha),
+                        SetMigrateSorting.Mode.TOTAL to stringResource(MR.strings.action_sort_count),
+                    ),
+                    title = stringResource(TDMR.strings.pref_migrate_source_sorting),
+                ),
+            )
+            add(
+                Preference.PreferenceItem.ListPreference(
+                    preference = sourcePreferences.migrationSortingDirection,
+                    entries = mapOf(
+                        SetMigrateSorting.Direction.ASCENDING to stringResource(MR.strings.action_asc),
+                        SetMigrateSorting.Direction.DESCENDING to stringResource(MR.strings.action_desc),
+                    ),
+                    title = stringResource(TDMR.strings.pref_migrate_source_sorting_direction),
+                ),
+            )
+            if (!isJoined) {
+                add(
+                    Preference.PreferenceItem.SwitchPreference(
+                        preference = libraryPreferences.showMangaSourceName,
+                        title = stringResource(TDMR.strings.pref_show_manga_source_name),
+                        subtitle = stringResource(TDMR.strings.pref_show_manga_source_name_summary),
+                    ),
+                )
+            }
+            add(
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = libraryPreferences.sortMangaTags,
+                    title = "Sort novel tags alphabetically",
+                    subtitle = "Sort tags on novel detail page by name instead of source order",
+                ),
+            )
+            if (!isJoined) {
+                add(
+                    Preference.PreferenceItem.SwitchPreference(
+                        preference = libraryPreferences.mangaReadProgress100,
+                        title = "Restore position in completed manga chapters",
+                        subtitle = "Resume manga chapters from where you left off even when already marked as read",
+                    ),
+                )
+            }
+            add(
+                Preference.PreferenceItem.SwitchPreference(
+                    preference = libraryPreferences.novelReadProgress100,
+                    title = "Restore position in completed novel chapters",
+                    subtitle = "Resume novel chapters from where you left off even when already marked as read",
+                ),
+            )
+        }
+
+        return Preference.PreferenceGroup(
+            title = stringResource(MR.strings.pref_behavior),
+            preferenceItems = preferenceItems.toList(),
+        )
+    }
+}

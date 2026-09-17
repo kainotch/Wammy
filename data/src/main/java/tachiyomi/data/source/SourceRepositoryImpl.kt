@@ -1,0 +1,113 @@
+package tachiyomi.data.source
+
+import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.isNovelSource
+import eu.kanade.tachiyomi.source.model.FilterList
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import tachiyomi.data.Database
+import tachiyomi.data.subscribeToDebouncedList
+import tachiyomi.domain.source.model.SourceWithCount
+import tachiyomi.domain.source.model.StubSource
+import tachiyomi.domain.source.model.hasJsMarker
+import tachiyomi.domain.source.repository.SourcePagingSource
+import tachiyomi.domain.source.repository.SourceRepository
+import tachiyomi.domain.source.service.SourceManager
+import kotlin.time.Duration.Companion.seconds
+import tachiyomi.domain.source.model.Source as DomainSource
+
+class SourceRepositoryImpl(
+    private val sourceManager: SourceManager,
+    private val database: Database,
+) : SourceRepository {
+
+    override fun getSources(): Flow<List<DomainSource>> {
+        return sourceManager.sources.map { sources ->
+            sources.map {
+                mapSourceToDomainSource(it).copy(
+                    supportsLatest = it.supportsLatest,
+                )
+            }
+        }
+    }
+
+    override fun getOnlineSources(): Flow<List<DomainSource>> {
+        return sourceManager.sources.map { sources ->
+            sources
+                .filter { it.id != 0L && it.id != 1L }
+                .map(::mapSourceToDomainSource)
+        }
+    }
+
+    override fun getSourcesWithFavoriteCount(): Flow<List<Pair<DomainSource, Long>>> {
+        return combine(
+            // Triggers cause multiple table writes per operation, so debounce
+            // collapses them into a single query execution after the burst.
+            database.mangasQueries.getSourceIdWithFavoriteCount().subscribeToDebouncedList(2.seconds),
+            sourceManager.sources,
+        ) { sourceIdWithFavoriteCount, _ -> sourceIdWithFavoriteCount }
+            .map {
+                it.map { (sourceId, count, isNovelFromManga) ->
+                    val source = sourceManager.getOrStub(sourceId)
+                    // A stub whose extension was never loaded/installed on this device (blank
+                    // name/lang) has no authoritative type of its own. Fall back to the actual
+                    // favorited manga's is_novel flag as a best guess, but also flag it as
+                    // unknown so callers can surface it in both the manga and novel migrate
+                    // lists - old backups predate the is_novel field, so even that flag can be a
+                    // false negative.
+                    val isUnknownStub = source is StubSource && source.isInvalid
+                    val domainSource = mapSourceToDomainSource(source).copy(
+                        isStub = source is StubSource,
+                        isTypeUnknown = isUnknownStub,
+                        isNovelSource = if (isUnknownStub) isNovelFromManga == true else source.isNovelSource(),
+                    )
+                    domainSource to count
+                }
+            }
+    }
+
+    override fun getSourcesWithNonLibraryManga(): Flow<List<SourceWithCount>> {
+        val sourceIdWithNonLibraryManga =
+            database.mangasQueries.getSourceIdsWithNonLibraryManga().subscribeToDebouncedList(2.seconds)
+        return sourceIdWithNonLibraryManga.map { sourceId ->
+            sourceId.map { (sourceId, count) ->
+                val source = sourceManager.getOrStub(sourceId)
+                val domainSource = mapSourceToDomainSource(source).copy(
+                    isStub = source is StubSource,
+                )
+                SourceWithCount(domainSource, count)
+            }
+        }
+    }
+
+    override fun search(
+        sourceId: Long,
+        query: String,
+        filterList: FilterList,
+    ): SourcePagingSource {
+        val source = sourceManager.get(sourceId) as CatalogueSource
+        return SourceSearchPagingSource(source, query, filterList)
+    }
+
+    override fun getPopular(sourceId: Long): SourcePagingSource {
+        val source = sourceManager.get(sourceId) as CatalogueSource
+        return SourcePopularPagingSource(source)
+    }
+
+    override fun getLatest(sourceId: Long): SourcePagingSource {
+        val source = sourceManager.get(sourceId) as CatalogueSource
+        return SourceLatestPagingSource(source)
+    }
+
+    private fun mapSourceToDomainSource(source: Source): DomainSource = DomainSource(
+        id = source.id,
+        lang = source.lang,
+        name = source.name,
+        supportsLatest = false,
+        isStub = false,
+        isNovelSource = source.isNovelSource(),
+        isJsSource = source.hasJsMarker(),
+    )
+}

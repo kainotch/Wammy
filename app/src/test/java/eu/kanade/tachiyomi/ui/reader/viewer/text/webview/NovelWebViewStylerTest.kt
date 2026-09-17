@@ -1,0 +1,162 @@
+package eu.kanade.tachiyomi.ui.reader.viewer.text.webview
+
+import eu.kanade.presentation.reader.settings.CodeSnippet
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Test
+
+/**
+ * Tests for the pure, Android-free CSS helpers in [NovelWebViewStyler].
+ *
+ * [NovelWebViewStyler.buildPayload] requires Activity / WebView and is not
+ * exercisable in JVM unit tests. [NovelWebViewStyler.fontOverrideCss] is the
+ * extracted testable piece: it owns the logic that forces font-size and
+ * font-family from reader settings to win over inline styles baked into the
+ * source HTML (e.g. `<div style="font-size:18px">`).
+ */
+class NovelWebViewStylerTest {
+
+    // fontOverrideCss
+
+    @Test
+    fun `reader-priority mode emits font-size inherit in star rule`() {
+        val (star, _) = NovelWebViewStyler.fontOverrideCss(sourceCssPriority = false, useOriginalFonts = false)
+        assertTrue("font-size: inherit !important" in star) {
+            "Expected star-rule override to contain font-size inherit, got: $star"
+        }
+    }
+
+    @Test
+    fun `reader-priority mode emits font-family inherit in star rule when not using original fonts`() {
+        val (star, _) = NovelWebViewStyler.fontOverrideCss(sourceCssPriority = false, useOriginalFonts = false)
+        assertTrue("font-family: inherit !important" in star) {
+            "Expected star-rule override to contain font-family inherit, got: $star"
+        }
+    }
+
+    @Test
+    fun `reader-priority with useOriginalFonts omits font-family inherit`() {
+        val (star, _) = NovelWebViewStyler.fontOverrideCss(sourceCssPriority = false, useOriginalFonts = true)
+        assertTrue("font-size: inherit !important" in star)
+        assertFalse("font-family: inherit !important" in star) {
+            "Should not override font-family when useOriginalFonts=true, got: $star"
+        }
+    }
+
+    @Test
+    fun `reader-priority mode emits heading size rules`() {
+        val (_, headings) = NovelWebViewStyler.fontOverrideCss(sourceCssPriority = false, useOriginalFonts = false)
+        assertTrue("h1" in headings && "2em" in headings) { "Missing h1 rule in: $headings" }
+        assertTrue("h2" in headings && "1.5em" in headings) { "Missing h2 rule in: $headings" }
+        assertTrue("h3" in headings) { "Missing h3 rule in: $headings" }
+        assertTrue("h4" in headings) { "Missing h4 rule in: $headings" }
+        assertTrue("h5" in headings) { "Missing h5 rule in: $headings" }
+        assertTrue("h6" in headings) { "Missing h6 rule in: $headings" }
+    }
+
+    @Test
+    fun `heading rules use !important so they beat star-rule specificity`() {
+        val (_, headings) = NovelWebViewStyler.fontOverrideCss(sourceCssPriority = false, useOriginalFonts = false)
+        assertTrue("!important" in headings) {
+            "Heading rules must use !important to override * { font-size: inherit !important }, got: $headings"
+        }
+    }
+
+    @Test
+    fun `source-priority mode produces empty overrides`() {
+        val (star, headings) = NovelWebViewStyler.fontOverrideCss(sourceCssPriority = true, useOriginalFonts = false)
+        assertTrue(star.isEmpty()) { "Expected empty star override when source has priority, got: $star" }
+        assertTrue(headings.isEmpty()) { "Expected empty heading rules when source has priority, got: $headings" }
+    }
+
+    @Test
+    fun `source-priority with useOriginalFonts also produces empty overrides`() {
+        val (star, headings) = NovelWebViewStyler.fontOverrideCss(sourceCssPriority = true, useOriginalFonts = true)
+        assertTrue(star.isEmpty())
+        assertTrue(headings.isEmpty())
+    }
+
+    // snippetsToRun
+
+    @Test
+    fun `not reapplying runs every enabled snippet regardless of baseline`() {
+        val snippets = listOf(CodeSnippet(title = "a", code = "1", id = "a"))
+        val toRun = NovelWebViewStyler.snippetsToRun(
+            snippets,
+            reapplyChangedOnly = false,
+            lastAppliedSnippetCode = mapOf("a" to "1"),
+        )
+        assertEquals(snippets, toRun)
+    }
+
+    @Test
+    fun `reapply skips a snippet whose code matches the baseline`() {
+        val snippets = listOf(CodeSnippet(title = "a", code = "1", id = "a"))
+        val toRun = NovelWebViewStyler.snippetsToRun(
+            snippets,
+            reapplyChangedOnly = true,
+            lastAppliedSnippetCode = mapOf("a" to "1"),
+        )
+        assertTrue(toRun.isEmpty())
+    }
+
+    @Test
+    fun `reapply runs a snippet whose code changed since the baseline`() {
+        val snippets = listOf(CodeSnippet(title = "a", code = "2", id = "a"))
+        val toRun = NovelWebViewStyler.snippetsToRun(
+            snippets,
+            reapplyChangedOnly = true,
+            lastAppliedSnippetCode = mapOf("a" to "1"),
+        )
+        assertEquals(snippets, toRun)
+    }
+
+    @Test
+    fun `reapply runs a snippet absent from the baseline`() {
+        val snippets = listOf(CodeSnippet(title = "new", code = "1", id = "new"))
+        val toRun = NovelWebViewStyler.snippetsToRun(
+            snippets,
+            reapplyChangedOnly = true,
+            lastAppliedSnippetCode = emptyMap(),
+        )
+        assertEquals(snippets, toRun)
+    }
+
+    @Test
+    fun `reapply only runs the changed snippet among several`() {
+        val unchanged = CodeSnippet(title = "u", code = "1", id = "u")
+        val changed = CodeSnippet(title = "c", code = "2", id = "c")
+        val toRun = NovelWebViewStyler.snippetsToRun(
+            listOf(unchanged, changed),
+            reapplyChangedOnly = true,
+            lastAppliedSnippetCode = mapOf("u" to "1", "c" to "1"),
+        )
+        assertEquals(listOf(changed), toRun)
+    }
+
+    // nextAppliedSnippetCode
+
+    @Test
+    fun `append-mode baseline update lets a later revert be detected as changed`() {
+        var baseline = mapOf("a" to "v1")
+
+        val editedToV2 = listOf(CodeSnippet(title = "a", code = "v2", id = "a"))
+        NovelWebViewStyler.snippetsToRun(editedToV2, reapplyChangedOnly = true, baseline)
+        baseline = NovelWebViewStyler.nextAppliedSnippetCode(baseline, editedToV2)
+
+        val revertedToV1 = listOf(CodeSnippet(title = "a", code = "v1", id = "a"))
+        val toRun = NovelWebViewStyler.snippetsToRun(revertedToV1, reapplyChangedOnly = true, baseline)
+
+        assertEquals(revertedToV1, toRun)
+    }
+
+    @Test
+    fun `nextAppliedSnippetCode preserves entries absent from the current snippet set`() {
+        val baseline = NovelWebViewStyler.nextAppliedSnippetCode(
+            mapOf("oneShot" to "code"),
+            enabledSnippets = listOf(CodeSnippet(title = "append", code = "v2", id = "append")),
+        )
+        assertEquals(mapOf("oneShot" to "code", "append" to "v2"), baseline)
+    }
+}

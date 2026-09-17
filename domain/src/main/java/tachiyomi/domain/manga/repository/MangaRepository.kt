@@ -1,0 +1,330 @@
+package tachiyomi.domain.manga.repository
+
+import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.json.JsonObject
+import tachiyomi.domain.library.model.LibraryManga
+import tachiyomi.domain.library.model.LibraryMangaForUpdate
+import tachiyomi.domain.manga.model.Manga
+import tachiyomi.domain.manga.model.MangaSelectionMetric
+import tachiyomi.domain.manga.model.MangaUpdate
+import tachiyomi.domain.manga.model.MangaWithChapterCount
+
+data class FavoriteMetadataMatches(
+    val author: Set<Long> = emptySet(),
+    val artist: Set<Long> = emptySet(),
+    val description: Set<Long> = emptySet(),
+    val altTitle: Set<Long> = emptySet(),
+)
+
+data class DuplicateGroup(
+    val normalizedTitle: String,
+    val ids: List<Long>,
+    val count: Int,
+)
+
+data class DuplicatePair(
+    val idA: Long,
+    val titleA: String,
+    val idB: Long,
+    val titleB: String,
+)
+
+interface MangaRepository {
+
+    suspend fun getMangaById(id: Long): Manga
+
+    suspend fun getMangaByIdOrNull(id: Long): Manga?
+
+    suspend fun getMangasByIds(ids: List<Long>): List<Manga>
+
+    suspend fun getMangaByIdAsFlow(id: Long): Flow<Manga>
+
+    /** Raw [Manga.memo] JSON for a manga, used for per-field custom metadata overrides. */
+    suspend fun getMemo(mangaId: Long): JsonObject
+
+    suspend fun clearDescriptionsForMangaIds(ids: List<Long>)
+
+    suspend fun clearGenresForMangaIds(ids: List<Long>)
+
+    suspend fun clearDescriptionsAndGenresForMangaIds(ids: List<Long>)
+
+    suspend fun clearCoversForMangaIds(ids: List<Long>, coverLastModified: Long)
+
+    suspend fun getMangaByUrlAndSourceId(url: String, sourceId: Long): Manga?
+
+    suspend fun getLiteMangaByUrlAndSourceId(url: String, sourceId: Long): Manga?
+
+    fun getMangaByUrlAndSourceIdAsFlow(url: String, sourceId: Long): Flow<Manga?>
+
+    suspend fun getFavorites(): List<Manga>
+
+    suspend fun getFavoritesPaged(limit: Long, offset: Long): List<Manga>
+
+    suspend fun getFavoritesCount(): Long
+
+    suspend fun getFavoritesEntry(): List<Manga>
+
+    /** Keyset-paged favorites (id > afterId, ascending) so very large libraries can be streamed. */
+    suspend fun getFavoritesEntryPaged(afterId: Long, limit: Long): List<Manga>
+
+    fun getFavoritesEntryBySourceId(sourceId: Long): Flow<List<Manga>>
+
+    suspend fun getFavoriteSourceAndUrl(): List<Pair<Long, String>>
+
+    /**
+     * returns only (id, url) pairs for favorites.
+     */
+    suspend fun getFavoriteIdAndUrl(): List<Pair<Long, String>>
+
+    /**
+     * returns only (id, genre) pairs for favorites that have genres.
+     */
+    suspend fun getFavoriteIdAndGenre(): List<Pair<Long, List<String>?>>
+
+    /**
+     * Lightweight query: returns (manga_id, total_count) for favorites.
+     */
+    suspend fun getFavoriteIdAndTotalCount(): List<Pair<Long, Long>>
+
+    suspend fun getReadMangaNotInLibrary(): List<Manga>
+
+    suspend fun getLibraryManga(): List<LibraryManga>
+
+    /**
+     * Experimental memory-capped library load: one page of favorites for a single category and
+     * content type, with the DB-expressible filters/sort in [spec] applied so the page is the
+     * globally-correct slice. [categoryId] 0 is the uncategorized bucket.
+     */
+    suspend fun getLibraryMangaPage(
+        categoryId: Long,
+        isNovel: Boolean,
+        limit: Long,
+        offset: Long,
+        spec: tachiyomi.domain.library.model.LibraryPageSpec,
+    ): List<LibraryManga>
+
+    /**
+     * Get a single LibraryManga by ID from the library cache.
+     * Returns null if the manga is not in the library or cache is missing.
+     */
+    suspend fun getLibraryMangaById(mangaId: Long): LibraryManga?
+
+    /**
+     * Get multiple LibraryManga by IDs from the library cache.
+     * Only returns items that exist in the library cache.
+     */
+    suspend fun getLibraryMangaByIds(mangaIds: List<Long>): List<LibraryManga>
+
+    suspend fun getLibraryMangaForUpdate(): List<LibraryMangaForUpdate>
+
+    fun getLibraryMangaAsFlow(): Flow<List<LibraryManga>>
+
+    fun getFavoritesBySourceId(sourceId: Long): Flow<List<Manga>>
+
+    suspend fun getDuplicateLibraryManga(
+        id: Long,
+        title: String,
+        altTitles: List<String> = emptyList(),
+        limit: Long,
+    ): List<MangaWithChapterCount>
+
+    suspend fun findDuplicatesExact(includeBlank: Boolean = false): List<DuplicateGroup>
+
+    suspend fun findDuplicatesContains(): List<DuplicatePair>
+
+    /**
+     * Stream favorites' (author, artist, description) through the given predicates and collect
+     * the matching IDs per field. Single cursor scan; rows are decoded and discarded one at a
+     * time, so nothing per-favorite is retained. A null predicate skips that field.
+     *
+     * @return matching favorite IDs as (author, artist, description) sets.
+     */
+    suspend fun findFavoriteIdsMatchingMetadata(
+        matchAuthor: ((String) -> Boolean)?,
+        matchArtist: ((String) -> Boolean)?,
+        matchDescription: ((String) -> Boolean)?,
+        matchAltTitle: ((List<String>) -> Boolean)? = null,
+    ): FavoriteMetadataMatches
+
+    /**
+     * Get ID + title pairs for all favorites.
+     */
+    suspend fun getFavoriteIdAndTitle(): List<Pair<Long, String>>
+
+    /** Unbounded selection metrics for favorites, optionally restricted to [categoryIds]. */
+    suspend fun getFavoriteSelectionMetrics(categoryIds: List<Long>): List<MangaSelectionMetric>
+
+    /** Targeted selection metrics for [ids], so hydrating a small known set never scans the full favorites table. */
+    suspend fun getSelectionMetricsForIds(ids: List<Long>): List<MangaSelectionMetric>
+
+    /** Targeted (id, total_count) lookup for [ids], used to rank a group's members before truncation. */
+    suspend fun getTotalCountsForIds(ids: List<Long>): List<Pair<Long, Long>>
+
+    /**
+     * Get all favorite manga ids in [categoryId] (0 = uncategorized). Id-only for bulk category actions.
+     */
+    suspend fun getFavoriteIdsForCategory(categoryId: Long): List<Long>
+
+    /** Ids of favorites matching the DB-expressible half of the Library screen's active filters. */
+    suspend fun getFavoriteIdsMatchingLibraryFilter(
+        excludedSourceIds: List<Long>,
+        filterUnread: Long,
+        filterStarted: Long,
+        filterCompleted: Long,
+        filterNovel: Long,
+        filterChapterCount: Long,
+        chapterCountThreshold: Long,
+        includedTagsCsv: String,
+    ): List<Long>
+
+    /**
+     * Find duplicates by URL within the same source.
+     * Returns groups where multiple manga have the same URL from the same source.
+     */
+    suspend fun findDuplicatesByUrl(includeBlank: Boolean = false): List<DuplicateGroup>
+
+    /**
+     * Get lightweight favorite genres for tag counting.
+     * Returns list of (mangaId, genreList) pairs - much faster than getLibraryManga().
+     */
+    suspend fun getFavoriteGenres(): List<Pair<Long, List<String>?>>
+
+    /**
+     * Get lightweight favorite genres with source ID for tag counting filtered by content type.
+     * Returns list of (mangaId, sourceId, genreList) triples.
+     */
+    suspend fun getFavoriteGenresWithSource(): List<Triple<Long, Long, List<String>?>>
+
+    /**
+     * Aggregate favorite genre tag counts without materializing the full per-manga genre list.
+     * Folds the DB cursor row-by-row into a small (rawTag -> count) map, so a 200k library can't
+     * OOM the way loading every genre row at once does.
+     *
+     * @param novelSourceIds source IDs considered novel sources (for content-type filtering).
+     * @param wantNovel null = all, true = novel-source favorites only, false = manga-source only.
+     * @return (rawTag -> count) and the number of included favorites with no tags.
+     */
+    suspend fun getFavoriteGenreTagCounts(
+        novelSourceIds: Set<Long>,
+        wantNovel: Boolean?,
+    ): Pair<Map<String, Int>, Int>
+
+    /**
+     * Get ultra-lightweight source + url pairs for duplicate checking.
+     * Much faster than getLibraryMangaForUpdate() - avoids libraryView JOIN entirely.
+     */
+    suspend fun getFavoriteSourceUrlPairs(): List<Pair<Long, String>>
+
+    /**
+     * Get just the distinct source IDs from favorites - ultra-lightweight for extension listing.
+     * Avoids expensive libraryView JOIN entirely.
+     */
+    suspend fun getFavoriteSourceIds(): List<Long>
+
+    suspend fun getMangaWithCounts(ids: List<Long>): List<MangaWithChapterCount>
+
+    suspend fun getMangaWithCountsLight(ids: List<Long>): List<MangaWithChapterCount>
+
+    /** Same as [getMangaWithCountsLight] but keeps real genre data (still skips description). */
+    suspend fun getMangaWithCountsLightWithGenre(ids: List<Long>): List<MangaWithChapterCount>
+
+    /** Id-only genre lookup, cheap enough to run over a large candidate set before display truncation. */
+    suspend fun getGenresForIds(ids: List<Long>): Map<Long, List<String>?>
+
+    suspend fun getUpcomingManga(
+        statuses: Set<Long>,
+        excludedCategories: List<Long>,
+        includedCategories: List<Long>,
+    ): Flow<List<Manga>>
+
+    suspend fun resetViewerFlags(): Boolean
+
+    suspend fun setMangaCategories(mangaId: Long, categoryIds: List<Long>)
+
+    suspend fun setMangasCategories(mangaIds: List<Long>, categoryIds: List<Long>)
+
+    suspend fun addMangasCategories(mangaIds: List<Long>, categoryIds: List<Long>)
+
+    suspend fun removeMangasCategories(mangaIds: List<Long>, categoryIds: List<Long>)
+
+    suspend fun update(update: MangaUpdate): Boolean
+
+    suspend fun updateAll(mangaUpdates: List<MangaUpdate>): Boolean
+
+    suspend fun insertNetworkManga(manga: List<Manga>): List<Manga>
+
+    suspend fun normalizeAllUrls(): Int
+
+    /**
+     * Data class to hold information about a duplicate URL entry.
+     */
+    data class DuplicateUrlInfo(
+        val mangaId: Long,
+        val title: String,
+        val oldUrl: String,
+        val normalizedUrl: String,
+    )
+
+    /** Normalizes URLs for favorites whose source id is in [allowedSourceIds]; others are untouched. */
+    suspend fun normalizeAllUrlsAdvanced(
+        removeDoubleSlashes: Boolean,
+        allowedSourceIds: Set<Long>,
+    ): Pair<Int, List<DuplicateUrlInfo>>
+
+    /**
+     * Remove (unfavorite) manga that would become duplicates after URL normalization.
+     * This allows the user to clean up duplicates before running normalization.
+     * @param removeDoubleSlashes whether to also consider double slashes when detecting duplicates
+     * @param allowedSourceIds only favorites whose source id is in this set are considered; others are untouched
+     * @return Pair of (count of removed duplicates, list of removed items with Triple(title, url, normalizedUrl))
+     */
+    suspend fun removePotentialDuplicates(
+        removeDoubleSlashes: Boolean,
+        allowedSourceIds: Set<Long>,
+    ): Pair<Int, List<Triple<String, String, String>>>
+
+    /**
+     * Refresh the library cache table.
+     * Call this after bulk operations to ensure cache integrity.
+     */
+    suspend fun refreshLibraryCache()
+
+    /**
+     * Incrementally refresh the library cache
+     */
+    suspend fun refreshLibraryCacheIncremental()
+
+    /**
+     * Refresh the library cache for a specific manga.
+     * Useful after individual manga operations.
+     */
+    suspend fun refreshLibraryCacheForManga(mangaId: Long)
+
+    /**
+     * Refresh the library cache for a batch of manga, scoped by id instead of the whole favorites table.
+     */
+    suspend fun refreshLibraryCacheForMangas(mangaIds: List<Long>)
+
+    /**
+     * Invalidate the in-memory library cache.
+     * Forces the next getLibraryManga() call to re-query the database.
+     * Use this before forced refreshes to ensure fresh data.
+     */
+    fun invalidateLibraryCache()
+
+    /**
+     * Normalize all tags/genres in the library.
+     * - Trims whitespace
+     * - Removes duplicates (case-insensitive)
+     * - Removes empty tags
+     * @return count of manga with normalized tags
+     */
+    suspend fun normalizeAllTags(): Int
+
+    /**
+     * Check library aggregate integrity.
+     * With aggregates stored directly on the mangas table, this always reports valid.
+     * @return Pair of (favoriteCount, cacheCount) - always matching
+     */
+    suspend fun checkLibraryCacheIntegrity(): Pair<Long, Long>
+}

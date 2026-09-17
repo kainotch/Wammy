@@ -1,0 +1,200 @@
+package eu.kanade.presentation.library.components
+
+import android.content.res.Configuration
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.dp
+import eu.kanade.core.preference.PreferenceMutableState
+import eu.kanade.tachiyomi.ui.library.LibraryItem
+import tachiyomi.domain.category.model.Category
+import tachiyomi.domain.library.model.LibraryDisplayMode
+import tachiyomi.domain.library.model.LibraryManga
+import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.screens.EmptyScreen
+import tachiyomi.presentation.core.util.plus
+
+@Composable
+fun LibraryPager(
+    state: PagerState,
+    contentPadding: PaddingValues,
+    hasActiveFilters: Boolean,
+    selection: Set<Long>,
+    searchQuery: String?,
+    onGlobalSearchClicked: () -> Unit,
+    getCategoryForPage: (Int) -> Category,
+    getDisplayMode: (Int) -> PreferenceMutableState<LibraryDisplayMode>,
+    getColumnsForOrientation: (Boolean) -> PreferenceMutableState<Int>,
+    getItemsForCategory: (Category) -> List<LibraryItem>,
+    onClickManga: (Category, LibraryManga) -> Unit,
+    onLongClickManga: (Category, LibraryManga) -> Unit,
+    onClickContinueReading: ((LibraryManga) -> Unit)?,
+    titleMaxLines: Int = 2,
+    showUrlInList: Boolean = false,
+    paginationEnabled: Boolean = false,
+    onCategoryFirstVisible: (Category) -> Unit = {},
+    onLoadMore: (Category) -> Unit = {},
+    getLoadMoreKey: (Category) -> Long = { 0 },
+    isCategoryLoading: (Category) -> Boolean = { false },
+) {
+    HorizontalPager(
+        modifier = Modifier.fillMaxSize(),
+        state = state,
+        verticalAlignment = Alignment.Top,
+    ) { page ->
+        if (page !in ((state.currentPage - 1)..(state.currentPage + 1))) {
+            // To make sure only one offscreen page is being composed
+            return@HorizontalPager
+        }
+        val category = getCategoryForPage(page)
+        val items = getItemsForCategory(category)
+
+        if (paginationEnabled) {
+            LaunchedEffect(category.id) { onCategoryFirstVisible(category) }
+        }
+
+        if (items.isEmpty()) {
+            if (paginationEnabled && isCategoryLoading(category)) {
+                Box(
+                    modifier = Modifier
+                        .padding(contentPadding)
+                        .fillMaxSize(),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    CircularProgressIndicator()
+                }
+            } else {
+                LibraryPagerEmptyScreen(
+                    searchQuery = searchQuery,
+                    hasActiveFilters = hasActiveFilters,
+                    contentPadding = contentPadding,
+                    onGlobalSearchClicked = onGlobalSearchClicked,
+                )
+            }
+            return@HorizontalPager
+        }
+
+        val onLoadMoreForCategory: (() -> Unit)? = if (paginationEnabled) {
+            { onLoadMore(category) }
+        } else {
+            null
+        }
+        // Generation key (paginated) drives sentinel re-fire; item count otherwise.
+        val loadMoreKey = if (paginationEnabled) getLoadMoreKey(category) else items.size.toLong()
+
+        val displayMode by getDisplayMode(page)
+        val columns by if (displayMode != LibraryDisplayMode.List) {
+            val configuration = LocalConfiguration.current
+            val isLandscape = configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+            remember(isLandscape) { getColumnsForOrientation(isLandscape) }
+        } else {
+            remember { mutableIntStateOf(0) }
+        }
+
+        val onClickManga: (LibraryManga) -> Unit = { onClickManga(category, it) }
+        val onLongClickManga: (LibraryManga) -> Unit = { onLongClickManga(category, it) }
+
+        when (displayMode) {
+            LibraryDisplayMode.List -> {
+                LibraryList(
+                    items = items,
+                    contentPadding = contentPadding,
+                    selection = selection,
+                    onClick = onClickManga,
+                    onLongClick = onLongClickManga,
+                    onClickContinueReading = onClickContinueReading,
+                    searchQuery = searchQuery,
+                    onGlobalSearchClicked = onGlobalSearchClicked,
+                    showUrl = showUrlInList,
+                    onLoadMore = onLoadMoreForCategory,
+                    loadMoreKey = loadMoreKey,
+                )
+            }
+            LibraryDisplayMode.CompactGrid, LibraryDisplayMode.CoverOnlyGrid -> {
+                LibraryCompactGrid(
+                    items = items,
+                    showTitle = displayMode is LibraryDisplayMode.CompactGrid,
+                    columns = columns,
+                    contentPadding = contentPadding,
+                    selection = selection,
+                    onClick = onClickManga,
+                    onLongClick = onLongClickManga,
+                    onClickContinueReading = onClickContinueReading,
+                    searchQuery = searchQuery,
+                    onGlobalSearchClicked = onGlobalSearchClicked,
+                    onLoadMore = onLoadMoreForCategory,
+                    loadMoreKey = loadMoreKey,
+                )
+            }
+            LibraryDisplayMode.ComfortableGrid -> {
+                LibraryComfortableGrid(
+                    items = items,
+                    columns = columns,
+                    contentPadding = contentPadding,
+                    selection = selection,
+                    onClick = onClickManga,
+                    onLongClick = onLongClickManga,
+                    onClickContinueReading = onClickContinueReading,
+                    searchQuery = searchQuery,
+                    onGlobalSearchClicked = onGlobalSearchClicked,
+                    titleMaxLines = titleMaxLines,
+                    onLoadMore = onLoadMoreForCategory,
+                    loadMoreKey = loadMoreKey,
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LibraryPagerEmptyScreen(
+    searchQuery: String?,
+    hasActiveFilters: Boolean,
+    contentPadding: PaddingValues,
+    onGlobalSearchClicked: () -> Unit,
+) {
+    val msg = when {
+        !searchQuery.isNullOrEmpty() -> MR.strings.no_results_found
+        hasActiveFilters -> MR.strings.error_no_match
+        else -> MR.strings.information_no_manga_category
+    }
+
+    Column(
+        modifier = Modifier
+            .padding(contentPadding + PaddingValues(8.dp))
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+    ) {
+        if (!searchQuery.isNullOrEmpty()) {
+            GlobalSearchItem(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterHorizontally),
+                searchQuery = searchQuery,
+                onClick = onGlobalSearchClicked,
+            )
+        }
+
+        EmptyScreen(
+            stringRes = msg,
+            modifier = Modifier.weight(1f),
+        )
+    }
+}

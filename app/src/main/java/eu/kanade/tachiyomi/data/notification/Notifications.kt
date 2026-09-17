@@ -1,0 +1,265 @@
+package eu.kanade.tachiyomi.data.notification
+
+import android.content.Context
+import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.NotificationManagerCompat.IMPORTANCE_DEFAULT
+import androidx.core.app.NotificationManagerCompat.IMPORTANCE_HIGH
+import androidx.core.app.NotificationManagerCompat.IMPORTANCE_LOW
+import eu.kanade.tachiyomi.util.system.buildNotificationChannel
+import eu.kanade.tachiyomi.util.system.buildNotificationChannelGroup
+import tachiyomi.core.common.i18n.stringResource
+import tachiyomi.i18n.MR
+import tachiyomi.i18n.novel.TDMR
+
+/**
+ * Class to manage the basic information of all the notifications used in the app.
+ */
+object Notifications {
+
+    /**
+     * Common notification channel and ids used anywhere.
+     */
+    const val CHANNEL_COMMON = "common_channel"
+    const val ID_DOWNLOAD_IMAGE = 2
+
+    /**
+     * Notification channel and ids used by the library updater.
+     */
+    private const val GROUP_LIBRARY = "group_library"
+    const val CHANNEL_LIBRARY_PROGRESS = "library_progress_channel"
+    const val ID_LIBRARY_PROGRESS = -101
+    const val ID_LIBRARY_SIZE_WARNING = -103
+    const val CHANNEL_LIBRARY_ERROR = "library_errors_channel"
+    const val ID_LIBRARY_ERROR = -102
+
+    /**
+     * Notification channel and ids used by the downloader.
+     */
+    private const val GROUP_DOWNLOADER = "group_downloader"
+    const val CHANNEL_DOWNLOADER_PROGRESS = "downloader_progress_channel"
+    const val ID_DOWNLOAD_CHAPTER_PROGRESS = -201
+    const val CHANNEL_DOWNLOADER_ERROR = "downloader_error_channel"
+    const val ID_DOWNLOAD_CHAPTER_ERROR = -202
+
+    /**
+     * Notification channel and ids used by the library updater.
+     */
+    const val CHANNEL_NEW_CHAPTERS = "new_chapters_channel"
+    const val ID_NEW_CHAPTERS = -301
+    const val GROUP_NEW_CHAPTERS = "eu.kanade.tachiyomi.NEW_CHAPTERS"
+
+    /**
+     * Notification channel and ids used by the backup/restore system.
+     */
+    private const val GROUP_BACKUP_RESTORE = "group_backup_restore"
+    const val CHANNEL_BACKUP_RESTORE_PROGRESS = "backup_restore_progress_channel"
+    const val ID_BACKUP_PROGRESS = -501
+    const val ID_RESTORE_PROGRESS = -503
+    const val CHANNEL_BACKUP_RESTORE_COMPLETE = "backup_restore_complete_channel_v2"
+    const val ID_BACKUP_COMPLETE = -502
+    const val ID_RESTORE_COMPLETE = -504
+
+    /**
+     * Notification channel used for Incognito Mode
+     */
+    const val CHANNEL_INCOGNITO_MODE = "incognito_mode_channel"
+    const val ID_INCOGNITO_MODE = -701
+
+    /**
+     * Notification channel and ids used for app and extension updates.
+     */
+    private const val GROUP_APK_UPDATES = "group_apk_updates"
+    const val CHANNEL_APP_UPDATE = "app_apk_update_channel"
+    const val ID_APP_UPDATER = 1
+    const val CHANNEL_EXTENSIONS_UPDATE = "ext_apk_update_channel"
+    const val ID_UPDATES_TO_EXTS = -401
+    const val ID_EXTENSION_INSTALLER = -402
+
+    /**
+     * Notification channel and ids used by the mass import.
+     */
+    const val CHANNEL_MASS_IMPORT = "mass_import_channel"
+    const val ID_MASS_IMPORT_PROGRESS = -601
+    const val ID_MASS_IMPORT_COMPLETE = -602
+
+    /**
+     * Notification channel and ids used by translation.
+     */
+    const val CHANNEL_TRANSLATION = "translation_channel"
+    const val ID_TRANSLATION_PROGRESS = -610
+    const val ID_TRANSLATION_COMPLETE = -611
+
+    /**
+     * Notification channel and ids used by reader TTS background playback.
+     */
+    const val CHANNEL_TTS_PLAYBACK = "tts_playback_channel"
+    const val ID_TTS_PLAYBACK = 612
+
+    /**
+     * Notification channel and ids used by EPUB export.
+     */
+    const val CHANNEL_EPUB_EXPORT = "epub_export_channel"
+    const val ID_EPUB_EXPORT_PROGRESS = -701
+    const val ID_EPUB_EXPORT_COMPLETE = -702
+
+    /**
+     * Notification channel and ids used by library CSV export.
+     */
+    const val CHANNEL_LIBRARY_EXPORT = "library_export_channel"
+    const val ID_LIBRARY_EXPORT_PROGRESS = -703
+    const val ID_LIBRARY_EXPORT_COMPLETE = -704
+
+    /**
+     * Notification channel and ids used by library clear operations.
+     */
+    const val CHANNEL_LIBRARY_CLEAR = "library_clear_channel"
+    const val ID_LIBRARY_CLEAR_PROGRESS = -801
+    const val ID_LIBRARY_CLEAR_COMPLETE = -802
+
+    /**
+     * Notification channel and ids used by database maintenance.
+     */
+    const val CHANNEL_DB_MAINTENANCE = "db_maintenance_channel"
+    const val ID_DB_MAINTENANCE_PROGRESS = -901
+    const val ID_DB_MAINTENANCE_COMPLETE = -902
+
+    /**
+     * Notification channel and ids used by quick migrate.
+     */
+    const val CHANNEL_MIGRATION = "migration_channel"
+    const val ID_QUICK_MIGRATE_PROGRESS = -1001
+    const val ID_QUICK_MIGRATE_COMPLETE = -1002
+
+    /**
+     * Notification ids used by bulk source migration (shares CHANNEL_MIGRATION with quick migrate).
+     */
+    const val ID_MIGRATION_PROGRESS = -1003
+    const val ID_MIGRATION_COMPLETE = -1004
+
+    private val deprecatedChannels = listOf(
+        "downloader_channel",
+        "downloader_complete_channel",
+        "backup_restore_complete_channel",
+        "library_channel",
+        "library_progress_channel",
+        "updates_ext_channel",
+        "downloader_cache_renewal",
+        "crash_logs_channel",
+        "library_skipped_channel",
+    )
+
+    /**
+     * Creates the notification channels introduced in Android Oreo.
+     * This won't do anything on Android versions that don't support notification channels.
+     *
+     * @param context The application context.
+     */
+    fun createChannels(context: Context) {
+        val notificationManager = NotificationManagerCompat.from(context)
+
+        // Delete old notification channels
+        deprecatedChannels.forEach(notificationManager::deleteNotificationChannel)
+
+        notificationManager.createNotificationChannelGroupsCompat(
+            listOf(
+                buildNotificationChannelGroup(GROUP_BACKUP_RESTORE) {
+                    setName(context.stringResource(MR.strings.label_backup))
+                },
+                buildNotificationChannelGroup(GROUP_DOWNLOADER) {
+                    setName(context.stringResource(MR.strings.download_notifier_downloader_title))
+                },
+                buildNotificationChannelGroup(GROUP_LIBRARY) {
+                    setName(context.stringResource(MR.strings.label_library))
+                },
+                buildNotificationChannelGroup(GROUP_APK_UPDATES) {
+                    setName(context.stringResource(MR.strings.label_recent_updates))
+                },
+            ),
+        )
+
+        notificationManager.createNotificationChannelsCompat(
+            listOf(
+                buildNotificationChannel(CHANNEL_COMMON, IMPORTANCE_LOW) {
+                    setName(context.stringResource(MR.strings.channel_common))
+                },
+                buildNotificationChannel(CHANNEL_LIBRARY_PROGRESS, IMPORTANCE_LOW) {
+                    setName(context.stringResource(MR.strings.channel_progress))
+                    setGroup(GROUP_LIBRARY)
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(CHANNEL_LIBRARY_ERROR, IMPORTANCE_LOW) {
+                    setName(context.stringResource(MR.strings.channel_errors))
+                    setGroup(GROUP_LIBRARY)
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(CHANNEL_NEW_CHAPTERS, IMPORTANCE_DEFAULT) {
+                    setName(context.stringResource(MR.strings.channel_new_chapters))
+                },
+                buildNotificationChannel(CHANNEL_DOWNLOADER_PROGRESS, IMPORTANCE_LOW) {
+                    setName(context.stringResource(MR.strings.channel_progress))
+                    setGroup(GROUP_DOWNLOADER)
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(CHANNEL_DOWNLOADER_ERROR, IMPORTANCE_LOW) {
+                    setName(context.stringResource(MR.strings.channel_errors))
+                    setGroup(GROUP_DOWNLOADER)
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(CHANNEL_BACKUP_RESTORE_PROGRESS, IMPORTANCE_LOW) {
+                    setName(context.stringResource(MR.strings.channel_progress))
+                    setGroup(GROUP_BACKUP_RESTORE)
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(CHANNEL_BACKUP_RESTORE_COMPLETE, IMPORTANCE_HIGH) {
+                    setName(context.stringResource(MR.strings.channel_complete))
+                    setGroup(GROUP_BACKUP_RESTORE)
+                    setShowBadge(false)
+                    setSound(null, null)
+                },
+                buildNotificationChannel(CHANNEL_INCOGNITO_MODE, IMPORTANCE_LOW) {
+                    setName(context.stringResource(MR.strings.pref_incognito_mode))
+                },
+                buildNotificationChannel(CHANNEL_APP_UPDATE, IMPORTANCE_DEFAULT) {
+                    setGroup(GROUP_APK_UPDATES)
+                    setName(context.stringResource(MR.strings.channel_app_updates))
+                },
+                buildNotificationChannel(CHANNEL_EXTENSIONS_UPDATE, IMPORTANCE_DEFAULT) {
+                    setGroup(GROUP_APK_UPDATES)
+                    setName(context.stringResource(MR.strings.channel_ext_updates))
+                },
+                buildNotificationChannel(CHANNEL_MASS_IMPORT, IMPORTANCE_LOW) {
+                    setName(context.stringResource(TDMR.strings.channel_mass_import))
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(CHANNEL_TRANSLATION, IMPORTANCE_LOW) {
+                    setName(context.stringResource(TDMR.strings.channel_translation))
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(CHANNEL_TTS_PLAYBACK, IMPORTANCE_LOW) {
+                    setName("TTS Playback")
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(CHANNEL_EPUB_EXPORT, IMPORTANCE_LOW) {
+                    setName("EPUB Export")
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(CHANNEL_LIBRARY_EXPORT, IMPORTANCE_LOW) {
+                    setName("Library Export")
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(CHANNEL_LIBRARY_CLEAR, IMPORTANCE_LOW) {
+                    setName(context.stringResource(TDMR.strings.channel_library_clear))
+                },
+                buildNotificationChannel(CHANNEL_DB_MAINTENANCE, IMPORTANCE_LOW) {
+                    setName(context.stringResource(TDMR.strings.channel_db_maintenance))
+                    setShowBadge(false)
+                },
+                buildNotificationChannel(CHANNEL_MIGRATION, IMPORTANCE_LOW) {
+                    // Shared by both bulk migrate (MigrationJob) and quick migrate (QuickMigrateJob).
+                    setName(context.stringResource(MR.strings.label_migration))
+                    setShowBadge(false)
+                },
+            ),
+        )
+    }
+}
