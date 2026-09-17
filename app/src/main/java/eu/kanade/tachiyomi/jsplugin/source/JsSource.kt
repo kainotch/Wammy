@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.jsplugin.source
+package eu.kanade.tachiyomi.jsplugin.source
 
 import android.content.Context
 import androidx.preference.PreferenceScreen
@@ -112,9 +112,9 @@ class JsSource(
         /**
          * Normalize raw chapter text extracted from a JS plugin response.
          *
-         * - Plain text: fully unescape all HTML entities so `&lt;D&gt;` â†’ `<D>`.
+         * - Plain text: fully unescape all HTML entities so `&lt;D&gt;` → `<D>`.
          *   The viewer's `escapeHtml` re-encodes them correctly for display.
-         * - HTML: fix only double-encoded entities (`&amp;lt;` â†’ `&lt;`) without
+         * - HTML: fix only double-encoded entities (`&amp;lt;` → `&lt;`) without
          *   destroying HTML structure (full unescape would turn `&lt;tag&gt;` into a
          *   real `<tag>` element).
          */
@@ -125,7 +125,7 @@ class JsSource(
                 fixDoubleEncodedEntities(raw)
             }
 
-        /** Fixes `&amp;lt;` â†’ `&lt;`, `&amp;nbsp;` â†’ `&nbsp;`, etc. for HTML content. */
+        /** Fixes `&amp;lt;` → `&lt;`, `&amp;nbsp;` → `&nbsp;`, etc. for HTML content. */
         internal fun fixDoubleEncodedEntities(html: String): String {
             if (!html.contains("&amp;")) return html
             return html.replace(DOUBLE_ENCODED_ENTITY_REGEX) { "&${it.groupValues[1]};" }
@@ -661,7 +661,7 @@ class JsSource(
                 // Only override chapter_number if the plugin didn't provide one
                 // (default SChapter chapter_number is -1)
                 if (chapter.chapter_number < 0) {
-                    // Assign sequential numbers matching position: index 0 â†’ 1, index 1 â†’ 2, etc.
+                    // Assign sequential numbers matching position: index 0 → 1, index 1 → 2, etc.
                     chapter.chapter_number = (index + 1).toFloat()
                 }
             }

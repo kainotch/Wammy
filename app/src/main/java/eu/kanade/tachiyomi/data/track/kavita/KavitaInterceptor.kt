@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.track.kavita
+package eu.kanade.tachiyomi.data.track.kavita
 
 import eu.kanade.tachiyomi.BuildConfig
 import okhttp3.Interceptor

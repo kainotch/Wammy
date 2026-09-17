@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.track.myanimelist
+package eu.kanade.tachiyomi.data.track.myanimelist
 
 import android.net.Uri
 import androidx.core.net.toUri

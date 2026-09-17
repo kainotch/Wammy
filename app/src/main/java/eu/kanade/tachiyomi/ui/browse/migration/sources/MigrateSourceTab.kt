@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.ui.browse.migration.sources
+package eu.kanade.tachiyomi.ui.browse.migration.sources
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
@@ -31,7 +31,7 @@ fun Screen.migrateSourceTab(): TabContent {
                 title = stringResource(MR.strings.migration_help_guide),
                 icon = Icons.AutoMirrored.Outlined.HelpOutline,
                 onClick = {
-                    uriHandler.openUri("https://wammy-otaku.github.io/docs/guides/source-migration")
+                    uriHandler.openUri("https://kainotch.github.io/wammy-otaku.github.io/docs/guides/source-migration")
                 },
             ),
         ),

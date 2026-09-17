@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.ui.reader
+package eu.kanade.tachiyomi.ui.reader
 
 import android.annotation.SuppressLint
 import android.app.assist.AssistContent
@@ -231,7 +231,7 @@ class ReaderActivity : BaseActivity() {
      * novel rendering mode between TextView and WebView mid-session) check
      * this flag and skip the on-start auto-display.
      *
-     * Per-activity-instance â€” automatically reset on `onCreate`.
+     * Per-activity-instance — automatically reset on `onCreate`.
      */
     var tapZonesShownInSession = false
 
@@ -1473,7 +1473,7 @@ class ReaderActivity : BaseActivity() {
                 val (paragraphIndex, paragraphCount) = viewer.getTtsParagraphProgress()
                 NovelTtsState(
                     // Use isTtsActive() (covers the autoPlay flag) so the brief
-                    // gap inside stepParagraph (stop â†’ speakChunksFrom) doesn't
+                    // gap inside stepParagraph (stop → speakChunksFrom) doesn't
                     // make the periodic sync drop the foreground service.
                     active = viewer.isTtsActive(),
                     paused = viewer.isTtsPaused(),

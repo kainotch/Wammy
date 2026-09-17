@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.storage
+package eu.kanade.tachiyomi.data.storage
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

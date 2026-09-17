@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.ui.reader.viewer.text.shared
+package eu.kanade.tachiyomi.ui.reader.viewer.text.shared
 
 import android.app.Activity
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences

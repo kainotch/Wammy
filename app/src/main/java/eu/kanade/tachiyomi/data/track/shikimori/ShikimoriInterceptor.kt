@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.track.shikimori
+package eu.kanade.tachiyomi.data.track.shikimori
 
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.track.shikimori.dto.SMOAuth

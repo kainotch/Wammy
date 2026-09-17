@@ -1,4 +1,4 @@
-﻿@file:Suppress("ktlint:standard:max-line-length")
+@file:Suppress("ktlint:standard:max-line-length")
 
 package eu.kanade.tachiyomi.ui.reader.viewer.text.shared
 
@@ -171,7 +171,7 @@ object HtmlUtils {
     }
 
     /**
-     * The first `<h1>â€“<h6>` tag is removed unconditionally (the `true` flag in
+     * The first `<h1>–<h6>` tag is removed unconditionally (the `true` flag in
      * [titlePatterns]). Sources routinely embed a redundant heading identical to
      * the chapter name already shown in the reader UI; matching by text would
      * silently keep headings with different casing or punctuation.

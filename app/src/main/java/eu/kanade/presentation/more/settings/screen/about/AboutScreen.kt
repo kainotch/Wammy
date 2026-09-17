@@ -163,7 +163,7 @@ object AboutScreen : Screen() {
                 item {
                     TextPreferenceWidget(
                         title = stringResource(MR.strings.privacy_policy),
-                        onPreferenceClick = { uriHandler.openUri("https://wammy-otaku.github.io/privacy/") },
+                        onPreferenceClick = { uriHandler.openUri("https://kainotch.github.io/wammy-otaku.github.io/privacy/") },
                     )
                 }
 

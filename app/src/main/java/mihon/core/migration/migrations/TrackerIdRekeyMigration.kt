@@ -1,4 +1,4 @@
-﻿package mihon.core.migration.migrations
+package mihon.core.migration.migrations
 
 import mihon.core.migration.Migration
 import mihon.core.migration.MigrationContext

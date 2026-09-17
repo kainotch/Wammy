@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.track.mangaupdates
+package eu.kanade.tachiyomi.data.track.mangaupdates
 
 import eu.kanade.tachiyomi.BuildConfig
 import okhttp3.Interceptor

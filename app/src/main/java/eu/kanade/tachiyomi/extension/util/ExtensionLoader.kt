@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.extension.util
+package eu.kanade.tachiyomi.extension.util
 
 import android.content.Context
 import android.content.pm.ApplicationInfo

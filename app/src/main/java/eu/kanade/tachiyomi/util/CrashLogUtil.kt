@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.util
+package eu.kanade.tachiyomi.util
 
 import android.content.Context
 import android.os.Build

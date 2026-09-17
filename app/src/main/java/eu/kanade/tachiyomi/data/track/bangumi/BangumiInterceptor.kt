@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.track.bangumi
+package eu.kanade.tachiyomi.data.track.bangumi
 
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.track.bangumi.dto.BGMOAuth

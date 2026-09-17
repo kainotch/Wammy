@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.track.ranobedb
+package eu.kanade.tachiyomi.data.track.ranobedb
 
 import dev.icerock.moko.resources.StringResource
 import eu.kanade.tachiyomi.R

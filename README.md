@@ -99,7 +99,7 @@ This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE
 
 ## 🔗 Links
 
-- 🌐 [Website & Docs](https://wammy-otaku.github.io)
+- 🌐 [Website & Docs](https://kainotch.github.io/wammy-otaku.github.io)
 - 💬 [Discord](https://discord.gg/yWgrg3Ep8G)
 - 🐛 [Report a Bug](https://github.com/wammy-otaku/wammy/issues)
-- 🔒 [Privacy Policy](https://wammy-otaku.github.io/privacy/)
+- 🔒 [Privacy Policy](https://kainotch.github.io/wammy-otaku.github.io/privacy/)

@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.translation
+package eu.kanade.tachiyomi.data.translation
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element
@@ -14,7 +14,7 @@ object TranslationHtmlUtils {
 
     private const val SOURCE_HASH_COMMENT_PREFIX = "<!-- wammy-source-hash:"
 
-    // â”€â”€ Image / media preservation â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Image / media preservation ──────────────────────────────────
 
     /** CSS selector for elements that must survive the translate round-trip. */
     private const val MEDIA_SELECTOR = "img, figure, picture, video, source, svg"
@@ -23,7 +23,7 @@ object TranslationHtmlUtils {
      * Replace media elements with unique placeholders so they are not mangled
      * by the translation engine.
      *
-     * @return the modified HTML **and** a map of placeholder â†’ original outer-HTML.
+     * @return the modified HTML **and** a map of placeholder → original outer-HTML.
      */
     fun extractImages(html: String): Pair<String, Map<String, String>> {
         val doc = Jsoup.parse(html)
@@ -61,7 +61,7 @@ object TranslationHtmlUtils {
             .replace('\u2029', '\n')
     }
 
-    // â”€â”€ Text â†” HTML conversion â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Text ↔ HTML conversion ──────────────────────────────────────
 
     /**
      * Convert HTML to plain text, preserving paragraph boundaries as `\n\n`.
@@ -126,7 +126,7 @@ object TranslationHtmlUtils {
         }
     }
 
-    // â”€â”€ Chunking â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Chunking ────────────────────────────────────────────────────
 
     /**
      * Split a list of paragraphs into translation-friendly chunks.
@@ -140,7 +140,7 @@ object TranslationHtmlUtils {
         }
     }
 
-    // â”€â”€ LLM helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── LLM helpers ─────────────────────────────────────────────────
 
     /**
      * Strip contextual-anchoring markers that the LLM might echo back.
@@ -157,12 +157,12 @@ object TranslationHtmlUtils {
         return translated.substring(afterMarker + 1).trim()
     }
 
-    // â”€â”€ Language code normalisation (fixes 6.4) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── Language code normalisation (fixes 6.4) ─────────────────────
 
     /**
      * Normalise a language code to its base 2-letter form for comparison.
      *
-     * Examples: `"EN-US"` â†’ `"en"`, `"zh-TW"` â†’ `"zh"`, `"ja"` â†’ `"ja"`.
+     * Examples: `"EN-US"` → `"en"`, `"zh-TW"` → `"zh"`, `"ja"` → `"ja"`.
      */
     fun normalizeLanguageCode(code: String): String {
         return code.lowercase().substringBefore('-').substringBefore('_')
@@ -175,7 +175,7 @@ object TranslationHtmlUtils {
         return normalizeLanguageCode(a) == normalizeLanguageCode(b)
     }
 
-    // â”€â”€ HTML escaping (fixes 6.5) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ── HTML escaping (fixes 6.5) ───────────────────────────────────
 
     /**
      * Minimal HTML entity escaping for text that will be embedded inside tags.

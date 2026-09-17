@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.ui.reader.viewer.text.textview
+package eu.kanade.tachiyomi.ui.reader.viewer.text.textview
 
 import android.graphics.BitmapFactory
 import android.graphics.Canvas

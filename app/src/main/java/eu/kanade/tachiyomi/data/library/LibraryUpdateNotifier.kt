@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.library
+package eu.kanade.tachiyomi.data.library
 
 import android.app.Notification
 import android.app.PendingIntent
@@ -383,7 +383,7 @@ class LibraryUpdateNotifier(
 
     companion object {
         const val HELP_WARNING_URL =
-            "https://wammy-otaku.github.io/docs/faq/library#why-am-i-warned-about-large-bulk-updates-and-downloads"
+            "https://kainotch.github.io/wammy-otaku.github.io/docs/faq/library#why-am-i-warned-about-large-bulk-updates-and-downloads"
     }
 }
 

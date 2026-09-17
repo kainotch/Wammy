@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.util.chapter
+package eu.kanade.tachiyomi.util.chapter
 
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory

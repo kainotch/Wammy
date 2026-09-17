@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.backup.restore
+package eu.kanade.tachiyomi.data.backup.restore
 
 import android.content.Context
 import android.net.Uri
@@ -131,7 +131,7 @@ class BackupRestorer(
 
         coroutineScope {
             // Categories MUST be restored before preferences because preference restoration
-            // maps backup category IDs â†’ current DB category IDs by name.  Running both
+            // maps backup category IDs → current DB category IDs by name.  Running both
             // concurrently causes restoreAppPreferences to see an empty categories table.
             val categoriesJob = if (options.categories) {
                 restoreCategories(summary.backupCategories)

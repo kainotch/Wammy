@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.track.komga
+package eu.kanade.tachiyomi.data.track.komga
 
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.database.models.Track

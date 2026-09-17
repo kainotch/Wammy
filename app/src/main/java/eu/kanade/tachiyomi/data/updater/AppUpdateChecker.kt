@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.updater
+package eu.kanade.tachiyomi.data.updater
 
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.util.system.isFossBuildType

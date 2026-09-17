@@ -1,4 +1,4 @@
-﻿@file:Suppress("ktlint:standard:max-line-length")
+@file:Suppress("ktlint:standard:max-line-length")
 
 package eu.kanade.tachiyomi.ui.reader.viewer.text.webview
 
@@ -247,7 +247,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
 
     // Initialized in [initWebView] after the WebView lateinit is assigned.
     // Was previously `by lazy { ... }` but the lazy initializer ran from
-    // inside the WebView's `.apply { }` block (before `webView = â€¦` had
+    // inside the WebView's `.apply { }` block (before `webView = …` had
     // completed assignment), causing "lateinit property webView has not been
     // initialized" when toggling rendering mode mid-session.
     private lateinit var styler: NovelWebViewStyler
@@ -489,7 +489,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
             // always fall through to the full chapter-switch handoff below, same as infinite
             // scroll being off.
             if (preferences.novelInfiniteScroll.get() && !isPagedModeActive()) {
-                // TTS owns the chapter transition here; suppress the visible "Loadingâ€¦"
+                // TTS owns the chapter transition here; suppress the visible "Loading…"
                 // banner so it doesn't flash while the cache hits (or the fresh fetch
                 // runs in the background). Errors still surface via showInlineError.
                 // 30 s hard cap: if the fetch stalls (e.g. no-timeout HTTP client),
@@ -518,7 +518,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                 // Use a viewer-owned flag so ttsController.stop() (called from setChapters)
                 // cannot clear it before onPageFinished fires.
                 pendingTtsAutoStartOnLoad = true
-                // Must NOT use activity.loadNextChapter(): stopNovelTtsForManualNav() â†’
+                // Must NOT use activity.loadNextChapter(): stopNovelTtsForManualNav() →
                 // stopTts() clears pendingTtsAutoStartOnLoad, so playback never resumes.
                 activity.loadNextChapterForTtsHandoff()
             }
@@ -831,7 +831,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
         }
 
         // Construct the styler now that `webView` has been assigned. Doing this
-        // here (instead of as a `by lazy { â€¦ }` initializer that referenced
+        // here (instead of as a `by lazy { … }` initializer that referenced
         // `webView`) avoids the "lateinit property webView has not been
         // initialized" crash that fired when the lazy initializer ran from
         // inside the WebView's `.apply { }` block during construction.
@@ -2280,7 +2280,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
                 activity.onNovelProgressChanged(1f)
                 logcat(LogPriority.DEBUG) { "NovelWebViewViewer: Chapter marked as short (fits in viewport)" }
 
-                // Chapter fits in viewport â†’ no scroll events fire â†’ threshold never reached.
+                // Chapter fits in viewport → no scroll events fire → threshold never reached.
                 // Trigger infinite scroll append manually. Paged mode's own "fits on one page"
                 // check reuses this same short-chapter path but must never append (see
                 // loadNextChapter()'s JS-interface guard) - a paged chapter switch happens on the
@@ -2553,7 +2553,7 @@ class NovelWebViewViewer(val activity: ReaderActivity) : Viewer {
 
     /**
      * Append the next chapter to the WebView, using the pre-fetched cache if
-     * available. [silent] suppresses the inline "Loadingâ€¦" banner - set it
+     * available. [silent] suppresses the inline "Loading…" banner - set it
      * when this is invoked from the TTS auto-advance path so the user doesn't
      * see the banner flash during TTS chapter handoff (errors still surface
      * via `showInlineError`). The JS-driven scroll trigger path uses the

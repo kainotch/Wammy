@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.track.mangabaka
+package eu.kanade.tachiyomi.data.track.mangabaka
 
 import android.net.Uri
 import androidx.core.net.toUri

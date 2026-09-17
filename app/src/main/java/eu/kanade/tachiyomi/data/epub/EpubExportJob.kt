@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.epub
+package eu.kanade.tachiyomi.data.epub
 
 import android.content.Context
 import android.graphics.Bitmap

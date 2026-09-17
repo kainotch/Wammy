@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.track
+package eu.kanade.tachiyomi.data.track
 
 import eu.kanade.tachiyomi.data.track.anilist.Anilist
 import eu.kanade.tachiyomi.data.track.bangumi.Bangumi

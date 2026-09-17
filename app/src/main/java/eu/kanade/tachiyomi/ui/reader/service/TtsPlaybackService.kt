@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.ui.reader.service
+package eu.kanade.tachiyomi.ui.reader.service
 
 import android.app.ForegroundServiceStartNotAllowedException
 import android.app.PendingIntent
@@ -175,7 +175,7 @@ class TtsPlaybackService : Service() {
         val statusText = if (isPaused) "Paused" else "Reading in background"
 
         val contentText = if (chapterTitle.isNotBlank()) {
-            "$chapterTitle Â· $statusText"
+            "$chapterTitle · $statusText"
         } else {
             statusText
         }

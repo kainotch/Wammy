@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.jsplugin.model
+package eu.kanade.tachiyomi.jsplugin.model
 
 import kotlinx.serialization.Serializable
 
@@ -48,20 +48,20 @@ data class JsPlugin(
      */
     fun langCode(): String = when {
         lang.contains("English", ignoreCase = true) -> "en"
-        lang.contains("ä¸­æ–‡") || lang.contains("Chinese", ignoreCase = true) -> "zh"
-        lang.contains("æ—¥æœ¬") || lang.contains("Japanese", ignoreCase = true) -> "ja"
-        lang.contains("í•œêµ­") || lang.contains("Korean", ignoreCase = true) -> "ko"
-        lang.contains("FranÃ§ais", ignoreCase = true) -> "fr"
-        lang.contains("EspaÃ±ol", ignoreCase = true) -> "es"
-        lang.contains("PortuguÃªs", ignoreCase = true) -> "pt"
-        lang.contains("Ð ÑƒÑÑÐºÐ¸Ð¹", ignoreCase = true) -> "ru"
+        lang.contains("中文") || lang.contains("Chinese", ignoreCase = true) -> "zh"
+        lang.contains("日本") || lang.contains("Japanese", ignoreCase = true) -> "ja"
+        lang.contains("한국") || lang.contains("Korean", ignoreCase = true) -> "ko"
+        lang.contains("Français", ignoreCase = true) -> "fr"
+        lang.contains("Español", ignoreCase = true) -> "es"
+        lang.contains("Português", ignoreCase = true) -> "pt"
+        lang.contains("Русский", ignoreCase = true) -> "ru"
         lang.contains("Indonesia", ignoreCase = true) -> "id"
-        lang.contains("TÃ¼rkÃ§e", ignoreCase = true) -> "tr"
-        lang.contains("Ø§Ù„Ø¹Ø±Ø¨ÙŠØ©") -> "ar"
-        lang.contains("à¹„à¸—à¸¢") -> "th"
-        lang.contains("Viá»‡t", ignoreCase = true) -> "vi"
+        lang.contains("Türkçe", ignoreCase = true) -> "tr"
+        lang.contains("العربية") -> "ar"
+        lang.contains("ไทย") -> "th"
+        lang.contains("Việt", ignoreCase = true) -> "vi"
         lang.contains("Polski", ignoreCase = true) -> "pl"
-        lang.contains("Ð£ÐºÑ€Ð°Ñ—Ð½ÑÑŒÐºÐ°", ignoreCase = true) -> "uk"
+        lang.contains("Українська", ignoreCase = true) -> "uk"
         lang.contains("Multi", ignoreCase = true) -> "all"
         else -> "other"
     }

@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.track.anilist
+package eu.kanade.tachiyomi.data.track.anilist
 
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.track.anilist.dto.ALOAuth

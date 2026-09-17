@@ -1,4 +1,4 @@
-﻿@file:Suppress("ktlint:standard:max-line-length")
+@file:Suppress("ktlint:standard:max-line-length")
 
 package eu.kanade.tachiyomi.ui.reader.viewer.text.webview
 

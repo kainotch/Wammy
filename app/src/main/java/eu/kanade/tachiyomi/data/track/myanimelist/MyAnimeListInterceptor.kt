@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.data.track.myanimelist
+package eu.kanade.tachiyomi.data.track.myanimelist
 
 import eu.kanade.tachiyomi.data.track.myanimelist.dto.MALOAuth
 import eu.kanade.tachiyomi.network.parseAs

@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.ui.main
+package eu.kanade.tachiyomi.ui.main
 
 import android.animation.ValueAnimator
 import android.app.SearchManager
@@ -620,7 +620,7 @@ class MainActivity : BaseActivity() {
      *
      * Handles three shapes:
      *  - `ACTION_VIEW` with a single URI in [Intent.getData]. Triggered by the
-     *    file-manager "open withâ€¦" flow.
+     *    file-manager "open with…" flow.
      *  - `ACTION_SEND` with one URI under [Intent.EXTRA_STREAM]. Triggered by
      *    apps that share a single EPUB via the Android share sheet.
      *  - `ACTION_SEND_MULTIPLE` with a list of URIs under
@@ -638,7 +638,7 @@ class MainActivity : BaseActivity() {
             val path = (uri.lastPathSegment ?: uri.path ?: uri.toString()).lowercase()
             if (path.endsWith(".epub")) return true
             // Fallback for content URIs where the path has no extension (e.g. Downloads provider
-            // uses numeric IDs like content://â€¦/document/12345). Query the display name instead.
+            // uses numeric IDs like content://…/document/12345). Query the display name instead.
             if (uri.scheme == "content") {
                 val displayName = runCatching {
                     contentResolver.query(

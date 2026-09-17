@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.ui.reader.viewer.text.webview
+package eu.kanade.tachiyomi.ui.reader.viewer.text.webview
 
 import android.view.View
 import android.webkit.WebView

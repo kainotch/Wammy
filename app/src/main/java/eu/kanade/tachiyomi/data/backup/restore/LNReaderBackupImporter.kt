@@ -1,4 +1,4 @@
-﻿@file:Suppress("ktlint:standard:max-line-length")
+@file:Suppress("ktlint:standard:max-line-length")
 
 package eu.kanade.tachiyomi.data.backup.restore
 
@@ -59,12 +59,12 @@ import java.util.zip.ZipInputStream
  * LNReader backup format:
  * ```
  * backup.zip
- * â”œâ”€â”€ Version.json
- * â”œâ”€â”€ Category.json
- * â”œâ”€â”€ NovelAndChapters/
- * â”‚   â”œâ”€â”€ {novelId}.json  (each contains novel info + chapters array)
- * â”‚   â””â”€â”€ ...
- * â””â”€â”€ Setting.json
+ * ├── Version.json
+ * ├── Category.json
+ * ├── NovelAndChapters/
+ * │   ├── {novelId}.json  (each contains novel info + chapters array)
+ * │   └── ...
+ * └── Setting.json
  * ```
  */
 
@@ -326,7 +326,7 @@ class LNReaderBackupImporter(
                                     mangaCache[novel.path to sourceId]
                                         ?: getMangaByUrlAndSourceId.await(novel.path, sourceId)
                                 if (existingManga != null && novel.isLocal == 0) {
-                                    // Existing JS novel â€” skip metadata overwrite, only update chapters/history
+                                    // Existing JS novel — skip metadata overwrite, only update chapters/history
                                     logcat(LogPriority.INFO) {
                                         "LNReaderImport: Novel '${novel.name}' already exists (id=${existingManga.id}), updating chapters only"
                                     }
