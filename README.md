@@ -9,16 +9,15 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/wammy-otaku/wammy/releases"><img src="https://img.shields.io/github/v/release/wammy-otaku/wammy?style=for-the-badge&logo=github&color=blue" alt="Latest Release"/></a>
-  <a href="https://discord.gg/yWgrg3Ep8G"><img src="https://img.shields.io/badge/Discord-Join-7289DA?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"/></a>
-  <a href="https://github.com/wammy-otaku/wammy/blob/main/LICENSE"><img src="https://img.shields.io/github/license/wammy-otaku/wammy?style=for-the-badge" alt="License"/></a>
+  <a href="https://github.com/kainotch/Wammy/releases"><img src="https://img.shields.io/github/v/release/kainotch/Wammy?style=for-the-badge&logo=github&color=blue" alt="Latest Release"/></a>
+  <a href="https://github.com/kainotch/Wammy/blob/main/LICENSE"><img src="https://img.shields.io/github/license/kainotch/Wammy?style=for-the-badge" alt="License"/></a>
 </p>
 
 ---
 
 ## 📖 About
 
-**Wammy** is a powerful, feature-rich manga and novel reader app for Android. Built as a fork of [Tsundoku](https://github.com/tsundoku-otaku/tsundoku) (originally based on [Mihon](https://github.com/mihonapp/mihon)), Wammy brings together the best of both worlds — manga and light novels — in a single, beautifully designed application.
+**Wammy** is a powerful, feature-rich manga and novel reader app for Android. Wammy brings together the best of both worlds — manga and light novels — in a single, beautifully designed application.
 
 Whether you're catching up on the latest manga chapters or diving into a new light novel, Wammy has you covered with a seamless reading experience.
 
@@ -61,7 +60,7 @@ Whether you're catching up on the latest manga chapters or diving into a new lig
 
 ## 📥 Installation
 
-1. Download the latest APK from the [Releases](https://github.com/wammy-otaku/wammy/releases) page
+1. Download the latest APK from the [Releases](https://github.com/kainotch/Wammy/releases) page
 2. Enable "Install from Unknown Sources" in your Android settings
 3. Open the downloaded APK and install
 4. Launch **Wammy** and start reading!
@@ -77,8 +76,8 @@ Whether you're catching up on the latest manga chapters or diving into a new lig
 
 ```bash
 # Clone the repository
-git clone https://github.com/wammy-otaku/wammy.git
-cd wammy
+git clone https://github.com/kainotch/Wammy.git
+cd Wammy
 
 # Build the debug APK
 ./gradlew app:assembleDebug
@@ -91,7 +90,6 @@ cd wammy
 
 - **Developer** — [@kainotch](https://github.com/kainotch)
 - **Partner** — [@xo._kiwikaffine](https://instagram.com/xo._kiwikaffine)
-- Built on top of [Tsundoku](https://github.com/tsundoku-otaku/tsundoku) and [Mihon](https://github.com/mihonapp/mihon)
 
 ## 📄 License
 
@@ -100,6 +98,5 @@ This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE
 ## 🔗 Links
 
 - 🌐 [Website & Docs](https://kainotch.github.io/wammy-otaku.github.io)
-- 💬 [Discord](https://discord.gg/yWgrg3Ep8G)
-- 🐛 [Report a Bug](https://github.com/wammy-otaku/wammy/issues)
+- 🐛 [Report a Bug](https://github.com/kainotch/Wammy/issues)
 - 🔒 [Privacy Policy](https://kainotch.github.io/wammy-otaku.github.io/privacy/)

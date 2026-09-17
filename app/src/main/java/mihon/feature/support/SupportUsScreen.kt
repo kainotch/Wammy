@@ -103,17 +103,7 @@ class SupportUsScreen : Screen() {
                     modifier = Modifier.padding(horizontal = MaterialTheme.padding.medium),
                 )
 
-                Text(
-                    text = stringResource(MR.strings.supportUsScreen_contactForDetailsMessage),
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(horizontal = MaterialTheme.padding.medium),
-                )
 
-                SupportItem(
-                    icon = CustomIcons.Discord,
-                    title = stringResource(MR.strings.supportUsScreen_contactPlatform),
-                    onClick = { uriHandler.openUri(Constants.URL_DISCORD) },
-                )
 
                 Spacer(modifier = Modifier.height(paddingValues.calculateBottomPadding()))
             }
