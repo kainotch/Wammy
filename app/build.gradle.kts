@@ -299,7 +299,7 @@ dependencies {
     implementation(libs.diskLruCache)
     implementation(libs.unifile)
 
-    // Preferences
+    // Preferences.
     implementation(libs.androidx.preference)
 
     // Dependency injection
