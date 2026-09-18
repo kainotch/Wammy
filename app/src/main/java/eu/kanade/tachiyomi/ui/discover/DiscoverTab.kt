@@ -200,38 +200,27 @@ object DiscoverTab : Tab {
                             Spacer(modifier = Modifier.height(24.dp))
                         }
 
-                        items(state.sources, key = { "popular_${it.id}" }) { source ->
-                            val cached = viewModel.popularCache[source.id]
-
-                            if (cached == null) {
-                                Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                    SectionHeader(title = source.name, onSeeAll = {})
-                                    SkeletonCarousel()
-                                }
-                                LaunchedEffect(source.id) {
-                                    val result = viewModel.loadSourcePopular(source)
-                                    viewModel.popularCache[source.id] = result
-                                }
-                            } else if (cached.isNotEmpty()) {
+                        val recentlyRead by viewModel.recentlyRead.collectAsState()
+                        if (recentlyRead.isNotEmpty()) {
+                            item {
                                 Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                                    SectionHeader(title = source.name, onSeeAll = {})
+                                    SectionHeader(title = "Recently Read", onSeeAll = {})
                                     LazyRow(
                                         contentPadding = PaddingValues(horizontal = 16.dp),
                                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
-                                        items(cached) { manga ->
+                                        items(recentlyRead) { history ->
                                             Box(modifier = Modifier.width(110.dp)) {
                                                 MangaCompactGridItem(
                                                     isSelected = false,
-                                                    title = manga.title,
-                                                    coverData = manga.asMangaCover(),
+                                                    title = history.title,
+                                                    coverData = history.coverData,
                                                     coverBadgeStart = {},
                                                     coverBadgeEnd = {},
                                                     onLongClick = {},
                                                     onClick = {
                                                         scope.launch {
-                                                            val localManga = viewModel.getNetworkToLocalManga(manga)
-                                                            navigator.push(MangaScreen(localManga.id))
+                                                            navigator.push(MangaScreen(history.mangaId))
                                                         }
                                                     },
                                                     onClickContinueReading = null
@@ -244,10 +233,53 @@ object DiscoverTab : Tab {
                         }
 
                         if (state.sources.isNotEmpty()) {
+                            val firstSource = state.sources.first()
+                            
+                            item {
+                                val cached = viewModel.popularCache[firstSource.id]
+                                if (cached == null) {
+                                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                                        SectionHeader(title = firstSource.name, onSeeAll = {})
+                                        SkeletonCarousel()
+                                    }
+                                    LaunchedEffect(firstSource.id) {
+                                        val result = viewModel.loadSourcePopular(firstSource)
+                                        viewModel.popularCache[firstSource.id] = result
+                                    }
+                                } else if (cached.isNotEmpty()) {
+                                    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
+                                        SectionHeader(title = firstSource.name, onSeeAll = {})
+                                        LazyRow(
+                                            contentPadding = PaddingValues(horizontal = 16.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            items(cached) { manga ->
+                                                Box(modifier = Modifier.width(110.dp)) {
+                                                    MangaCompactGridItem(
+                                                        isSelected = false,
+                                                        title = manga.title,
+                                                        coverData = manga.asMangaCover(),
+                                                        coverBadgeStart = {},
+                                                        coverBadgeEnd = {},
+                                                        onLongClick = {},
+                                                        onClick = {
+                                                            scope.launch {
+                                                                val localManga = viewModel.getNetworkToLocalManga(manga)
+                                                                navigator.push(MangaScreen(localManga.id))
+                                                            }
+                                                        },
+                                                        onClickContinueReading = null
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+
                             item {
                                 SectionHeader(title = "Recently Updated", onSeeAll = {})
                                 
-                                val firstSource = state.sources.first()
                                 val latest = viewModel.latestCache[firstSource.id]
 
                                 if (latest == null) {
@@ -278,6 +310,48 @@ object DiscoverTab : Tab {
                                                 }
                                             )
                                             Spacer(modifier = Modifier.height(12.dp))
+                                        }
+                                    }
+                                }
+                            }
+
+                            items(state.sources.drop(1), key = { "popular_${it.id}" }) { source ->
+                                val cached = viewModel.popularCache[source.id]
+                                if (cached == null) {
+                                    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+                                        SectionHeader(title = source.name, onSeeAll = {})
+                                        SkeletonCarousel()
+                                    }
+                                    LaunchedEffect(source.id) {
+                                        val result = viewModel.loadSourcePopular(source)
+                                        viewModel.popularCache[source.id] = result
+                                    }
+                                } else if (cached.isNotEmpty()) {
+                                    Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
+                                        SectionHeader(title = source.name, onSeeAll = {})
+                                        LazyRow(
+                                            contentPadding = PaddingValues(horizontal = 16.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                        ) {
+                                            items(cached) { manga ->
+                                                Box(modifier = Modifier.width(110.dp)) {
+                                                    MangaCompactGridItem(
+                                                        isSelected = false,
+                                                        title = manga.title,
+                                                        coverData = manga.asMangaCover(),
+                                                        coverBadgeStart = {},
+                                                        coverBadgeEnd = {},
+                                                        onLongClick = {},
+                                                        onClick = {
+                                                            scope.launch {
+                                                                val localManga = viewModel.getNetworkToLocalManga(manga)
+                                                                navigator.push(MangaScreen(localManga.id))
+                                                            }
+                                                        },
+                                                        onClickContinueReading = null
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }

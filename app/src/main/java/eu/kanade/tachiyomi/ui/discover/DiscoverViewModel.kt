@@ -36,13 +36,27 @@ class DiscoverViewModel(
     private val jsPluginManager: JsPluginManager = Injekt.get(),
     private val preferences: BasePreferences = Injekt.get(),
     private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
-    private val updateManga: eu.kanade.domain.manga.interactor.UpdateManga = Injekt.get()
+    private val updateManga: eu.kanade.domain.manga.interactor.UpdateManga = Injekt.get(),
+    private val getHistory: tachiyomi.domain.history.interactor.GetHistory = Injekt.get()
 ) : StateViewModel<DiscoverState>(DiscoverState()) {
 
     val popularCache = mutableStateMapOf<Long, List<Manga>>()
     val latestCache = mutableStateMapOf<Long, List<Manga>>()
+    
+    val recentlyRead = MutableStateFlow<List<tachiyomi.domain.history.model.HistoryWithRelations>>(emptyList())
 
     init {
+        viewModelScope.launch {
+            combine(
+                getHistory.subscribe(""),
+                preferences.homeTabIsNovel.changes()
+            ) { historyList, isNovel ->
+                historyList.filter { it.isNovel == isNovel }.take(10)
+            }.collectLatest { filtered ->
+                recentlyRead.value = filtered
+            }
+        }
+
         viewModelScope.launch {
             combine(
                 sourceManager.sources,
