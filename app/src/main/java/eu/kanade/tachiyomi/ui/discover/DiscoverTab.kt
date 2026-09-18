@@ -25,6 +25,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+import eu.kanade.tachiyomi.data.auth.AuthManager
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.AccountCircle
@@ -97,6 +101,9 @@ object DiscoverTab : Tab {
         val state by viewModel.state.collectAsState()
         val scope = rememberCoroutineScope()
         val tabNavigator = LocalTabNavigator.current
+        
+        val authManager: AuthManager = Injekt.get()
+        val user by authManager.currentUser.collectAsState()
 
         Scaffold(
             topBar = {
@@ -119,13 +126,22 @@ object DiscoverTab : Tab {
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
                         )
-                        IconButton(onClick = { /* TODO: Profile */ }) {
-                            Icon(
-                                imageVector = Icons.Outlined.AccountCircle,
-                                contentDescription = "Profile",
-                                modifier = Modifier.size(28.dp),
-                                tint = MaterialTheme.colorScheme.onBackground
-                            )
+                        IconButton(onClick = { navigator.push(eu.kanade.tachiyomi.ui.profile.ProfileScreen()) }) {
+                            if (user?.photoUrl != null) {
+                                coil3.compose.AsyncImage(
+                                    model = user?.photoUrl,
+                                    contentDescription = "Profile",
+                                    modifier = Modifier.size(28.dp).clip(CircleShape),
+                                    contentScale = ContentScale.Crop
+                                )
+                            } else {
+                                Icon(
+                                    imageVector = Icons.Outlined.AccountCircle,
+                                    contentDescription = "Profile",
+                                    modifier = Modifier.size(28.dp),
+                                    tint = MaterialTheme.colorScheme.onBackground
+                                )
+                            }
                         }
                     }
 
