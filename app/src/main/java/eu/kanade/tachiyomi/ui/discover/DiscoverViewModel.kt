@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,7 +41,8 @@ class DiscoverViewModel(
     private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
     private val updateManga: eu.kanade.domain.manga.interactor.UpdateManga = Injekt.get(),
     private val getHistory: tachiyomi.domain.history.interactor.GetHistory = Injekt.get(),
-    private val context: android.app.Application = Injekt.get()
+    private val context: android.app.Application = Injekt.get(),
+    private val sourcePreferences: eu.kanade.domain.source.service.SourcePreferences = Injekt.get()
 ) : StateViewModel<DiscoverState>(DiscoverState()) {
 
     val popularCache = mutableStateMapOf<Long, List<Manga>>()
@@ -65,19 +67,31 @@ class DiscoverViewModel(
         }
 
         viewModelScope.launch {
-            combine(
+            kotlinx.coroutines.flow.combine(
                 sourceManager.sources,
                 jsPluginManager.jsSources,
-                preferences.homeTabIsNovel.changes()
-            ) { apkSources, jsSources, isNovel ->
+                preferences.homeTabIsNovel.changes(),
+                jsPluginManager.isInitialized,
+                sourcePreferences.pinnedSources.changes()
+            ) { apkSources: List<eu.kanade.tachiyomi.source.Source>, jsSources: List<CatalogueSource>, isNovel: Boolean, jsInitialized: Boolean, pinnedSourceIds: Set<String> ->
+                if (!jsInitialized) {
+                    return@combine null
+                }
+                
                 val allSources = (apkSources + jsSources).filterIsInstance<CatalogueSource>().distinctBy { it.id }
                 val filtered = allSources.filter { 
                     it.isNovelSource() == isNovel && 
                     it.id != tachiyomi.source.local.LocalSource.ID && 
                     it.id != tachiyomi.source.local.LocalNovelSource.ID 
                 }
-                filtered to isNovel
-            }.collectLatest { (sources, isNovel) ->
+                
+                val sorted = filtered.sortedWith(compareBy(
+                    { it.id.toString() !in pinnedSourceIds }, // Pinned sources first (false comes before true)
+                    { it.name.lowercase() } // Then alphabetical
+                ))
+                
+                Pair(sorted, isNovel)
+            }.filterNotNull().collectLatest { (sources, isNovel) ->
                 mutableState.update { 
                     it.copy(isLoading = false, sources = sources, isNovel = isNovel)
                 }

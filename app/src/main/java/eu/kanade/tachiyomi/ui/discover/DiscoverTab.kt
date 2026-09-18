@@ -201,10 +201,21 @@ object DiscoverTab : Tab {
                             Spacer(modifier = Modifier.height(24.dp))
                         }
 
-                        if (recentlyRead.isNotEmpty()) {
-                            item {
-                                Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                                    SectionHeader(title = "Recently Read", onSeeAll = {})
+                        item {
+                            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
+                                SectionHeader(title = "Recently Read", onSeeAll = {})
+                                if (recentlyRead.isEmpty()) {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No recently read manga",
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                    }
+                                } else {
                                     LazyRow(
                                         contentPadding = PaddingValues(horizontal = 16.dp),
                                         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -291,6 +302,17 @@ object DiscoverTab : Tab {
                                     }
                                     LaunchedEffect(firstSource.id) {
                                         viewModel.latestCache[firstSource.id] = viewModel.loadSourceLatest(firstSource)
+                                    }
+                                } else if (latest.isEmpty()) {
+                                    Box(
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = "No recent updates",
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
                                     }
                                 } else {
                                     Column(
