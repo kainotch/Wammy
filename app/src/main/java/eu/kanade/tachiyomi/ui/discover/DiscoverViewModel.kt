@@ -68,11 +68,6 @@ class DiscoverViewModel(
                                 popularCache[source.id] = loadSourcePopular(source)
                             }
                         }
-                        if (!latestCache.containsKey(source.id)) {
-                            launch {
-                                latestCache[source.id] = loadSourceLatest(source)
-                            }
-                        }
                     }
                 }
             }
