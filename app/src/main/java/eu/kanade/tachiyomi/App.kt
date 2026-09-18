@@ -224,18 +224,23 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
         val defaultReposAdded = preferenceStore.getBoolean("default_repos_added_v2", false)
         if (!defaultReposAdded.get()) {
             Injekt.get<kotlinx.coroutines.CoroutineScope>().launchIO {
-                try {
-                    val repo = Injekt.get<mihon.domain.extension.repository.ExtensionStoreRepository>()
-                    val mangaResult = repo.insert("https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json", isNovel = false)
-                    
-                    val jsPluginManager = Injekt.get<eu.kanade.tachiyomi.jsplugin.JsPluginManager>()
-                    jsPluginManager.addRepository("Novel Extensions", "https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/.dist/plugins.min.json")
-                    
-                    if (mangaResult.isSuccess) {
-                        defaultReposAdded.set(true)
+                val repo = Injekt.get<mihon.domain.extension.repository.ExtensionStoreRepository>()
+                val jsPluginManager = Injekt.get<eu.kanade.tachiyomi.jsplugin.JsPluginManager>()
+                jsPluginManager.addRepository("Novel Extensions", "https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/.dist/plugins.min.json")
+                
+                while (!defaultReposAdded.get()) {
+                    try {
+                        val mangaResult = repo.insert("https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json", isNovel = false)
+                        if (mangaResult.isSuccess) {
+                            defaultReposAdded.set(true)
+                            val extensionManager = Injekt.get<eu.kanade.tachiyomi.extension.ExtensionManager>()
+                            extensionManager.findAvailableExtensions()
+                            break
+                        }
+                    } catch (e: Exception) {
+                        logcat(logcat.LogPriority.ERROR, e) { "Failed to add default repos, retrying..." }
                     }
-                } catch (e: Exception) {
-                    logcat(logcat.LogPriority.ERROR, e) { "Failed to add default repos" }
+                    kotlinx.coroutines.delay(3000)
                 }
             }
         }
