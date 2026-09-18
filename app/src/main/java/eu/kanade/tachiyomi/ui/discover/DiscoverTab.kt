@@ -80,6 +80,9 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.ui.draw.clip
 import androidx.compose.material3.Icon
 import androidx.compose.material.icons.filled.Extension
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import eu.kanade.tachiyomi.ui.browse.BrowseTab
 
 @Composable
@@ -159,7 +162,8 @@ fun EmptyDiscoverScreen(
 @Composable
 fun HeroCarousel(
     featuredManga: List<Manga>,
-    onClick: (Manga) -> Unit
+    onClick: (Manga) -> Unit,
+    onAddToLibrary: (Manga) -> Unit
 ) {
     if (featuredManga.isEmpty()) {
         val infiniteTransition = rememberInfiniteTransition()
@@ -174,7 +178,7 @@ fun HeroCarousel(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(350.dp)
+                .height(450.dp)
                 .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha))
         )
         return
@@ -198,7 +202,7 @@ fun HeroCarousel(
 
     HorizontalPager(
         state = pagerState,
-        modifier = Modifier.fillMaxWidth().height(350.dp)
+        modifier = Modifier.fillMaxWidth().height(450.dp)
     ) { page ->
         val pageOffset = (
             (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
@@ -226,13 +230,19 @@ fun HeroCarousel(
                 modifier = Modifier.fillMaxSize()
             )
             // Gradient Overlay
+            val bgColor = MaterialTheme.colorScheme.background
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.9f)),
-                            startY = 300f
+                            colors = listOf(
+                                Color.Transparent, 
+                                bgColor.copy(alpha = 0.6f),
+                                bgColor.copy(alpha = 0.95f),
+                                bgColor
+                            ),
+                            startY = 100f
                         )
                     )
             )
@@ -241,37 +251,47 @@ fun HeroCarousel(
             Column(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
-                    .padding(16.dp)
+                    .padding(24.dp)
             ) {
                 Text(
                     text = manga.title,
-                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold, color = Color.White),
+                    style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onBackground),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(modifier = Modifier.fillMaxWidth().padding(top = 12.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                     Button(
                         onClick = { onClick(manga) },
-                        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
-                        modifier = Modifier.weight(1f)
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary, contentColor = MaterialTheme.colorScheme.onPrimary),
+                        modifier = Modifier.weight(1f).height(48.dp)
                     ) {
-                        Text("Start Reading")
+                        Icon(
+                            imageVector = Icons.Filled.PlayArrow,
+                            contentDescription = "Start Reading",
+                            modifier = Modifier.padding(end = 8.dp)
+                        )
+                        Text("Start Reading", fontWeight = FontWeight.Bold)
                     }
                     OutlinedButton(
-                        onClick = { onClick(manga) },
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White),
-                        border = BorderStroke(1.dp, Color.White),
-                        modifier = Modifier.weight(1f)
+                        onClick = { onAddToLibrary(manga) },
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
+                        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+                        modifier = Modifier.height(48.dp)
                     ) {
-                        Text("+ Subscribe")
+                        Icon(
+                            imageVector = if (manga.favorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                            contentDescription = "Add to Library",
+                            modifier = Modifier.padding(end = 4.dp),
+                            tint = if (manga.favorite) Color.Red else MaterialTheme.colorScheme.onBackground
+                        )
+                        Text(if (manga.favorite) "In Library" else "Add to Library")
                     }
                 }
             }
         }
     }
 }
-
 object DiscoverTab : Tab {
 
     override val options: TabOptions
@@ -405,6 +425,16 @@ object DiscoverTab : Tab {
                                     val localManga = viewModel.getNetworkToLocalManga(manga)
                                     navigator.push(MangaScreen(localManga.id))
                                 }
+                            },
+                            onAddToLibrary = { manga ->
+                                viewModel.toggleFavorite(manga) { newFavorite ->
+                                    val list = popularCache[manga.source]
+                                    if (list != null) {
+                                        popularCache[manga.source] = list.map { 
+                                            if (it.title == manga.title) it.copy(favorite = newFavorite) else it 
+                                        }
+                                    }
+                                }
                             }
                         )
                     }
@@ -471,3 +501,4 @@ object DiscoverTab : Tab {
         }
     }
 }
+
