@@ -101,6 +101,8 @@ private val ErrorFaces = listOf(
     R.drawable.empty_face_1,
     R.drawable.empty_face_2,
     R.drawable.empty_face_3,
+    R.drawable.empty_face_4,
+    R.drawable.empty_face_5,
 )
 
 private fun getRandomErrorFace(): Int {
