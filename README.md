@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="https://wammy-otaku.github.io/"><b>Official Website & Documentation</b></a>
+  <a href="https://kainotch.github.io/wammy-otaku.github.io/"><b>Official Website & Documentation</b></a>
 </p>
 
 <p align="center">
