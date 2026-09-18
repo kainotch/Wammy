@@ -41,6 +41,7 @@ class NewUpdateScreenModel(
                     workInfo.outputData.getString(AppUpdateDownloadJob.EXTRA_DOWNLOAD_URL)
                 } else {
                     workInfo.progress.getString(AppUpdateDownloadJob.EXTRA_DOWNLOAD_URL)
+                        ?: downloadLink
                 }
 
                 if (url != downloadLink) {

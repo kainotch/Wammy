@@ -82,15 +82,6 @@ fun NewUpdateScreen(
                 )
         )
 
-        // Close button
-        IconButton(
-            onClick = onRejectUpdate,
-            modifier = Modifier
-                .padding(top = 48.dp, start = 16.dp)
-        ) {
-            Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = Color.White)
-        }
-
         // Scrollable content
         Column(
             modifier = Modifier
@@ -209,6 +200,15 @@ fun NewUpdateScreen(
             }
 
             Spacer(modifier = Modifier.height(180.dp)) // padding for bottom bar
+        }
+
+        // Close button (Placed after column so it sits on top)
+        IconButton(
+            onClick = onRejectUpdate,
+            modifier = Modifier
+                .padding(top = 48.dp, start = 16.dp)
+        ) {
+            Icon(imageVector = Icons.Default.Close, contentDescription = "Close", tint = Color.White)
         }
 
         // Bottom Bar (Fixed)
