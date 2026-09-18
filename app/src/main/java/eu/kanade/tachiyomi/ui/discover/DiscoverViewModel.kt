@@ -34,7 +34,8 @@ class DiscoverViewModel(
     private val sourceManager: SourceManager = Injekt.get(),
     private val jsPluginManager: JsPluginManager = Injekt.get(),
     private val preferences: BasePreferences = Injekt.get(),
-    private val networkToLocalManga: NetworkToLocalManga = Injekt.get()
+    private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
+    private val updateManga: eu.kanade.domain.manga.interactor.UpdateManga = Injekt.get()
 ) : StateViewModel<DiscoverState>(DiscoverState()) {
 
     init {
@@ -87,6 +88,17 @@ class DiscoverViewModel(
     suspend fun getNetworkToLocalManga(manga: Manga): Manga {
         return withContext(Dispatchers.IO) {
             networkToLocalManga(manga)
+        }
+    }
+
+    fun toggleFavorite(manga: Manga, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val localManga = networkToLocalManga(manga)
+            val newFavorite = !localManga.favorite
+            updateManga.awaitUpdateFavorite(localManga.id, newFavorite)
+            withContext(Dispatchers.Main) {
+                onResult(newFavorite)
+            }
         }
     }
 }
