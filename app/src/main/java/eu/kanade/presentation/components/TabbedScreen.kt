@@ -80,29 +80,31 @@ fun TabbedScreen(
                 divider = {},
             ) {
                 tabs.forEachIndexed { index, tab ->
-                    val selected = state.currentPage == index
-                    Surface(
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp, vertical = 8.dp)
-                            .clip(CircleShape)
-                            .clickable { scope.launch { state.animateScrollToPage(index) } },
-                        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                        contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
-                        shape = CircleShape
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
-                            verticalAlignment = Alignment.CenterVertically
+                    androidx.compose.runtime.key(index) {
+                        val selected = state.currentPage == index
+                        Surface(
+                            modifier = Modifier
+                                .padding(horizontal = 4.dp, vertical = 8.dp)
+                                .clip(CircleShape)
+                                .clickable { scope.launch { state.animateScrollToPage(index) } },
+                            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
+                            contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            shape = CircleShape
                         ) {
-                            if (selected) {
-                                Icon(
-                                    imageVector = Icons.Filled.Check,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
+                            Row(
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                if (selected) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Check,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                }
+                                TabText(text = stringResource(tab.titleRes), badgeCount = tab.badgeNumber)
                             }
-                            TabText(text = stringResource(tab.titleRes), badgeCount = tab.badgeNumber)
                         }
                     }
                 }
