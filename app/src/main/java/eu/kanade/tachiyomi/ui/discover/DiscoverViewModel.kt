@@ -44,7 +44,7 @@ class DiscoverViewModel(
                 jsPluginManager.jsSources,
                 preferences.homeTabIsNovel.changes()
             ) { apkSources, jsSources, isNovel ->
-                val allSources = (apkSources + jsSources).filterIsInstance<CatalogueSource>()
+                val allSources = (apkSources + jsSources).filterIsInstance<CatalogueSource>().distinctBy { it.id }
                 val filtered = allSources.filter { 
                     it.isNovelSource() == isNovel && 
                     it.id != tachiyomi.source.local.LocalSource.ID && 
