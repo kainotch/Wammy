@@ -216,19 +216,29 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
             new = BuildConfig.VERSION_CODE,
             migrations = migrations,
             onMigrationComplete = {
-                if (preference.get() == 0) {
-                    Injekt.get<kotlinx.coroutines.CoroutineScope>().launchIO {
-                        val repo = Injekt.get<mihon.domain.extension.repository.ExtensionStoreRepository>()
-                        repo.insert("https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json", isNovel = false)
-                        
-                        val jsPluginManager = Injekt.get<eu.kanade.tachiyomi.jsplugin.JsPluginManager>()
-                        jsPluginManager.addRepository("Novel Extensions", "https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/.dist/plugins.min.json")
-                    }
-                }
                 logcat { "Updating last version to ${BuildConfig.VERSION_CODE}" }
                 preference.set(BuildConfig.VERSION_CODE)
             },
         )
+
+        val defaultReposAdded = preferenceStore.getBoolean("default_repos_added_v2", false)
+        if (!defaultReposAdded.get()) {
+            Injekt.get<kotlinx.coroutines.CoroutineScope>().launchIO {
+                try {
+                    val repo = Injekt.get<mihon.domain.extension.repository.ExtensionStoreRepository>()
+                    val mangaResult = repo.insert("https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json", isNovel = false)
+                    
+                    val jsPluginManager = Injekt.get<eu.kanade.tachiyomi.jsplugin.JsPluginManager>()
+                    jsPluginManager.addRepository("Novel Extensions", "https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/.dist/plugins.min.json")
+                    
+                    if (mangaResult.isSuccess) {
+                        defaultReposAdded.set(true)
+                    }
+                } catch (e: Exception) {
+                    logcat(logcat.LogPriority.ERROR, e) { "Failed to add default repos" }
+                }
+            }
+        }
     }
 
     override fun newImageLoader(context: Context): ImageLoader {
