@@ -39,13 +39,18 @@ class DiscoverViewModel(
     private val preferences: BasePreferences = Injekt.get(),
     private val networkToLocalManga: NetworkToLocalManga = Injekt.get(),
     private val updateManga: eu.kanade.domain.manga.interactor.UpdateManga = Injekt.get(),
-    private val getHistory: tachiyomi.domain.history.interactor.GetHistory = Injekt.get()
+    private val getHistory: tachiyomi.domain.history.interactor.GetHistory = Injekt.get(),
+    private val context: android.app.Application = Injekt.get()
 ) : StateViewModel<DiscoverState>(DiscoverState()) {
 
     val popularCache = mutableStateMapOf<Long, List<Manga>>()
     val latestCache = mutableStateMapOf<Long, List<Manga>>()
     
     val recentlyRead = MutableStateFlow<List<tachiyomi.domain.history.model.HistoryWithRelations>>(emptyList())
+    
+    private val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+    private val sessionPopularFetched = mutableSetOf<Long>()
+    private val sessionLatestFetched = mutableSetOf<Long>()
 
     init {
         viewModelScope.launch {
@@ -93,12 +98,6 @@ class DiscoverViewModel(
     fun toggleNovel(isNovel: Boolean) {
         preferences.homeTabIsNovel.set(isNovel)
     }
-
-    private val context = Injekt.get<android.app.Application>()
-    private val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
-    
-    private val sessionPopularFetched = mutableSetOf<Long>()
-    private val sessionLatestFetched = mutableSetOf<Long>()
 
     suspend fun loadSourcePopular(source: CatalogueSource): List<Manga> {
         return withContext(Dispatchers.IO) {
