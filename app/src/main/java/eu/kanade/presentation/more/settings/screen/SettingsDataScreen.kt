@@ -1,4 +1,4 @@
-package eu.kanade.presentation.more.settings.screen
+﻿package eu.kanade.presentation.more.settings.screen
 
 import android.content.ActivityNotFoundException
 import android.content.Context
@@ -79,7 +79,7 @@ import uy.kohesive.injekt.api.get
 object SettingsDataScreen : SearchableSettings {
 
     val restorePreferenceKeyString = MR.strings.label_backup
-    const val HELP_URL = "https://kainotch.github.io/wammy-otaku.github.io/docs/faq/storage"
+    const val HELP_URL = "https://wammy-otaku.github.io/docs/faq.html#downloads"
 
     @ReadOnlyComposable
     @Composable
@@ -709,3 +709,4 @@ private fun LNReaderImportOptionsDialog(
         },
     )
 }
+

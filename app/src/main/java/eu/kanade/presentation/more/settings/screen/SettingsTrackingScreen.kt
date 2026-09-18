@@ -1,4 +1,4 @@
-@file:Suppress("ktlint:standard:max-line-length")
+﻿@file:Suppress("ktlint:standard:max-line-length")
 
 package eu.kanade.presentation.more.settings.screen
 
@@ -85,7 +85,7 @@ object SettingsTrackingScreen : SearchableSettings {
     @Composable
     override fun RowScope.AppBarAction() {
         val uriHandler = LocalUriHandler.current
-        IconButton(onClick = { uriHandler.openUri("https://kainotch.github.io/wammy-otaku.github.io/docs/guides/tracking") }) {
+        IconButton(onClick = { uriHandler.openUri("https://wammy-otaku.github.io/docs/tracking.html") }) {
             Icon(
                 imageVector = Icons.AutoMirrored.Outlined.HelpOutline,
                 contentDescription = stringResource(MR.strings.tracking_guide),
@@ -525,7 +525,7 @@ object SettingsTrackingScreen : SearchableSettings {
                 // Use a raw string split across multiple source lines to keep line lengths short
                 """
                 1. Login to novellist.co in browser
-                2. Open DevTools (F12) → Application → Cookies
+                2. Open DevTools (F12) â†’ Application â†’ Cookies
                 3. Find 'novellist' cookie
                 4. If it starts with 'base64-', decode it and extract 'access_token'
                 5. Paste the token below
@@ -534,7 +534,7 @@ object SettingsTrackingScreen : SearchableSettings {
             "NovelUpdates" -> {
                 """
                 1. Login to novelupdates.com in browser
-                2. Open DevTools (F12) → Application → Cookies
+                2. Open DevTools (F12) â†’ Application â†’ Cookies
                 3. Copy all cookie values
                 4. Paste below as: cookie_name=value; cookie_name2=value2
                 """.trimIndent()
@@ -826,3 +826,4 @@ private data class NovelTrackerLoginDialog(
 )
 
 private data object NovelUpdatesListMappingDialog
+

@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.library
+﻿package eu.kanade.tachiyomi.data.library
 
 import android.content.Context
 import android.content.pm.ServiceInfo
@@ -441,7 +441,7 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
         }
 
         // Update the in-memory library state so badges (unread/total) reflect the new chapters
-        // discovered during this update run — without this, users need a full app restart to
+        // discovered during this update run â€” without this, users need a full app restart to
         // see updated counts in the library grid.
         if (newUpdates.isNotEmpty()) {
             val batchUpdates = newUpdates.associate { (manga, newChapters) ->
@@ -633,7 +633,7 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
         private const val WORK_NAME_AUTO = "LibraryUpdate-auto"
         private const val WORK_NAME_MANUAL = "LibraryUpdate-manual"
 
-        private const val ERROR_LOG_HELP_URL = "https://kainotch.github.io/wammy-otaku.github.io/docs/guides/troubleshooting/"
+        private const val ERROR_LOG_HELP_URL = "https://wammy-otaku.github.io/docs/faq.html"
 
         private const val MANGA_PER_SOURCE_QUEUE_WARNING_THRESHOLD = 60
 
@@ -643,7 +643,7 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
         private const val KEY_CATEGORY = "category"
 
         /**
-         * Keys for "Update Selected" mode — specific manga IDs with options.
+         * Keys for "Update Selected" mode â€” specific manga IDs with options.
          */
         private const val KEY_MANGA_IDS = "manga_ids"
         private const val KEY_IDS_FILE = "ids_file"
@@ -762,3 +762,4 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
         }
     }
 }
+

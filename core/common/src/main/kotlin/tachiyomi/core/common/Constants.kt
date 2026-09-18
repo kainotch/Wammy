@@ -1,8 +1,8 @@
-package tachiyomi.core.common
+﻿package tachiyomi.core.common
 
 object Constants {
-    const val URL_HELP = "https://kainotch.github.io/wammy-otaku.github.io/docs/guides/troubleshooting/"
-    const val URL_HELP_UPCOMING = "https://kainotch.github.io/wammy-otaku.github.io/docs/faq/updates/upcoming"
+    const val URL_HELP = "https://wammy-otaku.github.io/docs/faq.html"
+    const val URL_HELP_UPCOMING = "https://wammy-otaku.github.io/docs/faq.html#updates"
     const val URL_DONATE_PATREON = ""
     const val URL_DONATE_OPENCOLLECTIVE = ""
 
@@ -19,3 +19,4 @@ object Constants {
     const val SHORTCUT_EXTENSIONS = "eu.kanade.tachiyomi.EXTENSIONS"
     const val SHORTCUT_DOWNLOADS = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
 }
+
