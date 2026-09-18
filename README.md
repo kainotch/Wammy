@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kainotch/Wammy/master/app/src/main/res/drawable/wammy_logo.png" alt="Wammy Logo" width="200"/>
+  <img src="https://raw.githubusercontent.com/kainotch/Wammy/master/app/src/main/res/drawable-nodpi/wammy_logo.png" alt="Wammy Logo" width="200"/>
 </p>
 
 <h1 align="center">Wammy</h1>
