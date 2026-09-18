@@ -319,7 +319,7 @@ object DiscoverTab : Tab {
         val scope = androidx.compose.runtime.rememberCoroutineScope()
         val user by viewModel.authManager.currentUser.collectAsState()
 
-        val popularCache = remember { mutableStateMapOf<Long, List<Manga>>() }
+        
 
         Scaffold(
             topBar = {
@@ -381,13 +381,13 @@ object DiscoverTab : Tab {
                     CircularProgressIndicator()
                 }
             } else {
-                val featuredManga = remember(popularCache.toMap(), state.isNovel) {
+                val featuredManga = remember(viewModel.popularCache.toMap(), state.isNovel) {
                     val result = mutableListOf<Manga>()
                     var index = 0
                     while (result.size < 5) {
                         var added = false
                         for (source in state.sources) {
-                            val list = popularCache[source.id]
+                            val list = viewModel.popularCache[source.id]
                             if (list != null && index < list.size) {
                                 if (result.none { it.title == list[index].title }) {
                                     result.add(list[index])
@@ -402,8 +402,8 @@ object DiscoverTab : Tab {
                     result
                 }
                 
-                val allCachesLoaded = state.sources.all { popularCache.containsKey(it.id) }
-                val hasNoMangaAtAll = allCachesLoaded && popularCache.values.all { it.isEmpty() }
+                val allCachesLoaded = state.sources.all { viewModel.popularCache.containsKey(it.id) }
+                val hasNoMangaAtAll = allCachesLoaded && viewModel.popularCache.values.all { it.isEmpty() }
 
                 val tabNavigator = LocalTabNavigator.current
 
@@ -428,9 +428,9 @@ object DiscoverTab : Tab {
                             },
                             onAddToLibrary = { manga ->
                                 viewModel.toggleFavorite(manga) { newFavorite ->
-                                    val list = popularCache[manga.source]
+                                    val list = viewModel.popularCache[manga.source]
                                     if (list != null) {
-                                        popularCache[manga.source] = list.map { 
+                                        viewModel.popularCache[manga.source] = list.map { 
                                             if (it.title == manga.title) it.copy(favorite = newFavorite) else it 
                                         }
                                     }
@@ -440,7 +440,7 @@ object DiscoverTab : Tab {
                     }
 
                     items(state.sources, key = { it.id }) { source ->
-                        val cached = popularCache[source.id]
+                        val cached = viewModel.popularCache[source.id]
                         
                         if (cached == null) {
                             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
@@ -453,7 +453,7 @@ object DiscoverTab : Tab {
                             }
                             LaunchedEffect(source.id) {
                                 val result = viewModel.loadSourcePopular(source)
-                                popularCache[source.id] = result
+                                viewModel.popularCache[source.id] = result
                             }
                         } else if (cached.isNotEmpty()) {
                             Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
@@ -501,5 +501,6 @@ object DiscoverTab : Tab {
         }
     }
 }
+
 
 

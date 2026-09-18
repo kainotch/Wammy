@@ -14,6 +14,7 @@ import uy.kohesive.injekt.api.get
 import eu.kanade.tachiyomi.source.isNovelSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import androidx.compose.runtime.mutableStateMapOf
 import tachiyomi.domain.manga.model.Manga
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -56,9 +57,21 @@ class DiscoverViewModel(
                 mutableState.update { 
                     it.copy(isLoading = false, sources = sources, isNovel = isNovel)
                 }
+                            // Pre-fetch the first 3 sources to speed up the initial banner load
+                viewModelScope.launch {
+                    sources.take(3).forEach { source ->
+                        if (!popularCache.containsKey(source.id)) {
+                            launch {
+                                popularCache[source.id] = loadSourcePopular(source)
+                            }
+                        }
+                    }
+                }
             }
         }
     }
+
+    val popularCache = mutableStateMapOf<Long, List<Manga>>()
 
     fun toggleNovel(isNovel: Boolean) {
         preferences.homeTabIsNovel.set(isNovel)
@@ -102,3 +115,4 @@ class DiscoverViewModel(
         }
     }
 }
+
