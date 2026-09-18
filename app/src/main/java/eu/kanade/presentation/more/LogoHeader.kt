@@ -25,7 +25,7 @@ fun LogoHeader(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Image(
-            painter = painterResource(R.drawable.ic_launcher_foreground),
+            painter = painterResource(R.drawable.wammy_logo),
             contentDescription = null,
             modifier = Modifier
                 .padding(iconPadding)

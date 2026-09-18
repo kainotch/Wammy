@@ -72,23 +72,26 @@ fun TabbedScreen(
                 end = contentPadding.calculateEndPadding(LocalLayoutDirection.current),
             ),
         ) {
-            ScrollableTabRow(
+            androidx.compose.material3.PrimaryScrollableTabRow(
                 selectedTabIndex = state.currentPage,
                 edgePadding = 8.dp,
                 modifier = Modifier.zIndex(1f),
-                indicator = {},
-                divider = {},
+                indicator = { },
+                divider = { }
             ) {
                 tabs.forEachIndexed { index, tab ->
-                    androidx.compose.runtime.key(index) {
-                        val selected = state.currentPage == index
+                    val selected = state.currentPage == index
+                    Tab(
+                        selected = selected,
+                        onClick = { scope.launch { state.animateScrollToPage(index) } },
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp, vertical = 8.dp)
+                            .clip(CircleShape),
+                        selectedContentColor = MaterialTheme.colorScheme.onPrimary,
+                        unselectedContentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                    ) {
                         Surface(
-                            modifier = Modifier
-                                .padding(horizontal = 4.dp, vertical = 8.dp)
-                                .clip(CircleShape)
-                                .clickable { scope.launch { state.animateScrollToPage(index) } },
                             color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant,
-                            contentColor = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant,
                             shape = CircleShape
                         ) {
                             Row(
