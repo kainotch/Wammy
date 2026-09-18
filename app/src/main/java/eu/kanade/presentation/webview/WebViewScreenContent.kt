@@ -1,4 +1,4 @@
-package eu.kanade.presentation.webview
+﻿package eu.kanade.presentation.webview
 
 import android.content.pm.ApplicationInfo
 import android.graphics.Bitmap
@@ -298,7 +298,7 @@ fun WebViewScreenContent(
                                     .clip(MaterialTheme.shapes.small)
                                     .clickable {
                                         uriHandler.openUri(
-                                            "https://kainotch.github.io/wammy-otaku.github.io/docs/guides/troubleshooting/#cloudflare",
+                                            "https://wammy-otaku.github.io/docs/faq.html",
                                         )
                                     },
                             )
@@ -372,3 +372,4 @@ fun WebViewScreenContent(
         }
     }
 }
+

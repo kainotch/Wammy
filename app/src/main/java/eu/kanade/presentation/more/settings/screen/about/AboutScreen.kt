@@ -1,4 +1,4 @@
-package eu.kanade.presentation.more.settings.screen.about
+﻿package eu.kanade.presentation.more.settings.screen.about
 
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
@@ -163,7 +163,7 @@ object AboutScreen : Screen() {
                 item {
                     TextPreferenceWidget(
                         title = stringResource(MR.strings.privacy_policy),
-                        onPreferenceClick = { uriHandler.openUri("https://kainotch.github.io/wammy-otaku.github.io/privacy/") },
+                        onPreferenceClick = { uriHandler.openUri("https://wammy-otaku.github.io/privacy/") },
                     )
                 }
 
@@ -327,3 +327,4 @@ fun DynamicInstagramProfileRow(username: String, name: String, fallbackUrl: Stri
         onClick = onClick
     )
 }
+

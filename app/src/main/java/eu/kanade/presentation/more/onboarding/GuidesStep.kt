@@ -1,4 +1,4 @@
-package eu.kanade.presentation.more.onboarding
+﻿package eu.kanade.presentation.more.onboarding
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -56,7 +56,7 @@ internal class GuidesStep(
     }
 }
 
-const val GETTING_STARTED_URL = "https://kainotch.github.io/wammy-otaku.github.io/docs/guides/getting-started"
+const val GETTING_STARTED_URL = "https://wammy-otaku.github.io/docs/getting-started.html"
 
 @PreviewLightDark
 @Composable
@@ -67,3 +67,4 @@ private fun GuidesStepPreview() {
         ).Content()
     }
 }
+
