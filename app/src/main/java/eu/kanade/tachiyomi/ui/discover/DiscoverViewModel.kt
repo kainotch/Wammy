@@ -1,28 +1,28 @@
 package eu.kanade.tachiyomi.ui.discover
 
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.viewModelScope
 import eu.kanade.domain.base.BasePreferences
 import eu.kanade.tachiyomi.jsplugin.JsPluginManager
 import eu.kanade.tachiyomi.source.CatalogueSource
+import eu.kanade.tachiyomi.source.isNovelSource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import logcat.LogPriority
+import mihon.core.viewmodel.StateViewModel
+import tachiyomi.core.common.util.system.logcat
+import tachiyomi.domain.manga.interactor.NetworkToLocalManga
+import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import eu.kanade.tachiyomi.source.isNovelSource
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import androidx.compose.runtime.mutableStateMapOf
-import tachiyomi.domain.manga.model.Manga
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import logcat.LogPriority
-import tachiyomi.core.common.util.system.logcat
-import mihon.core.viewmodel.StateViewModel
-import tachiyomi.domain.manga.interactor.NetworkToLocalManga
 
 data class DiscoverState(
     val isLoading: Boolean = true,
@@ -40,6 +40,7 @@ class DiscoverViewModel(
 ) : StateViewModel<DiscoverState>(DiscoverState()) {
 
     val popularCache = mutableStateMapOf<Long, List<Manga>>()
+    val latestCache = mutableStateMapOf<Long, List<Manga>>()
 
     init {
         viewModelScope.launch {
@@ -59,12 +60,17 @@ class DiscoverViewModel(
                 mutableState.update { 
                     it.copy(isLoading = false, sources = sources, isNovel = isNovel)
                 }
-                            // Pre-fetch the first 3 sources to speed up the initial banner load
+                // Pre-fetch the first 3 sources to speed up the initial banner load
                 viewModelScope.launch {
                     sources.take(3).forEach { source ->
                         if (!popularCache.containsKey(source.id)) {
                             launch {
                                 popularCache[source.id] = loadSourcePopular(source)
+                            }
+                        }
+                        if (!latestCache.containsKey(source.id)) {
+                            launch {
+                                latestCache[source.id] = loadSourceLatest(source)
                             }
                         }
                     }
@@ -98,6 +104,27 @@ class DiscoverViewModel(
         }
     }
 
+    suspend fun loadSourceLatest(source: CatalogueSource): List<Manga> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val page = source.getLatestUpdates(1)
+                page.mangas.map { sManga ->
+                    Manga.create().copy(
+                        source = source.id,
+                        url = sManga.url,
+                        title = sManga.title,
+                        thumbnailUrl = sManga.thumbnail_url,
+                        initialized = sManga.initialized,
+                        isNovel = source.isNovelSource()
+                    )
+                }
+            } catch (e: Exception) {
+                logcat(LogPriority.ERROR, e) { "Failed to load latest manga for source ${source.name}" }
+                emptyList()
+            }
+        }
+    }
+
     suspend fun getNetworkToLocalManga(manga: Manga): Manga {
         return withContext(Dispatchers.IO) {
             networkToLocalManga(manga)
@@ -115,5 +142,3 @@ class DiscoverViewModel(
         }
     }
 }
-
-
