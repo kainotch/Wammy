@@ -271,13 +271,13 @@ fun HeroCarousel(
                             contentDescription = "Start Reading",
                             modifier = Modifier.padding(end = 8.dp)
                         )
-                        Text("Start Reading", fontWeight = FontWeight.Bold)
+                        Text("Start Reading", fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                     OutlinedButton(
                         onClick = { onAddToLibrary(manga) },
                         colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onBackground),
                         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
-                        modifier = Modifier.height(48.dp)
+                        modifier = Modifier.weight(1f).height(48.dp)
                     ) {
                         Icon(
                             imageVector = if (manga.favorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
@@ -285,7 +285,7 @@ fun HeroCarousel(
                             modifier = Modifier.padding(end = 4.dp),
                             tint = if (manga.favorite) Color.Red else MaterialTheme.colorScheme.onBackground
                         )
-                        Text(if (manga.favorite) "In Library" else "Add to Library")
+                        Text(if (manga.favorite) "In Library" else "Add to Library", maxLines = 1, overflow = TextOverflow.Ellipsis)
                     }
                 }
             }
@@ -381,7 +381,7 @@ object DiscoverTab : Tab {
                     CircularProgressIndicator()
                 }
             } else {
-                val featuredManga = remember(popularCache.values.sumOf { it.size }, state.isNovel) {
+                val featuredManga = remember(popularCache.toMap(), state.isNovel) {
                     val result = mutableListOf<Manga>()
                     var index = 0
                     while (result.size < 5) {
@@ -501,4 +501,5 @@ object DiscoverTab : Tab {
         }
     }
 }
+
 
