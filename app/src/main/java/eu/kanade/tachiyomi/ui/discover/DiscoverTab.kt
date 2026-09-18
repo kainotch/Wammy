@@ -152,6 +152,7 @@ object DiscoverTab : Tab {
                     CircularProgressIndicator()
                 }
             } else {
+                val recentlyRead by viewModel.recentlyRead.collectAsState()
                 val featuredManga = remember(viewModel.popularCache.toMap(), state.isNovel) {
                     val result = mutableListOf<Manga>()
                     var index = 0
@@ -200,7 +201,6 @@ object DiscoverTab : Tab {
                             Spacer(modifier = Modifier.height(24.dp))
                         }
 
-                        val recentlyRead by viewModel.recentlyRead.collectAsState()
                         if (recentlyRead.isNotEmpty()) {
                             item {
                                 Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
