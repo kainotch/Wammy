@@ -163,18 +163,19 @@ object DiscoverTab : Tab {
                 }
             }
         ) { contentPadding ->
-            if (state.isLoading) {
-                Box(modifier = Modifier.fillMaxSize().padding(contentPadding), contentAlignment = Alignment.Center) {
+            androidx.compose.animation.Crossfade(targetState = state, animationSpec = tween(400), modifier = Modifier.padding(contentPadding).fillMaxSize(), label = "discover") { animatedState ->
+                if (animatedState.isLoading) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     CircularProgressIndicator()
                 }
             } else {
                 val recentlyRead by viewModel.recentlyRead.collectAsState()
-                val featuredManga = remember(viewModel.popularCache.toMap(), state.isNovel) {
+                val featuredManga = remember(viewModel.popularCache.toMap(), animatedState.isNovel) {
                     val result = mutableListOf<Manga>()
                     var index = 0
                     while (result.size < 5) {
                         var added = false
-                        for (source in state.sources) {
+                        for (source in animatedState.sources) {
                             val list = viewModel.popularCache[source.id]
                             if (list != null && index < list.size) {
                                 if (result.none { it.title == list[index].title }) {
@@ -190,17 +191,17 @@ object DiscoverTab : Tab {
                     result
                 }
 
-                val allCachesLoaded = state.sources.all { viewModel.popularCache.containsKey(it.id) }
+                val allCachesLoaded = animatedState.sources.all { viewModel.popularCache.containsKey(it.id) }
                 val hasNoMangaAtAll = allCachesLoaded && viewModel.popularCache.values.all { it.isEmpty() }
 
-                if (state.sources.isEmpty() || hasNoMangaAtAll) {
+                if (animatedState.sources.isEmpty() || hasNoMangaAtAll) {
                     EmptyDiscoverScreen(
-                        isNovel = state.isNovel,
+                        isNovel = animatedState.isNovel,
                         onBrowseExtensions = { tabNavigator.current = BrowseTab }
                     )
                 } else {
                     LazyColumn(
-                        contentPadding = contentPadding,
+                        contentPadding = PaddingValues(0.dp),
                         modifier = Modifier.fillMaxSize(),
                     ) {
                         item {
@@ -259,8 +260,8 @@ object DiscoverTab : Tab {
                             }
                         }
 
-                        if (state.sources.isNotEmpty()) {
-                            val firstSource = state.sources.first()
+                        if (animatedState.sources.isNotEmpty()) {
+                            val firstSource = animatedState.sources.first()
                             
                             item {
                                 val cached = viewModel.popularCache[firstSource.id]
@@ -353,7 +354,7 @@ object DiscoverTab : Tab {
                                 }
                             }
 
-                            items(state.sources.drop(1), key = { "popular_${it.id}" }) { source ->
+                            items(animatedState.sources.drop(1), key = { "popular_${it.id}" }) { source ->
                                 val cached = viewModel.popularCache[source.id]
                                 if (cached == null) {
                                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
@@ -399,7 +400,8 @@ object DiscoverTab : Tab {
                 }
             }
         }
-    }
+
+            }    }
 }
 
 @Composable
@@ -709,3 +711,4 @@ fun EmptyDiscoverScreen(isNovel: Boolean, onBrowseExtensions: () -> Unit) {
         }
     }
 }
+
