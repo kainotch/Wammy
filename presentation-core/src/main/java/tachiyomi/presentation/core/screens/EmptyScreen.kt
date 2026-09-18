@@ -10,15 +10,16 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.painterResource
+import tachiyomi.presentation.core.R
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastForEach
 import dev.icerock.moko.resources.StringResource
@@ -53,7 +54,7 @@ fun EmptyScreen(
     modifier: Modifier = Modifier,
     actions: List<EmptyScreenAction>? = null,
 ) {
-    val face = remember { getRandomErrorFace() }
+    val faceImage = remember { getRandomErrorFace() }
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -62,13 +63,11 @@ fun EmptyScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
-        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
-            Text(
-                text = face,
-                modifier = Modifier.secondaryItemAlpha(),
-                style = MaterialTheme.typography.displayMedium,
-            )
-        }
+        Image(
+            painter = painterResource(faceImage),
+            contentDescription = null,
+            modifier = Modifier.size(168.dp),
+        )
 
         Text(
             text = message,
@@ -99,20 +98,11 @@ fun EmptyScreen(
 }
 
 private val ErrorFaces = listOf(
-    "(･o･;)",
-    "Σ(ಠ_ಠ)",
-    "ಥ_ಥ",
-    "(˘･_･˘)",
-    "(；￣Д￣)",
-    "(･Д･。",
-    "(╬ಠ益ಠ)",
-    "(╥﹏╥)",
-    "(⋟﹏⋞)",
-    "Ò︵Ó",
-    " ˙ᯅ˙)",
-    "(¬_¬)",
+    R.drawable.empty_face_1,
+    R.drawable.empty_face_2,
+    R.drawable.empty_face_3,
 )
 
-private fun getRandomErrorFace(): String {
+private fun getRandomErrorFace(): Int {
     return ErrorFaces[Random.nextInt(ErrorFaces.size)]
 }
