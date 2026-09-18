@@ -39,6 +39,8 @@ class DiscoverViewModel(
     private val updateManga: eu.kanade.domain.manga.interactor.UpdateManga = Injekt.get()
 ) : StateViewModel<DiscoverState>(DiscoverState()) {
 
+    val popularCache = mutableStateMapOf<Long, List<Manga>>()
+
     init {
         viewModelScope.launch {
             combine(
@@ -70,8 +72,6 @@ class DiscoverViewModel(
             }
         }
     }
-
-    val popularCache = mutableStateMapOf<Long, List<Manga>>()
 
     fun toggleNovel(isNovel: Boolean) {
         preferences.homeTabIsNovel.set(isNovel)
@@ -115,4 +115,5 @@ class DiscoverViewModel(
         }
     }
 }
+
 
