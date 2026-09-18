@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="app/src/main/res/drawable/ic_launcher_foreground.jpg" alt="Wammy Logo" width="200"/>
+  <img src="app/src/main/res/drawable/wammy_logo.png" alt="Wammy Logo" width="200"/>
 </p>
 
 <h1 align="center">Wammy</h1>
