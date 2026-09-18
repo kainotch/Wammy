@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -100,6 +101,8 @@ object DiscoverTab : Tab {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.background)
+                        .statusBarsPadding()
                         .padding(horizontal = 16.dp)
                         .padding(top = 16.dp, bottom = 8.dp)
                 ) {
@@ -346,7 +349,7 @@ fun RecentlyUpdatedItem(manga: Manga, onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         AsyncImage(
-            model = manga.thumbnailUrl,
+            model = manga.asMangaCover(),
             contentDescription = null,
             modifier = Modifier
                 .size(64.dp)
@@ -425,7 +428,7 @@ fun HeroCarousel(
             .clickable { onClick(manga) }
     ) {
         AsyncImage(
-            model = manga.thumbnailUrl,
+            model = manga.asMangaCover(),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop
