@@ -33,7 +33,7 @@ android {
         applicationId = "com.notch.wammy"
 
         versionCode = 3
-        versionName = "0.0.3"
+        versionName = "0.0.4"
 
         buildConfigField("String", "COMMIT_COUNT", "\"${getLatestCommitCount()}\"")
         buildConfigField("String", "COMMIT_SHA", "\"${getLatestCommitSha()}\"")

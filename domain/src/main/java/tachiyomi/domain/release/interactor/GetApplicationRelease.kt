@@ -1,4 +1,4 @@
-﻿package tachiyomi.domain.release.interactor
+package tachiyomi.domain.release.interactor
 
 import tachiyomi.domain.release.model.Release
 import tachiyomi.domain.release.service.ReleaseService
@@ -42,10 +42,12 @@ class GetApplicationRelease(
             val newSemVer = newVersion.split(".").map { it.toInt() }
             val oldSemVer = oldVersion.split(".").map { it.toInt() }
 
-            oldSemVer.mapIndexed { index, i ->
-                if (newSemVer[index] > i) {
-                    return true
-                }
+            val maxIndex = maxOf(newSemVer.size, oldSemVer.size)
+            for (index in 0 until maxIndex) {
+                val new = newSemVer.getOrElse(index) { 0 }
+                val old = oldSemVer.getOrElse(index) { 0 }
+                if (new > old) return true
+                if (new < old) return false
             }
 
             false
