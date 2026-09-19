@@ -68,21 +68,22 @@ class DiscoverViewModel(
 
         viewModelScope.launch {
             kotlinx.coroutines.flow.combine(
-                sourceManager.sources,
-                jsPluginManager.jsSources,
+                kotlinx.coroutines.flow.combine(sourceManager.sources, jsPluginManager.jsSources) { apk, js -> apk + js },
                 preferences.homeTabIsNovel.changes(),
                 jsPluginManager.isInitialized,
-                sourcePreferences.pinnedSources.changes()
-            ) { apkSources: List<eu.kanade.tachiyomi.source.Source>, jsSources: List<CatalogueSource>, isNovel: Boolean, jsInitialized: Boolean, pinnedSourceIds: Set<String> ->
+                sourcePreferences.pinnedSources.changes(),
+                sourcePreferences.enabledLanguages.changes()
+            ) { allApkJs, isNovel: Boolean, jsInitialized: Boolean, pinnedSourceIds: Set<String>, enabledLanguages: Set<String> ->
                 if (!jsInitialized) {
                     return@combine null
                 }
                 
-                val allSources = (apkSources + jsSources).filterIsInstance<CatalogueSource>().distinctBy { it.id }
+                val allSources = allApkJs.filterIsInstance<CatalogueSource>().distinctBy { it.id }
                 val filtered = allSources.filter { 
                     it.isNovelSource() == isNovel && 
                     it.id != tachiyomi.source.local.LocalSource.ID && 
-                    it.id != tachiyomi.source.local.LocalNovelSource.ID 
+                    it.id != tachiyomi.source.local.LocalNovelSource.ID &&
+                    (it.lang in enabledLanguages || it.lang == "all")
                 }
                 
                 val sorted = filtered.sortedWith(compareBy(
