@@ -17,7 +17,7 @@
     <string name="default_category">Kategoria lehentsia</string>
     <string name="licensed">Lizentziatua</string>
     <string name="chapter_not_found">Kapitulua ez da aurkitu</string>
-    <string name="loading">Kargatzenâ€¦</string>
+    <string name="loading">Kargatzen...</string>
     <string name="charging">Telefonoa kargatzen</string>
     <string name="title">Titulua</string>
     <string name="completed">Bukatua</string>
@@ -238,7 +238,7 @@
     <string name="pref_clear_history">Garbitu historia</string>
     <string name="lock_with_biometrics">Desblokeatzea eskatu</string>
     <string name="default_category_summary">Galdetu beti</string>
-    <string name="ext_install_service_notif">Luzapena instalatzenâ€¦</string>
+    <string name="ext_install_service_notif">Luzapena instalatzen...</string>
     <string name="filter_mode_overlay">Gainjarri</string>
     <string name="white_background">Zuria</string>
     <string name="black_background">Beltza</string>
@@ -302,10 +302,10 @@
     <string name="information_webview_outdated">Mesedez, eguneratu WebView aplikazioa bateragarritasun hobea izateko</string>
     <string name="channel_complete">Bukatua</string>
     <string name="error_category_exists">Izen hori daukan kategoria bat badago dagoeneko!</string>
-    <string name="update_check_notification_download_in_progress">Deskargatzenâ€¦</string>
+    <string name="update_check_notification_download_in_progress">Deskargatzen...</string>
     <string name="migration_selection_prompt">Hautatu migratzeko iturri bat</string>
     <string name="notification_first_add_to_library">Mesedez, gehitu manga zure liburutegian hau egin aurretik</string>
-    <string name="transition_pages_loading">Orriak kargatzenâ€¦</string>
+    <string name="transition_pages_loading">Orriak kargatzen...</string>
     <string name="channel_common">Arrunta</string>
     <string name="information_webview_required">WebView beharrezkoa da Wammy-rentzat</string>
     <string name="download_notifier_text_only_wifi">Ez dago Wi-Fi konexiorik erabilgarri</string>
@@ -412,7 +412,7 @@
     <string name="include">Sartu: %s</string>
     <string name="color_filter_r_value">G</string>
     <string name="other_source">Besteak</string>
-    <string name="action_global_search_hint">Bilaketa globalaâ€¦</string>
+    <string name="action_global_search_hint">Bilaketa globala...</string>
     <string name="clear_history_completed">Historia ezabatu da</string>
     <string name="clear_history_confirmation">Ziur zaude? Historia guztia galduko da.</string>
     <string name="migration_help_guide">Iturrien migrazio gida</string>
@@ -564,7 +564,7 @@
     <string name="action_close">Itxi</string>
     <string name="pref_app_language">App hizkuntza</string>
     <string name="ext_info_language">Hizkuntza</string>
-    <string name="action_search_hint">Bilatuâ€¦</string>
+    <string name="action_search_hint">Bilatu...</string>
     <string name="delete_category_confirmation">\"%s\" kategoria ezabatu nahi duzu?</string>
     <string name="action_remove_everything">Guztia kendu</string>
     <string name="label_stats">Estatistikak</string>

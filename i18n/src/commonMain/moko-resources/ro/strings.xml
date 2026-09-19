@@ -61,7 +61,7 @@
     <string name="action_undo">AnuleazÄƒ</string>
     <string name="action_open_log">Deschide jurnal</string>
     <string name="action_restore">RestaureazÄƒ</string>
-    <string name="loading">Se Ã®ncarcÄƒâ€¦</string>
+    <string name="loading">Se Ã®ncarcÄƒ...</string>
     <string name="app_not_available">AplicaÈ›ia nu este accesibilÄƒ</string>
     <string name="pref_category_general">Generale</string>
     <string name="pref_category_reader">Cititor</string>
@@ -185,7 +185,7 @@
     <string name="no_more_results">Nu mai sunt rezultate</string>
     <string name="local_source">SursÄƒ localÄƒ</string>
     <string name="other_source">Altele</string>
-    <string name="action_global_search_hint">CÄƒutare globalÄƒâ€¦</string>
+    <string name="action_global_search_hint">CÄƒutare globalÄƒ...</string>
     <string name="latest">Cel mai recent</string>
     <string name="browse">CautÄƒ</string>
     <string name="ongoing">ÃŽn desfÄƒÈ™urare</string>
@@ -240,7 +240,7 @@
     <string name="transition_previous">Precedent:</string>
     <string name="transition_no_next">Nu existÄƒ capitolul urmÄƒtor</string>
     <string name="transition_no_previous">Nu existÄƒ capitolul precedent</string>
-    <string name="transition_pages_loading">Paginile se Ã®ncarcÄƒâ€¦</string>
+    <string name="transition_pages_loading">Paginile se Ã®ncarcÄƒ...</string>
     <string name="transition_pages_error">ÃŽncÄƒrcarea paginilor a eÈ™uat: %1$s</string>
     <string name="migration_dialog_what_to_include">SelectaÈ›i ce date sÄƒ fie incluse</string>
     <string name="migrate">MigreazÄƒ</string>
@@ -253,7 +253,7 @@
     <string name="file_select_backup">SelecteazÄƒ fiÈ™ierul de rezervÄƒ</string>
     <string name="update_check_confirm">DescarcÄƒ</string>
     <string name="update_check_no_new_updates">Nu sunt exista actualizÄƒri noi</string>
-    <string name="update_check_notification_download_in_progress">Se descarcÄƒâ€¦</string>
+    <string name="update_check_notification_download_in_progress">Se descarcÄƒ...</string>
     <string name="update_check_notification_update_available">Versiune nouÄƒ disponibilÄƒ!</string>
     <string name="information_no_downloads">FÄƒrÄƒ descÄƒrcÄƒri</string>
     <string name="information_no_recent">Nu existÄƒ actualizÄƒri recente</string>
@@ -563,7 +563,7 @@
     <string name="local_filter_order_by">OrdoneazÄƒ dupÄƒ</string>
     <string name="cant_open_last_read_chapter">Nu se poate deschide ultimul capitol citit</string>
     <string name="extension_api_error">Nu s-a putut obÈ›ine lista de extensii</string>
-    <string name="ext_install_service_notif">Se instaleazÄƒ extensiaâ€¦</string>
+    <string name="ext_install_service_notif">Se instaleazÄƒ extensia...</string>
     <string name="ext_installer_pref">Program de instalare</string>
     <string name="pref_create_folder_per_manga_summary">CreeazÄƒ dosare Ã®n funcÈ›ie de titlul intrÄƒrilor</string>
     <string name="automatic_background">Automat</string>
@@ -594,7 +594,7 @@
     <string name="update_check_open">Deschide pe GitHub</string>
     <string name="not_installed">Nu este instalat</string>
     <string name="action_sort_count">Total intrÄƒri</string>
-    <string name="action_search_hint">CautÄƒâ€¦</string>
+    <string name="action_search_hint">CautÄƒ...</string>
     <string name="theme_tidalwave">Tsunami</string>
     <string name="ext_info_age_rating">VÃ¢rsta minimÄƒ</string>
     <string name="ext_installer_legacy">Versiune veche</string>
@@ -707,7 +707,7 @@
     <string name="pref_chapter_swipe_end">Glisare cÄƒtre dreapta a unui capitol</string>
     <string name="exception_offline">FÄƒrÄƒ conexiune la internet</string>
     <string name="pref_storage_usage">Utilizarea spaÈ›iului de stocare</string>
-    <string name="notification_updating_progress">Actualizare bibliotecÄƒâ€¦ (%s)</string>
+    <string name="notification_updating_progress">Actualizare bibliotecÄƒ... (%s)</string>
     <string name="download_cache_invalidated">Indexul de descÄƒrcÄƒri a fost invalidat</string>
     <string name="action_bar_up_description">NavigheazÄƒ Ã®n sus</string>
     <string name="action_sort_tracker_score">Scorul serviciului de urmÄƒrire</string>
@@ -836,7 +836,7 @@
     <string name="clear_db_exclude_read">PÄƒstraÈ›i intrÄƒrile cu capitole citite</string>
     <string name="pref_update_library_manga_titles">ActualizaÈ›i titlurile benzilor desenate din bibliotecÄƒ pentru a le potrivi cu sursa</string>
     <string name="pref_update_library_manga_titles_summary">AtenÈ›ie: dacÄƒ o bandÄƒ desenatÄƒ este redenumitÄƒ, aceasta va fi eliminatÄƒ din coada de descÄƒrcare (dacÄƒ este prezenÄƒ).</string>
-    <string name="logging_in">Conectareâ€¦</string>
+    <string name="logging_in">Conectare...</string>
     <string name="author">Autor</string>
     <string name="artist">Artist</string>
     <string name="possible_duplicates_title">Posibile duplicate</string>
@@ -844,7 +844,7 @@
     <string name="tracked_privately">UrmÄƒrit Ã®n mod privat</string>
     <string name="action_toggle_private_on">UrmÄƒriÈ›i Ã®n mod privat</string>
     <string name="action_toggle_private_off">UrmÄƒriÈ›i Ã®n mod public</string>
-    <string name="notes_placeholder">Mi-a plÄƒcut partea Ã®n careâ€¦</string>
+    <string name="notes_placeholder">Mi-a plÄƒcut partea Ã®n care...</string>
     <string name="migrationConfigScreen.selectedHeader">Selectat</string>
     <string name="migrationConfigScreen.availableHeader">Disponibil</string>
     <string name="migrationConfigScreen.selectAllLabel">SelectaÈ›i tot</string>

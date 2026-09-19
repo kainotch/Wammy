@@ -54,7 +54,7 @@
     <string name="action_undo">Ongedaan maken</string>
     <string name="action_open_log">Open log</string>
     <string name="action_restore">Herstellen</string>
-    <string name="loading">Ladenâ€¦</string>
+    <string name="loading">Laden...</string>
     <string name="pref_category_general">Algemeen</string>
     <string name="pref_category_reader">Lezer</string>
     <string name="pref_category_downloads">Downloads</string>
@@ -215,7 +215,7 @@
     <string name="decode_image_error">De afbeelding kon niet worden geladen</string>
     <string name="download_queue_error">Kon hoofdstukken niet downloaden. Je kan het opnieuw proberen in het downloadscherm</string>
     <string name="notification_cover_update_failed">Updaten van omslag mislukt</string>
-    <string name="update_check_notification_download_in_progress">Downloadenâ€¦</string>
+    <string name="update_check_notification_download_in_progress">Downloaden...</string>
     <string name="action_filter_bookmarked">Met bladwijzer</string>
     <string name="login_success">Ingelogd</string>
     <string name="licensed">Gelicenseerd</string>
@@ -223,7 +223,7 @@
     <string name="action_global_search">Globaal zoeken</string>
     <string name="action_display_download_badge">Gedownloade hoofdstukken</string>
     <string name="other_source">Anders</string>
-    <string name="action_global_search_hint">Globaal zoekenâ€¦</string>
+    <string name="action_global_search_hint">Globaal zoeken...</string>
     <string name="latest">Nieuwste</string>
     <string name="browse">Bladeren</string>
     <string name="channel_common">Algemeen</string>
@@ -261,7 +261,7 @@
     <string name="transition_previous">Vorige:</string>
     <string name="transition_no_next">Er is geen volgend hoofdstuk</string>
     <string name="transition_no_previous">Er is geen vorig hoofdstuk</string>
-    <string name="transition_pages_loading">Pagina\'s aan het ladenâ€¦</string>
+    <string name="transition_pages_loading">Pagina\'s aan het laden...</string>
     <string name="transition_pages_error">Fout bij het laden van pagina\'s : %1$s</string>
     <string name="migration_dialog_what_to_include">Selecteer data om mee te nemen</string>
     <string name="migrate">Migreren</string>
@@ -523,7 +523,7 @@
     <string name="confirm_lock_change">Authenticeer om de wijziging te bevestigen</string>
     <string name="label_default">Standaard</string>
     <string name="ext_app_info">App-informatie</string>
-    <string name="ext_install_service_notif">Extensies installerenâ€¦</string>
+    <string name="ext_install_service_notif">Extensies installeren...</string>
     <string name="action_display_language_badge">Taal</string>
     <string name="label_warning">Waarschuwing</string>
     <string name="ext_installer_legacy">Verouderd</string>
@@ -589,7 +589,7 @@
     <string name="action_sort_unread_count">Ongelezen aantal</string>
     <string name="download_ahead_info">Werkt alleen als het huidige hoofdstuk en het volgende alreeds gedownload zijn.</string>
     <string name="pref_user_agent_string">Standaard \'user-agent-string\'</string>
-    <string name="action_search_hint">Zoekâ€¦</string>
+    <string name="action_search_hint">Zoek...</string>
     <string name="missing_storage_permission">Opslagrechten niet verleend</string>
     <string name="action_display_show_continue_reading_button">Knop om lezen te hervatten weergeven</string>
     <string name="label_stats">Statistieken</string>
@@ -822,7 +822,7 @@
     <string name="clear_db_exclude_read">Houd items met gelezen hoofdstukken</string>
     <string name="pref_update_library_manga_titles">Update mangatitels in bibliotheek om overeen te komen met bron</string>
     <string name="pref_update_library_manga_titles_summary">Waarschuwing: als een manga hernoemt wordt zal deze worden verwijderd uit de downloadwachtrij (indien aanwezig).</string>
-    <string name="logging_in">Aan het inloggenâ€¦</string>
+    <string name="logging_in">Aan het inloggen...</string>
     <string name="author">Auteur</string>
     <string name="artist">Tekenaar</string>
     <string name="possible_duplicates_title">Mogelijke duplicaten</string>
@@ -830,7 +830,7 @@
     <string name="tracked_privately">PrivÃ© getrackt</string>
     <string name="action_toggle_private_on">Track privÃ©</string>
     <string name="action_toggle_private_off">Track openbaar</string>
-    <string name="notes_placeholder">Vond het deel leuk waarâ€¦</string>
+    <string name="notes_placeholder">Vond het deel leuk waar...</string>
     <string name="migrationConfigScreen.selectedHeader">Geselecteerd</string>
     <string name="migrationConfigScreen.availableHeader">Beschikbaar</string>
     <string name="migrationConfigScreen.selectAllLabel">Selecteer alle</string>
@@ -890,7 +890,7 @@
     <string name="extensionStoresScreen.emptyLabel">Je hebt nog geen extensiewinkel toegevoegd</string>
     <string name="extensionStoresScreen.addStore.title">Extensiewinkel toevoegen</string>
     <string name="extensionStoresScreen.addStore.alreadyExists">Deze extensiewinkel bestaat al</string>
-    <string name="extensionStoresScreen.addStore.processing">Aan het verwerkenâ€¦</string>
+    <string name="extensionStoresScreen.addStore.processing">Aan het verwerken...</string>
     <string name="extensionStoresScreen.addStoreInput.inputLabel">Winkelindex-URL</string>
     <string name="extensionStoresScreen.addStoreDeeplink.bodyText">Wil je onderstaande extensiewinkel toevoegen?</string>
     <string name="extensionStoresScreen.deleteStore.title">Extensiewinkel verwijderen</string>

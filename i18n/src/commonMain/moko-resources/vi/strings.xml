@@ -49,7 +49,7 @@
     <string name="action_save">LÆ°u</string>
     <string name="action_reset">LÃ m má»›i</string>
     <string name="action_undo">HoÃ n tÃ¡c</string>
-    <string name="loading">Äang táº£iâ€¦</string>
+    <string name="loading">Äang táº£i...</string>
     <string name="pref_category_general">Chung</string>
     <string name="pref_category_reader">TrÃ¬nh Ä‘á»c</string>
     <string name="pref_category_downloads">Táº£i xuá»‘ng</string>
@@ -182,7 +182,7 @@
     <string name="file_select_backup">Chá»n file sao lÆ°u</string>
     <string name="update_check_confirm">Táº£i xuá»‘ng</string>
     <string name="update_check_no_new_updates">KhÃ´ng cÃ³ cáº­p nháº­t má»›i</string>
-    <string name="update_check_notification_download_in_progress">Äang táº£i xuá»‘ngâ€¦</string>
+    <string name="update_check_notification_download_in_progress">Äang táº£i xuá»‘ng...</string>
     <string name="update_check_notification_update_available">CÃ³ cáº­p nháº­t má»›i!</string>
     <string name="information_no_downloads">KhÃ´ng cÃ³ táº£i xuá»‘ng</string>
     <string name="information_no_recent">KhÃ´ng cÃ³ cáº­p nháº­t má»›i</string>
@@ -240,7 +240,7 @@
     <string name="creating_backup">Äang táº¡o báº£n sao lÆ°u</string>
     <string name="local_source">Nguá»“n cá»¥c bá»™</string>
     <string name="other_source">KhÃ¡c</string>
-    <string name="action_global_search_hint">TÃ¬m kiáº¿m toÃ n bá»™â€¦</string>
+    <string name="action_global_search_hint">TÃ¬m kiáº¿m toÃ n bá»™...</string>
     <string name="latest">Má»›i nháº¥t</string>
     <string name="browse">Duyá»‡t</string>
     <string name="manga_added_library">ÄÃ£ thÃªm vÃ o thÆ° viá»‡n</string>
@@ -258,7 +258,7 @@
     <string name="transition_previous">ChÆ°Æ¡ng trÆ°á»›c:</string>
     <string name="transition_no_next">KhÃ´ng cÃ³ chÆ°Æ¡ng tiáº¿p theo</string>
     <string name="transition_no_previous">KhÃ´ng cÃ³ chÆ°Æ¡ng trÆ°á»›c Ä‘Ã³</string>
-    <string name="transition_pages_loading">Äang táº£i trangâ€¦</string>
+    <string name="transition_pages_loading">Äang táº£i trang...</string>
     <string name="transition_pages_error">Táº£i trang tháº¥t báº¡i: %1$s</string>
     <string name="migration_dialog_what_to_include">Chá»n dá»¯ liá»‡u Ä‘á»ƒ bao gá»“m</string>
     <string name="migrate">Chuyá»ƒn nguá»“n</string>
@@ -534,7 +534,7 @@
     <string name="backup_info">Báº¡n nÃªn giá»¯ láº¡i nhiá»u báº£n sao cá»§a sao lÆ°u á»Ÿ cÃ¡c nÆ¡i khÃ¡c ná»¯a. Báº£n sao lÆ°u cÃ³ thá»ƒ chá»©a cÃ¡c thÃ´ng tin nháº¡y cáº£m nhÆ° máº­t kháº©u Ä‘Ã£ lÆ°u; hÃ£y cáº©n tháº­n khi chia sáº» vá»›i ngÆ°á»i khÃ¡c.</string>
     <string name="pref_verbose_logging_summary">In cÃ¡c ghi chÃ©p chi tiáº¿t vÃ o ghi chÃ©p há»‡ thá»‘ng ( giáº£m hiá»‡u suáº¥t á»©ng dá»¥ng )</string>
     <string name="notification_size_warning">CÃ¡c báº£n cáº­p nháº­t lá»›n sáº½ gÃ¢y háº¡i cho cÃ¡c nguá»“n vÃ  cÃ³ thá»ƒ dáº«n Ä‘áº¿n cÃ¡c báº£n cáº­p nháº­t cháº­m hÆ¡n vÃ  cÅ©ng lÃ m tÄƒng má»©c sá»­ dá»¥ng pin. Nháº¥n vÃ o Ä‘á»ƒ tÃ¬m hiá»ƒu thÃªm.</string>
-    <string name="ext_install_service_notif">Äang cÃ i Ä‘áº·t tiá»‡n Ã­ch má»Ÿ rá»™ngâ€¦</string>
+    <string name="ext_install_service_notif">Äang cÃ i Ä‘áº·t tiá»‡n Ã­ch má»Ÿ rá»™ng...</string>
     <string name="update_72hour">Má»—i 3 ngÃ y</string>
     <string name="connected_to_wifi">Chá»‰ qua Wi-Fi</string>
     <string name="download_queue_size_warning">Cáº£nh bÃ¡o: táº£i xuá»‘ng hÃ ng loáº¡t cá»¡ lá»›n cÃ³ thá»ƒ dáº«n Ä‘áº¿n cÃ¡c nguá»“n trá»Ÿ nÃªn cháº­m hÆ¡n vÃ  / hoáº·c cháº·n %s. Nháº¥n vÃ o Ä‘á»ƒ tÃ¬m hiá»ƒu thÃªm.</string>
@@ -617,7 +617,7 @@
     <string name="download_ahead_info">Chá»‰ Ã¡p dá»¥ng khi chÆ°Æ¡ng hiá»‡n giá» + chÆ°Æ¡ng tiáº¿p theo Ä‘Ã£ Ä‘Æ°á»£c táº£i.</string>
     <string name="multi_lang">Äa NgÃ´n Ngá»¯</string>
     <string name="skipped_reason_not_always_update">Bá» qua vÃ¬ loáº¡t truyá»‡n khÃ´ng cáº§n cáº­p nháº­t</string>
-    <string name="action_search_hint">TÃ¬m kiáº¿mâ€¦</string>
+    <string name="action_search_hint">TÃ¬m kiáº¿m...</string>
     <string name="pref_appearance_summary">Chá»§ Ä‘á», kiá»ƒu hiá»ƒn thá»‹ ngÃ y &amp; giá»</string>
     <string name="pref_library_summary">Danh má»¥c, cáº­p nháº­t toÃ n bá»™, vuá»‘t chÆ°Æ¡ng</string>
     <string name="pref_reader_summary">Dáº¡ng Ä‘á»c, hiá»ƒn thá»‹, Ä‘iá»u hÆ°á»›ng</string>
@@ -729,7 +729,7 @@
     <string name="onboarding_action_next">Tiáº¿p</string>
     <string name="onboarding_permission_ignore_battery_opts">Sá»­ dá»¥ng pin ná»n</string>
     <string name="onboarding_permission_install_apps_description">Äá»ƒ cÃ i Ä‘áº·t nguá»“n má»Ÿ rá»™ng.</string>
-    <string name="notification_updating_progress">Äang cáº­p nháº­t thÆ° viá»‡nâ€¦ (%s)</string>
+    <string name="notification_updating_progress">Äang cáº­p nháº­t thÆ° viá»‡n... (%s)</string>
     <string name="download_cache_invalidated">TÃ¡i táº¡o chá»‰ má»¥c táº£i xuá»‘ng</string>
     <string name="action_bar_up_description">Äiá»u hÆ°á»›ng trÃªn</string>
     <string name="onboarding_description">TrÆ°á»›c tiÃªn hÃ£y thiáº¿t láº­p má»™t sá»‘ thá»© nhÃ©. Báº¡n cÃ³ thá»ƒ tÃ¹y Ã½ chá»‰nh láº¡i nhá»¯ng cÃ i Ä‘áº·t nÃ y láº¡i sau.</string>
@@ -857,11 +857,11 @@
     <string name="action_toggle_private_on">Theo dÃµi riÃªng tÆ°</string>
     <string name="author">TÃ¡c giáº£</string>
     <string name="clear_database_text">Báº¡n sáº¯p xÃ³a cÃ¡c truyá»‡n khá»i cÆ¡ sá»Ÿ dá»¯ liá»‡u</string>
-    <string name="notes_placeholder">Ráº¥t thÃ­ch pháº§n mÃ â€¦</string>
+    <string name="notes_placeholder">Ráº¥t thÃ­ch pháº§n mÃ ...</string>
     <string name="pref_update_library_manga_titles_summary">Cáº£nh bÃ¡o: náº¿u má»™t truyá»‡n Ä‘Æ°á»£c Ä‘á»•i tÃªn, nÃ³ sáº½ bá»‹ xÃ³a khá»i hÃ ng Ä‘á»£i táº£i xuá»‘ng (náº¿u cÃ³).</string>
     <string name="artist">HoÌ£a siÌƒ</string>
     <string name="clear_db_exclude_read">Giá»¯ cÃ¡c truyá»‡n cÃ³ chÆ°Æ¡ng Ä‘Ã£ Ä‘á»c</string>
-    <string name="logging_in">Äang Ä‘Äƒng nháº­pâ€¦</string>
+    <string name="logging_in">Äang Ä‘Äƒng nháº­p...</string>
     <string name="pref_hide_missing_chapter_indicators">áº¨n chá»‰ bÃ¡o thiáº¿u chÆ°Æ¡ng</string>
     <string name="migrationConfigScreen.dataToMigrateHeader">Dá»¯ liá»‡u Ä‘á»ƒ di chuyá»ƒn</string>
     <string name="migrationConfigScreen.removeDownloadsTitle">XÃ³a pháº§n táº£i xuá»‘ng cá»§a truyá»‡n hiá»‡n táº¡i sau khi chuyá»ƒn nguá»“n</string>
@@ -920,7 +920,7 @@
     <string name="extensionStoresScreen.emptyLabel">Báº¡n chÆ°a thÃªm cá»­a hÃ ng tiá»‡n Ã­ch má»Ÿ rá»™ng</string>
     <string name="extensionStoresScreen.addStore.title">ThÃªm cá»­a hÃ ng tiá»‡n Ã­ch má»Ÿ rá»™ng</string>
     <string name="extensionStoresScreen.addStore.alreadyExists">Cá»­a hÃ ng tiá»‡n Ã­ch má»Ÿ rá»™ng nÃ y Ä‘Ã£ tá»“n táº¡i</string>
-    <string name="extensionStoresScreen.addStore.processing">Äang xá»­ lÃ½â€¦</string>
+    <string name="extensionStoresScreen.addStore.processing">Äang xá»­ lÃ½...</string>
     <string name="extensionStoresScreen.addStoreInput.inputLabel">LÆ°u URL chá»‰ má»¥c</string>
     <string name="extensionStoresScreen.addStoreDeeplink.bodyText">Báº¡n cÃ³ muá»‘n thÃªm cá»­a hÃ ng tiÃªn Ã­ch má»Ÿ rá»™ng bÃªn dÆ°á»›i khÃ´ng ?</string>
     <string name="extensionStores">Cá»­a hÃ ng tiá»‡n Ã­ch má»Ÿ rá»™ng</string>
@@ -931,7 +931,7 @@
     <string name="pref_vertical_navigator_height">Chiá»u cao thanh Ä‘iá»u hÆ°á»›ng dá»c</string>
     <string name="considering">Äang cÃ¢n nháº¯c</string>
     <string name="theme_tokyonight">ÄÃªm Tokyo</string>
-    <string name="downloading_with_progress">Äang táº£i xuá»‘ngâ€¦ (%d%%)</string>
+    <string name="downloading_with_progress">Äang táº£i xuá»‘ng... (%d%%)</string>
     <string name="pref_filter_update_categories_details">CÃ¡c cáº­p nháº­t trong cÃ¡c danh má»¥c bá»‹ loáº¡i trá»« sáº½ khÃ´ng Ä‘Æ°á»£c hiá»ƒn thá»‹ ngay cáº£ khi chÃºng cÅ©ng náº±m trong báº¥t ká»³ danh má»¥c nÃ o Ä‘Æ°á»£c bao gá»“m.</string>
     <string name="pref_filter_upcoming_categories_details">CÃ¡c tá»±a sÃ¡ch thuá»™c cÃ¡c danh má»¥c bá»‹ loáº¡i trá»« sáº½ khÃ´ng Ä‘Æ°á»£c hiá»ƒn thá»‹, ngay cáº£ khi chÃºng cÅ©ng náº±m trong báº¥t ká»³ danh má»¥c nÃ o Ä‘Æ°á»£c bao gá»“m.</string>
 </resources>

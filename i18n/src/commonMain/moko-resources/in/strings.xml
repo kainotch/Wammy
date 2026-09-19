@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="categories">Kategori</string>
     <string name="manga">Entri pustaka</string>
@@ -57,7 +57,7 @@
     <string name="name">Nama</string>
     <string name="action_display_grid">Grid kompak</string>
     <string name="action_restore">Pulihkan</string>
-    <string name="loading">Memuat…</string>
+    <string name="loading">Memuat...</string>
     <string name="app_not_available">Aplikasi tidak tersedia</string>
     <string name="pref_category_general">Umum</string>
     <string name="pref_category_reader">Pembaca</string>
@@ -205,7 +205,7 @@
     <string name="file_select_backup">Pilih berkas cadangan</string>
     <string name="update_check_confirm">Unduh</string>
     <string name="update_check_no_new_updates">Pembaruan tidak tersedia</string>
-    <string name="update_check_notification_download_in_progress">Mengunduh…</string>
+    <string name="update_check_notification_download_in_progress">Mengunduh...</string>
     <string name="update_check_notification_update_available">Versi baru tersedia!</string>
     <string name="information_no_downloads">Tidak ada unduhan</string>
     <string name="information_no_recent">Tidak ada pembaruan terkini</string>
@@ -220,7 +220,7 @@
     <string name="action_global_search">Pencarian Global</string>
     <string name="action_display_download_badge">Diunduh</string>
     <string name="other_source">Lainnya</string>
-    <string name="action_global_search_hint">Pencarian global…</string>
+    <string name="action_global_search_hint">Pencarian global...</string>
     <string name="latest">Terbaru</string>
     <string name="browse">Jelajahi</string>
     <string name="channel_common">Umum</string>
@@ -263,7 +263,7 @@
     <string name="transition_previous">Sebelumnya:</string>
     <string name="transition_no_next">Tak ada bab selanjutnya</string>
     <string name="transition_no_previous">Tak ada bab sebelumnya</string>
-    <string name="transition_pages_loading">Memuat halaman…</string>
+    <string name="transition_pages_loading">Memuat halaman...</string>
     <string name="transition_pages_error">Gagal memuat halaman: %1$s</string>
     <string name="action_open_in_web_view">Buka dalam WebView</string>
     <string name="pref_skip_read_chapters">Lewati bab yang sudah dibaca</string>
@@ -525,7 +525,7 @@
     <string name="ext_app_info">Informasi aplikasi</string>
     <string name="ext_installer_shizuku_stopped">Shizuku tidak berjalan</string>
     <string name="ext_installer_shizuku_unavailable_dialog">Pasang dan mulai Shizuku untuk menggunakan Shizuku sebagai pemasang ekstensi.</string>
-    <string name="ext_install_service_notif">Memasang ekstensi…</string>
+    <string name="ext_install_service_notif">Memasang ekstensi...</string>
     <string name="ext_installer_legacy">Warisan</string>
     <string name="ext_installer_pref">Pemasang</string>
     <string name="action_sort_count">Total entri</string>
@@ -619,7 +619,7 @@
     <string name="popular">Populer</string>
     <string name="missing_storage_permission">Izin penyimpanan tidak diberikan</string>
     <string name="skipped_reason_not_always_update">Dilewati karena seri ini tidak memerlukan pembaruan</string>
-    <string name="action_search_hint">Cari…</string>
+    <string name="action_search_hint">Cari...</string>
     <string name="pref_browse_summary">Sumber, ekstensi, pencarian global</string>
     <string name="pref_reader_summary">Mode membaca, tampilan, navigasi</string>
     <string name="pref_tracking_summary">Sinkronisasi progres searah, sinkronisasi yang ditingkatkan</string>
@@ -841,10 +841,10 @@
     <string name="clear_db_exclude_read">Simpan entri dengan bab yang sudah dibaca</string>
     <string name="pref_update_library_manga_titles">Perbarui judul manga perpustakaan agar sesuai dengan sumbernya</string>
     <string name="pref_update_library_manga_titles_summary">Peringatan: Jika sebuah manga diganti namanya, maka manga tersebut akan dihapus dari antrean unduhan (jika ada).</string>
-    <string name="logging_in">Sedang masuk…</string>
+    <string name="logging_in">Sedang masuk...</string>
     <string name="possible_duplicates_title">Duplikat yang mungkin</string>
     <string name="possible_duplicates_summary">Anda memiliki entri di perpustakaan Anda dengan nama yang serupa.\n\nPilih entri yang ingin Anda pindahkan atau tambahkan tetap.</string>
-    <string name="notes_placeholder">Suka bagian di mana…</string>
+    <string name="notes_placeholder">Suka bagian di mana...</string>
     <string name="migrationConfigScreen.selectedHeader">Dipilih</string>
     <string name="migrationConfigScreen.availableHeader">Tersedia</string>
     <string name="migrationConfigScreen.selectAllLabel">Pilih semua</string>
@@ -896,7 +896,7 @@
     <string name="extensionStoresScreen.emptyLabel">Anda belum menambahkan ekstensi</string>
     <string name="extensionStoresScreen.addStore.title">Tambah ekstensi</string>
     <string name="extensionStoresScreen.addStore.alreadyExists">Ekstensi ini sudah ditambahkan</string>
-    <string name="extensionStoresScreen.addStore.processing">Memproses…</string>
+    <string name="extensionStoresScreen.addStore.processing">Memproses...</string>
     <string name="extensionStoresScreen.addStoreDeeplink.bodyText">Apakah Anda ingin menambahkan ekstensi di bawah ini?</string>
     <string name="extensionStoresScreen.deleteStore.title">Hapus ekstensi</string>
     <string name="extensionStoresScreen.deleteStore.body">Apakah Anda ingin menghapus ekstensi \"%1$s\" (%2$s)?</string>

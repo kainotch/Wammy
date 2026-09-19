@@ -159,7 +159,7 @@
     <string name="action_webview_forward">ÐÐ»Ò“Ð°</string>
     <string name="action_webview_refresh">Ð–Ð°Ò£Ð°Ñ€Ñ‚Ñƒ</string>
     <string name="action_start_downloading_now">Ð–Ò¯ÐºÑ‚ÐµÑƒÐ´Ñ– Ò›Ð°Ð·Ñ–Ñ€ Ð±Ð°ÑÑ‚Ð°Ñƒ</string>
-    <string name="loading">Ð–Ò¯ÐºÑ‚ÐµÐ»ÑƒÐ´Ðµâ€¦</string>
+    <string name="loading">Ð–Ò¯ÐºÑ‚ÐµÐ»ÑƒÐ´Ðµ...</string>
     <string name="app_not_available">ÒšÐ¾Ð»Ð´Ð°Ð½Ð±Ð° Ò›Ð¾Ð»Ð¶ÐµÑ‚Ñ–Ð¼ÑÑ–Ð·</string>
     <string name="pref_category_general">Ð–Ð°Ð»Ð¿Ñ‹</string>
     <string name="pref_date_format">ÐšÒ¯Ð½ Ð¿Ñ–ÑˆÑ–Ð¼Ñ–</string>
@@ -242,7 +242,7 @@
 \nÐžÑÑ‹ ÑÐµÑ€Ñ‚Ð¸Ñ„Ð¸ÐºÐ°Ñ‚Ò›Ð° ÑÐµÐ½Ñƒ Ð°Ñ€Ò›Ñ‹Ð»Ñ‹ ÑÑ–Ð· Ð¾ÑÑ‹ Ò›Ð°ÑƒÑ–Ð¿-Ò›Ð°Ñ‚ÐµÑ€Ð´Ñ– Ò›Ð°Ð±Ñ‹Ð»Ð´Ð°Ð¹ÑÑ‹Ð·.</string>
     <string name="ext_nsfw_short">18+</string>
     <string name="ext_nsfw_warning">Ð‘Ò±Ð» ÐºÐµÒ£ÐµÐ¹Ñ‚Ñƒ Ð´ÐµÑ€ÐµÐºÐºÓ©Ð·Ñ–Ð½Ð´Ðµ NSFW (18+) Ð¼Ð°Ð·Ð¼Ò±Ð½Ñ‹ Ð±Ð¾Ð»ÑƒÑ‹ Ð¼Ò¯Ð¼ÐºÑ–Ð½</string>
-    <string name="ext_install_service_notif">ÐšÐµÒ£ÐµÐ¹Ñ‚Ñƒ Ð¾Ñ€Ð½Ð°Ñ‚Ñ‹Ð»ÑƒÐ´Ð°â€¦</string>
+    <string name="ext_install_service_notif">ÐšÐµÒ£ÐµÐ¹Ñ‚Ñƒ Ð¾Ñ€Ð½Ð°Ñ‚Ñ‹Ð»ÑƒÐ´Ð°...</string>
     <string name="pref_fullscreen">Ð¢Ð¾Ð»Ñ‹Ò› ÑÐºÑ€Ð°Ð½Ð´Ñ‹</string>
     <string name="pref_page_transitions">Ð‘ÐµÑ‚Ñ‚Ñ–Ò£ Ð°ÑƒÑ‹ÑÑƒÑ‹Ð½ Ð°Ð½Ð¸Ð¼Ð°Ñ†Ð¸ÑÐ»Ð°Ñƒ</string>
     <string name="pref_double_tap_anim_speed">ÒšÐ¾ÑÐ°Ñ€Ð»Ñ‹ Ñ‚Ò¯Ñ€Ñ‚Ñƒ Ð°Ð½Ð¸Ð¼Ð°Ñ†Ð¸Ñ Ð¶Ñ‹Ð»Ð´Ð°Ð¼Ð´Ñ‹Ò“Ñ‹</string>
@@ -352,7 +352,7 @@
     <string name="split_tall_images_summary">ÐžÒ›Ñ‹Ð¼Ð°Ð½Ñ‹Ò£ Ó©Ð½Ñ–Ð¼Ð´Ñ–Ð»Ñ–Ð³Ñ–Ð½ Ð¶Ð°Ò›ÑÐ°Ñ€Ñ‚Ð°Ð´Ñ‹</string>
     <string name="pref_navigate_pan">ÐšÐµÒ£ ÑÑƒÑ€ÐµÑ‚Ñ‚Ñ– Ð±Ð°ÑÒ›Ð°Ð½Ð´Ð° Ð¿Ð°Ð½Ð¾Ñ€Ð°Ð¼Ð°Ð»Ð°Ñƒ</string>
     <string name="l_nav">L Ñ‚Ó™Ñ€Ñ–Ð·Ð´ÐµÑ</string>
-    <string name="action_search_hint">Ð†Ð·Ð´ÐµÑƒâ€¦</string>
+    <string name="action_search_hint">Ð†Ð·Ð´ÐµÑƒ...</string>
     <string name="pref_hide_threshold">ÐÐ¹Ð½Ð°Ð»Ð´Ñ‹Ñ€Ò“Ð°Ð½Ð´Ð°Ò“Ñ‹ Ð¼Ó™Ð·Ñ–Ñ€Ð´Ñ– Ð¶Ð°ÑÑ‹Ñ€Ñƒ ÑÐµÐ·Ð³Ñ–ÑˆÑ‚Ñ–Ð³Ñ–</string>
     <string name="pref_image_scale_type">ÐœÐ°ÑÑˆÑ‚Ð°Ð±Ñ‚Ð°Ñƒ</string>
     <string name="vertical_plus_viewer">Ð¢Ð¾Ò›Ñ‚Ð°ÑƒÑÑ‹Ð· Ñ‚Ñ–Ðº</string>
@@ -471,7 +471,7 @@
     <string name="about_dont_kill_my_app">ÐšÐµÐ¹Ð±Ñ–Ñ€ Ó©Ð½Ð´Ñ–Ñ€ÑƒÑˆÑ–Ð»ÐµÑ€Ð´Ðµ Ð°ÑÐ»Ñ‹Ò› Ò›Ñ‹Ð·Ð¼ÐµÑ‚Ñ‚ÐµÑ€Ð´Ñ– Ó©ÑˆÑ–Ñ€ÐµÑ‚Ñ–Ð½ Ò›Ð¾Ð»Ð´Ð°Ð½Ð±Ð°Ð»Ð°Ñ€Ò“Ð° Ò›Ð¾ÑÑ‹Ð¼ÑˆÐ° ÑˆÐµÐºÑ‚ÐµÑƒÐ»ÐµÑ€ Ð±Ð°Ñ€. Ð‘Ò±Ð» ÑÐ°Ð¹Ñ‚Ñ‚Ð° Ð¾Ð½Ñ‹ Ò›Ð°Ð»Ð°Ð¹ Ñ‚Ò¯Ð·ÐµÑ‚ÑƒÐ³Ðµ Ð±Ð¾Ð»Ð°Ñ‚Ñ‹Ð½Ñ‹ Ñ‚ÑƒÑ€Ð°Ð»Ñ‹ Ñ‚Ð¾Ð»Ñ‹Ò“Ñ‹Ñ€Ð°Ò› Ð°Ò›Ð¿Ð°Ñ€Ð°Ñ‚ Ð±Ð°Ñ€.</string>
     <string name="pref_verbose_logging">Ð¢Ñ–Ñ€ÐºÐµÑƒÐ´Ñ– Ð¶Ð°Ð½-Ð¶Ð°Ò›Ñ‚Ñ‹ Ð¶Ò¯Ñ€Ð³Ñ–Ð·Ñƒ</string>
     <string name="website">Ð¡Ð°Ð¹Ñ‚</string>
-    <string name="action_global_search_hint">ÐÑƒÒ›Ñ‹Ð¼Ð´Ñ‹ Ñ–Ð·Ð´ÐµÑƒâ€¦</string>
+    <string name="action_global_search_hint">ÐÑƒÒ›Ñ‹Ð¼Ð´Ñ‹ Ñ–Ð·Ð´ÐµÑƒ...</string>
     <string name="action_global_search_query">\"%1$s\" Ð°ÑƒÒ›Ñ‹Ð¼Ð´Ñ‹ Ñ–Ð·Ð´ÐµÑƒ</string>
     <string name="browse">Ð†Ð·Ð´ÐµÑƒ</string>
     <string name="pref_reset_user_agent_string">User agent-Ñ‚Ñ– Ó™Ð´ÐµÐ¿ÐºÑ–Ð³Ðµ Ò›Ð°Ð¹Ñ‚Ð°Ñ€Ñƒ</string>
@@ -586,7 +586,7 @@
     <string name="appwidget_updates_description">Ð–Ð°Ò›Ñ‹Ð½Ð´Ð° ÐºÑ–Ñ‚Ð°Ð¿Ñ…Ð°Ð½Ð°Ð´Ð° Ð¶Ð°Ò£Ð°Ñ€Ñ‚Ñ‹Ð»Ò“Ð°Ð½ Ð¶Ð°Ð·Ð±Ð°Ð»Ð°Ñ€Ð´Ñ‹ Ò›Ð°Ñ€Ð°Ñƒ</string>
     <string name="remove_manga">\"%s\"Ñ‚Ñ– ÐºÑ–Ñ‚Ð°Ð¿Ñ…Ð°Ð½Ð°Ð´Ð°Ð½ Ð¶Ð¾Ð¹Ò“Ð°Ð¹ Ñ‚Ò±Ñ€ÑÑ‹Ð·</string>
     <string name="skipped_reason_not_always_update">Ð¢ÑƒÑ‹Ð½Ð´Ñ‹Ò“Ð° Ð¶Ð°Ò£Ð°Ñ€Ñ‚Ñƒ ÐºÐµÑ€ÐµÐº Ð¶Ð¾Ò› Ð±Ð¾Ð»Ò“Ð°Ð½Ð´Ñ‹Ò›Ñ‚Ð°Ð½ Ó©Ñ‚ÐºÑ–Ð·Ñ–Ð¿ Ð¶Ñ–Ð±ÐµÑ€Ñ–Ð»ÐµÐ´Ñ–</string>
-    <string name="update_check_notification_download_in_progress">Ð–Ò¯ÐºÑ‚ÐµÐ»ÑƒÐ´Ðµâ€¦</string>
+    <string name="update_check_notification_download_in_progress">Ð–Ò¯ÐºÑ‚ÐµÐ»ÑƒÐ´Ðµ...</string>
     <string name="channel_errors">ÒšÐ°Ñ‚ÐµÐ»Ñ–ÐºÑ‚ÐµÑ€</string>
     <string name="unfinished_list">ÐÑÒ›Ñ‚Ð°Ð»Ð¼Ð°Ò“Ð°Ð½Ð´Ð°Ñ€ Ð¢Ñ–Ð·Ñ–Ð¼Ñ–</string>
     <string name="score">Ð‘Ð°Ò“Ð°Ð»Ð°Ñƒ</string>
@@ -595,7 +595,7 @@
     <string name="track_started_reading_date">Ð‘Ð°ÑÑ‚Ð°Ð»Ò“Ð°Ð½ ÐºÒ¯Ð½Ñ–</string>
     <string name="track_finished_reading_date">ÐÑÒ›Ñ‚Ð°Ð»Ò“Ð°Ð½ ÐºÒ¯Ð½Ñ–</string>
     <string name="dialog_with_checkbox_remove_description">Ð‘Ò±Ð» Ð¾ÑÑ‹ Ñ‚Ð°Ñ€Ð°ÑƒÐ´Ñ‹Ò£ Ð¾Ò›Ñ‹Ð»Ò“Ð°Ð½ ÑƒÐ°Ò›Ñ‹Ñ‚Ñ‹Ð½ Ð¶Ð¾ÑÐ´Ñ‹. Ð¡ÐµÐ½Ñ–Ð¼Ð´Ñ–ÑÑ–Ð· Ð±Ðµ?</string>
-    <string name="transition_pages_loading">Ð‘ÐµÑ‚Ñ‚ÐµÑ€ Ð¶Ò¯ÐºÑ‚ÐµÐ»ÑƒÐ´Ðµâ€¦</string>
+    <string name="transition_pages_loading">Ð‘ÐµÑ‚Ñ‚ÐµÑ€ Ð¶Ò¯ÐºÑ‚ÐµÐ»ÑƒÐ´Ðµ...</string>
     <string name="transition_finished">ÐÑÒ›Ñ‚Ð°Ð»Ò“Ð°Ð½:</string>
     <string name="transition_previous">ÐÐ»Ð´Ñ‹Ò£Ò“Ñ‹:</string>
     <string name="clear_history_completed">Ð¢Ð°Ñ€Ð¸Ñ… Ð¶Ð¾Ð¹Ñ‹Ð»Ð´Ñ‹</string>

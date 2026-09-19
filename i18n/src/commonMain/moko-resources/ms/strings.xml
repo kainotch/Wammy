@@ -58,7 +58,7 @@
     <string name="action_undo">Batal</string>
     <string name="action_open_log">Buka log</string>
     <string name="action_restore">Kembalikan ke asal</string>
-    <string name="loading">Muatâ€¦</string>
+    <string name="loading">Muat...</string>
     <string name="app_not_available">Aplikasi tidak tersedia</string>
     <string name="pref_category_general">Umum</string>
     <string name="pref_category_reader">Pembaca</string>
@@ -163,7 +163,7 @@
     <string name="no_more_results">Tiada lagi hasil</string>
     <string name="local_source">Sumber lokal</string>
     <string name="other_source">Lain</string>
-    <string name="action_global_search_hint">Carian keseluruhanâ€¦</string>
+    <string name="action_global_search_hint">Carian keseluruhan...</string>
     <string name="latest">Terkini</string>
     <string name="browse">Semak imbas</string>
     <string name="ongoing">Berterusan</string>
@@ -213,7 +213,7 @@
     <string name="file_select_backup">Pilih fail sandaran</string>
     <string name="update_check_confirm">Muat turun</string>
     <string name="update_check_no_new_updates">Tiada versi baharu tersedia</string>
-    <string name="update_check_notification_download_in_progress">Memuat turunâ€¦</string>
+    <string name="update_check_notification_download_in_progress">Memuat turun...</string>
     <string name="update_check_notification_update_available">Versi baharu tersedia!</string>
     <string name="information_no_downloads">Tiada muat turun</string>
     <string name="information_no_recent">Tiada kemas kini terkini</string>
@@ -262,7 +262,7 @@
     <string name="transition_previous">Sebelumnya:</string>
     <string name="transition_no_next">Tiada bab seterusnya dijumpai</string>
     <string name="transition_no_previous">Tiada bab sebelumnya dijumpai</string>
-    <string name="transition_pages_loading">Memuatkan muka suratâ€¦</string>
+    <string name="transition_pages_loading">Memuatkan muka surat...</string>
     <string name="transition_pages_error">Gagal untuk memuatkan muka surat: %1$s</string>
     <string name="migration_dialog_what_to_include">Pilih data untuk disertakan</string>
     <string name="migrate">Beralih</string>
@@ -527,7 +527,7 @@
     <string name="ext_installer_shizuku_unavailable_dialog">Pasang dan mulakan Shizuku untuk guna Shizuku sebagai pemasang sambungan.</string>
     <string name="ext_installer_shizuku_stopped">Shizuku tidak dijalankan</string>
     <string name="ext_installer_pref">Pemasang</string>
-    <string name="ext_install_service_notif">Memasang sambunganâ€¦</string>
+    <string name="ext_install_service_notif">Memasang sambungan...</string>
     <string name="action_sort_count">Jumlah entri</string>
     <string name="pref_verbose_logging">Pengelogan berjela-jela</string>
     <string name="pref_verbose_logging_summary">Cetak log berjela ke log sistem (mengurangkan prestasi aplikasi)</string>
@@ -617,7 +617,7 @@
     <string name="popular">Popular</string>
     <string name="missing_storage_permission">Kebenaran storan tidak diberikan</string>
     <string name="skipped_reason_not_always_update">Dilangkau kerana siri tidak memerlukan kemas kini</string>
-    <string name="action_search_hint">Cariâ€¦</string>
+    <string name="action_search_hint">Cari...</string>
     <string name="pref_appearance_summary">Tema, format tarikh &amp; masa</string>
     <string name="pref_library_summary">Kategori, Kemas kini keseluruhan, leret bab</string>
     <string name="pref_reader_summary">Mod membaca, paparan, navigasi</string>
@@ -774,7 +774,7 @@
     <string name="pref_flash_page">Kilat pada perubahan muka surat</string>
     <string name="pref_flash_page_summ">Mengurangkan kesan \'ghosting\' pada skrin e-ink</string>
     <string name="last_auto_backup_info">Sandaran automatik terakhir:%s</string>
-    <string name="notification_updating_progress">Mengemaskini pustakaâ€¦ (%s)</string>
+    <string name="notification_updating_progress">Mengemaskini pustaka... (%s)</string>
     <string name="action_replace_repo">Ganti</string>
     <string name="label_upcoming">Akan datang</string>
     <string name="pref_webtoon_disable_zoom_out">Lumpuhkan zum keluar</string>
@@ -840,7 +840,7 @@
     <string name="pref_update_library_manga_titles">Kemas kini tajuk manga perpustakaan untuk memadankan sumber</string>
     <string name="pref_update_library_manga_titles_summary">Amaran: Jika manga dinamakan semula, ia akan dikeluarkan dari barisan muat turun (jika ada).</string>
     <string name="pref_incognito_mode_extension_summary">Jeda membaca sejarah untuk lanjutan</string>
-    <string name="logging_in">Log masukâ€¦</string>
+    <string name="logging_in">Log masuk...</string>
     <string name="author">Pengarang</string>
     <string name="artist">Artis</string>
     <string name="possible_duplicates_title">Kemungkinan pendua</string>
@@ -852,7 +852,7 @@
     <string name="action_toggle_private_on">Jejak secara peribadi</string>
     <string name="action_toggle_private_off">Jejak secara terbuka</string>
     <string name="file_picker_uri_permission_unsupported">Gagal memperoleh akses folder berterusan. Aplikasi ini mungkin akan berkelakuan luar jangkaan.</string>
-    <string name="notes_placeholder">Menikmati bahagian di manaâ€¦</string>
+    <string name="notes_placeholder">Menikmati bahagian di mana...</string>
     <string name="migrationConfigScreen.selectedHeader">Dipilih</string>
     <string name="migrationConfigScreen.availableHeader">Terdapat</string>
     <string name="migrationConfigScreen.selectAllLabel">Pilih Semua</string>
@@ -904,7 +904,7 @@
     <string name="extensionStoresScreen.emptyLabel">Anda belum menambah gudang sambungan lagi</string>
     <string name="extensionStoresScreen.addStore.title">Tambah gudang sambungan</string>
     <string name="extensionStoresScreen.addStore.alreadyExists">Gudang sambungan ini sudah wujud</string>
-    <string name="extensionStoresScreen.addStore.processing">Memprosesâ€¦</string>
+    <string name="extensionStoresScreen.addStore.processing">Memproses...</string>
     <string name="extensionStoresScreen.addStoreInput.inputLabel">URL indeks gudang</string>
     <string name="extensionStoresScreen.addStoreDeeplink.bodyText">Adakah anda ingin menambah gudang sambungan berikut?</string>
     <string name="extensionStoresScreen.deleteStore.title">Buang gudang sambungan</string>

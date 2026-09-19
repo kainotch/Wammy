@@ -56,7 +56,7 @@
     <string name="action_undo">ì‹¤í–‰ ì·¨ì†Œ</string>
     <string name="action_open_log">ë¡œê·¸ ì—´ê¸°</string>
     <string name="action_restore">ë³µì›</string>
-    <string name="loading">ë¶ˆëŸ¬ì˜¤ëŠ” ì¤‘â€¦</string>
+    <string name="loading">ë¶ˆëŸ¬ì˜¤ëŠ” ì¤‘...</string>
     <string name="app_not_available">ì•± ì´ìš© ë¶ˆê°€</string>
     <string name="pref_category_general">ì¼ë°˜</string>
     <string name="pref_category_reader">ë·°ì–´</string>
@@ -159,7 +159,7 @@
     <string name="unknown_error">ì•Œ ìˆ˜ ì—†ëŠ” ì˜¤ë¥˜</string>
     <string name="updating_category">ì¹´í…Œê³ ë¦¬ ì—…ë°ì´íŠ¸ì¤‘</string>
     <string name="no_more_results">ë”ì´ìƒ ê²°ê³¼ ì—†ìŒ</string>
-    <string name="action_global_search_hint">ì „ì²´ ê²€ìƒ‰â€¦</string>
+    <string name="action_global_search_hint">ì „ì²´ ê²€ìƒ‰...</string>
     <string name="latest">ìµœì‹ </string>
     <string name="ongoing">ì—°ìž¬ ì¤‘</string>
     <string name="unknown">ì•Œ ìˆ˜ ì—†ìŒ</string>
@@ -201,7 +201,7 @@
     <string name="transition_previous">ì´ì „:</string>
     <string name="transition_no_next">ë‹¤ìŒ í™”ê°€ ì—†ìŠµë‹ˆë‹¤</string>
     <string name="transition_no_previous">ì´ì „ í™”ê°€ ì—†ìŠµë‹ˆë‹¤</string>
-    <string name="transition_pages_loading">íŽ˜ì´ì§€ ë¡œë”©ì¤‘â€¦</string>
+    <string name="transition_pages_loading">íŽ˜ì´ì§€ ë¡œë”©ì¤‘...</string>
     <string name="transition_pages_error">íŽ˜ì´ì§€ ë¡œë”© ì‹¤íŒ¨: %1$s</string>
     <string name="notification_new_chapters">ìƒˆë¡œìš´ íšŒì°¨ ë°œê²¬</string>
     <string name="notification_cover_update_failed">í‘œì§€ ì—…ë°ì´íŠ¸ ì‹¤íŒ¨</string>
@@ -209,7 +209,7 @@
     <string name="file_select_backup">ë°±ì—… íŒŒì¼ ì„ íƒ</string>
     <string name="update_check_confirm">ë‹¤ìš´ë¡œë“œ</string>
     <string name="update_check_no_new_updates">ìƒˆë¡œìš´ ì—…ë°ì´íŠ¸ ì—†ìŒ</string>
-    <string name="update_check_notification_download_in_progress">ë‹¤ìš´ë¡œë“œ ì¤‘â€¦</string>
+    <string name="update_check_notification_download_in_progress">ë‹¤ìš´ë¡œë“œ ì¤‘...</string>
     <string name="update_check_notification_update_available">ì—…ë°ì´íŠ¸ ì´ìš© ê°€ëŠ¥!</string>
     <string name="information_no_downloads">ë‹¤ìš´ë¡œë“œ ì—†ìŒ</string>
     <string name="information_no_recent">ìµœê·¼ ì—…ë°ì´íŠ¸ ì—†ìŒ</string>
@@ -471,7 +471,7 @@
     <string name="information_webview_outdated">í˜¸í™˜ì„±ì„ ìœ„í•´ WebView ì–´í”Œë¦¬ì¼€ì´ì…˜ì„ ì—…ë°ì´íŠ¸ í•´ ì£¼ì„¸ìš”</string>
     <string name="pref_navigate_pan">ë„“ì€ ì´ë¯¸ì§€ ì´ë™</string>
     <string name="obsolete_extension_message">ì´ í™•ìž¥ í”„ë¡œê·¸ëž¨ì€ ì–´ë–¤ ìŠ¤í† ì–´ì™€ë„ ì—°ê²°ë˜ì–´ ìžˆì§€ ì•ŠìŠµë‹ˆë‹¤. ì—…ë°ì´íŠ¸ë˜ì§€ ì•Šìœ¼ë©°, ì œëŒ€ë¡œ ìž‘ë™í•˜ì§€ ì•Šì„ ìˆ˜ ìžˆê³ , ì•±ì— ë¬¸ì œê°€ ë°œìƒí•  ìˆ˜ ìžˆìŠµë‹ˆë‹¤. ì œê±°í•˜ëŠ” ê²ƒì„ ê¶Œìž¥í•©ë‹ˆë‹¤.</string>
-    <string name="ext_install_service_notif">í™•ìž¥ ì•± ì„¤ì¹˜ ì¤‘â€¦</string>
+    <string name="ext_install_service_notif">í™•ìž¥ ì•± ì„¤ì¹˜ ì¤‘...</string>
     <string name="ext_installer_legacy">ë ˆê±°ì‹œ</string>
     <string name="action_track">íŠ¸ëž˜í‚¹</string>
     <string name="pref_refresh_library_covers">ì„œìž¬ í‘œì§€ ìƒˆë¡œê³ ì¹¨</string>
@@ -619,7 +619,7 @@
     <string name="popular">ì¸ê¸°</string>
     <string name="are_you_sure">ì •ë§ë¡œ ì‹¤í–‰í•©ë‹ˆê¹Œ?</string>
     <string name="skipped_reason_not_always_update">ë§Œí™”ì— ì—…ë°ì´íŠ¸ê°€ í•„ìš”í•˜ì§€ ì•ŠìŒìœ¼ë¡œ ê±´ë„ˆëœ€</string>
-    <string name="action_search_hint">ê²€ìƒ‰â€¦</string>
+    <string name="action_search_hint">ê²€ìƒ‰...</string>
     <string name="pref_library_summary">ì¹´í…Œê³ ë¦¬, ì „ì—­ ì—…ë°ì´íŠ¸, íšŒì°¨ ìŠ¤ì™€ì´í”„</string>
     <string name="pref_reader_summary">ì½ê¸° ëª¨ë“œ, ë””ìŠ¤í”Œë ˆì´, íƒìƒ‰</string>
     <string name="pref_tracking_summary">ë‹¨ë°©í–¥ ì§„í–‰ ë™ê¸°í™”, í–¥ìƒëœ ë™ê¸°í™”</string>
@@ -824,7 +824,7 @@
     <string name="pref_update_library_manga_titles">ë¼ì´ë¸ŒëŸ¬ë¦¬ ë§Œí™” íƒ€ì´í‹€ì„ ì›ë³¸ê³¼ ì¼ì¹˜í•˜ë„ë¡ ì—…ë°ì´íŠ¸</string>
     <string name="pref_update_library_manga_titles_summary">ê²½ê³ : ë§Œí™”ì˜ ì´ë¦„ì´ ë³€ê²½ë  ê²½ìš° ë‹¤ìš´ë¡œë“œ ëŒ€ê¸°ì—´ì—ì„œ (ì¡´ìž¬í•  ê²½ìš°) ì œê±°ë©ë‹ˆë‹¤.</string>
     <string name="pref_incognito_mode_extension_summary">í™•ìž¥ ì•± ì½ê¸° ê¸°ë¡ ì¤‘ì§€</string>
-    <string name="logging_in">ë¡œê·¸ ê¸°ë¡ ì¤‘â€¦</string>
+    <string name="logging_in">ë¡œê·¸ ê¸°ë¡ ì¤‘...</string>
     <string name="author">ì €ìž</string>
     <string name="artist">ì•„í‹°ìŠ¤íŠ¸</string>
     <string name="possible_duplicates_title">ì¤‘ë³µ ê°€ëŠ¥</string>
@@ -853,7 +853,7 @@
     <string name="pref_download_concurrent_sources">ë™ì‹œ ì†ŒìŠ¤ ë‹¤ìš´ë¡œë“œ</string>
     <string name="pref_download_concurrent_pages">ë™ì‹œ íŽ˜ì´ì§€ ë‹¤ìš´ë¡œë“œ</string>
     <string name="pref_download_concurrent_pages_summary">ì†ŒìŠ¤ë³„ ë™ì‹œì— ë‹¤ìš´ë¡œë“œëœ íŽ˜ì´ì§€ ìˆ˜</string>
-    <string name="notes_placeholder">ì¸ìƒ ê¹Šì—ˆë˜ ë¶€ë¶„ì€â€¦</string>
+    <string name="notes_placeholder">ì¸ìƒ ê¹Šì—ˆë˜ ë¶€ë¶„ì€...</string>
     <string name="migrationConfigScreen.availableHeader">ì‚¬ìš© ê°€ëŠ¥</string>
     <string name="migrationConfigScreen.selectEnabledLabel">í™œì„±í™”ëœ ì†ŒìŠ¤ ì„ íƒ</string>
     <string name="migrationConfigScreen.selectPinnedLabel">ê³ ì •ëœ ì†ŒìŠ¤ ì„ íƒ</string>
@@ -909,7 +909,7 @@
     <string name="extensionStoresScreen.emptyLabel">í™•ìž¥ ì•± ìŠ¤í† ì–´ë¥¼ ì•„ì§ ì¶”ê°€í•˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤</string>
     <string name="extensionStoresScreen.addStore.title">í™•ìž¥ ì•± ìŠ¤í† ì–´ ì¶”ê°€</string>
     <string name="extensionStoresScreen.addStore.alreadyExists">ì´ í™•ìž¥ ì•± ìŠ¤í† ì–´ëŠ” ì´ë¯¸ ì¡´ìž¬í•©ë‹ˆë‹¤</string>
-    <string name="extensionStoresScreen.addStore.processing">ì§„í–‰ ì¤‘â€¦</string>
+    <string name="extensionStoresScreen.addStore.processing">ì§„í–‰ ì¤‘...</string>
     <string name="extensionStoresScreen.addStoreInput.inputLabel">ìŠ¤í† ì–´ ì¸ë±ìŠ¤ URL</string>
     <string name="extensionStoresScreen.addStoreDeeplink.bodyText">ì•„ëž˜ í™•ìž¥ ì•± ìŠ¤í† ì–´ë¥¼ ì¶”ê°€í•˜ì‹œê² ìŠµë‹ˆê¹Œ?</string>
     <string name="extensionStoresScreen.deleteStore.title">í™•ìž¥ ì•± ìŠ¤í† ì–´ ì œê±°</string>
@@ -919,6 +919,6 @@
     <string name="pref_vertical_navigator_height">ì„¸ë¡œ íƒìƒ‰ê¸° ë†’ì´</string>
     <string name="considering">ê³ ë ¤ ì¤‘</string>
     <string name="theme_tokyonight">ë„ì¿„ ë‚˜ì´íŠ¸</string>
-    <string name="downloading_with_progress">ë‹¤ìš´ë¡œë“œ ì¤‘â€¦ (%d%%)</string>
+    <string name="downloading_with_progress">ë‹¤ìš´ë¡œë“œ ì¤‘... (%d%%)</string>
     <string name="pref_filter_update_categories_details">ì œì™¸ëœ ì¹´í…Œê³ ë¦¬ ì—…ë°ì´íŠ¸ëŠ” í¬í•¨ë˜ëŠ” ì¹´í…Œê³ ë¦¬ê°€ ìžˆì–´ë„ í‘œì‹œë˜ì§€ ì•ŠìŠµë‹ˆë‹¤.</string>
 </resources>

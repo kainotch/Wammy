@@ -73,7 +73,7 @@
     <string name="action_sort_tracker_score">Ù†ØªÙŠØ¬Ø© Ø§Ù„Ù…ØªØªØ¨Ø¹</string>
     <string name="action_sort_random">Ø¹Ø´ÙˆØ§Ø¦ÙŠ</string>
     <string name="action_search">Ø¨Ø­Ø«</string>
-    <string name="action_search_hint">Ø¨Ø­Ø«â€¦</string>
+    <string name="action_search_hint">Ø¨Ø­Ø«...</string>
     <string name="action_search_settings">Ø¥Ø¹Ø¯Ø§Ø¯Ø§Øª Ø§Ù„Ø¨Ø­Ø«</string>
     <string name="action_global_search">Ø¨Ø­Ø« Ø¹Ø§Ù…</string>
     <string name="action_select_all">ØªØ­Ø¯ÙŠØ¯ Ø§Ù„ÙƒÙ„</string>
@@ -169,7 +169,7 @@
     <string name="action_add_anyway">Ø¥Ø¶Ø§ÙØ© Ø¹Ù„Ù‰ Ø£ÙŠ Ø­Ø§Ù„</string>
 
     <!-- Ø§Ù„Ø¹Ù…Ù„ÙŠØ§Øª -->
-    <string name="loading">Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù…ÙŠÙ„â€¦</string>
+    <string name="loading">Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù…ÙŠÙ„...</string>
     <string name="internal_error">Ø®Ø·Ø£ Ø¯Ø§Ø®Ù„ÙŠ: Ø±Ø§Ø¬Ø¹ Ø³Ø¬Ù„Ø§Øª Ø§Ù„Ø£Ø¹Ø·Ø§Ù„ Ù„Ù…Ø²ÙŠØ¯ Ù…Ù† Ø§Ù„Ù…Ø¹Ù„ÙˆÙ…Ø§Øª</string>
 
     <!-- Ø§Ù„Ø§Ø®ØªØµØ§Ø±Ø§Øª -->
@@ -344,7 +344,7 @@
     <string name="ext_nsfw_short">18+</string>
     <string name="ext_nsfw_warning">Ù‚Ø¯ ØªØ­ØªÙˆÙŠ Ù…ØµØ§Ø¯Ø± Ù‡Ø°Ù‡ Ø§Ù„Ø¥Ø¶Ø§ÙØ© Ø¹Ù„Ù‰ Ù…Ø­ØªÙˆÙ‰ NSFW (18+)</string>
     <string name="ext_permission_install_apps_warning">Ù‡Ù†Ø§Ùƒ Ø­Ø§Ø¬Ø© Ø¥Ù„Ù‰ Ø£Ø°ÙˆÙ†Ø§Øª Ù„ØªØ«Ø¨ÙŠØª Ø§Ù„Ø¥Ø¶Ø§ÙØ§Øª. Ø§Ø¶ØºØ· Ù‡Ù†Ø§ Ù„Ù…Ù†Ø­Ù‡Ø§.</string>
-    <string name="ext_install_service_notif">Ø¬Ø§Ø±ÙŠ ØªØ«Ø¨ÙŠØª Ø§Ù„Ø¥Ø¶Ø§ÙØ©â€¦</string>
+    <string name="ext_install_service_notif">Ø¬Ø§Ø±ÙŠ ØªØ«Ø¨ÙŠØª Ø§Ù„Ø¥Ø¶Ø§ÙØ©...</string>
     <string name="ext_installer_pref">Ø§Ù„Ù…Ø«Ø¨Øª</string>
     <string name="ext_installer_legacy">Ù‚Ø¯ÙŠÙ…</string>
     <string name="ext_installer_packageinstaller" translatable="false">PackageInstaller</string>
@@ -370,7 +370,7 @@
     <string name="extensionStoresScreen.emptyLabel">Ù„Ù… ØªÙ‚Ù… Ø¨Ø¥Ø¶Ø§ÙØ© Ø£ÙŠ Ù…ØªØ¬Ø± Ø¥Ø¶Ø§ÙØ§Øª Ø¨Ø¹Ø¯</string>
     <string name="extensionStoresScreen.addStore.title">Ø¥Ø¶Ø§ÙØ© Ù…ØªØ¬Ø± Ø¥Ø¶Ø§ÙØ§Øª</string>
     <string name="extensionStoresScreen.addStore.alreadyExists">Ù…ØªØ¬Ø± Ø§Ù„Ø¥Ø¶Ø§ÙØ§Øª Ù‡Ø°Ø§ Ù…ÙˆØ¬ÙˆØ¯ Ø¨Ø§Ù„ÙØ¹Ù„</string>
-    <string name="extensionStoresScreen.addStore.processing">Ø¬Ø§Ø±ÙŠ Ø§Ù„Ù…Ø¹Ø§Ù„Ø¬Ø©â€¦</string>
+    <string name="extensionStoresScreen.addStore.processing">Ø¬Ø§Ø±ÙŠ Ø§Ù„Ù…Ø¹Ø§Ù„Ø¬Ø©...</string>
     <string name="extensionStoresScreen.addStoreInput.inputLabel">Ø±Ø§Ø¨Ø· ÙÙ‡Ø±Ø³ Ø§Ù„Ù…ØªØ¬Ø±</string>
     <string name="extensionStoresScreen.addStoreDeeplink.bodyText">Ù‡Ù„ ØªØ±ØºØ¨ ÙÙŠ Ø¥Ø¶Ø§ÙØ© Ù…ØªØ¬Ø± Ø§Ù„Ø¥Ø¶Ø§ÙØ§Øª Ø£Ø¯Ù†Ø§Ù‡ØŸ</string>
     <string name="extensionStoresScreen.deleteStore.title">Ø¥Ø²Ø§Ù„Ø© Ù…ØªØ¬Ø± Ø§Ù„Ø¥Ø¶Ø§ÙØ§Øª</string>
@@ -656,7 +656,7 @@
     <string name="email">Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ</string>
     <string name="password">ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±</string>
     <string name="login">ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„</string>
-    <string name="logging_in">Ø¬Ø§Ø±ÙŠ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„â€¦</string>
+    <string name="logging_in">Ø¬Ø§Ø±ÙŠ ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„...</string>
     <string name="login_success">ØªÙ… ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„</string>
     <string name="logout_title">ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬ Ù…Ù† %1$sØŸ</string>
     <string name="logout">ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬</string>
@@ -676,7 +676,7 @@
     <string name="other_source">Ø£Ø®Ø±Ù‰</string>
     <string name="last_used_source">Ø¢Ø®Ø± Ø§Ø³ØªØ®Ø¯Ø§Ù…</string>
     <string name="pinned_sources">Ø§Ù„Ù…Ø«Ø¨ØªØ©</string>
-    <string name="action_global_search_hint">Ø¨Ø­Ø« Ø¹Ø§Ù…â€¦</string>
+    <string name="action_global_search_hint">Ø¨Ø­Ø« Ø¹Ø§Ù…...</string>
     <string name="action_global_search_query">Ø§Ù„Ø¨Ø­Ø« Ø¹Ù† \"%1$s\" Ø¨Ø´ÙƒÙ„ Ø¹Ø§Ù…</string>
     <string name="latest">Ø§Ù„Ø£Ø­Ø¯Ø«</string>
     <string name="popular">Ø§Ù„Ø£Ø´Ù‡Ø±</string>
@@ -814,7 +814,7 @@
     <string name="transition_previous">Ø§Ù„Ø³Ø§Ø¨Ù‚:</string>
     <string name="transition_no_next">Ù„Ø§ ÙŠÙˆØ¬Ø¯ ÙØµÙ„ ØªØ§Ù„Ù</string>
     <string name="transition_no_previous">Ù„Ø§ ÙŠÙˆØ¬Ø¯ ÙØµÙ„ Ø³Ø§Ø¨Ù‚</string>
-    <string name="transition_pages_loading">Ø¬Ø§Ø±ÙŠ ØªØ­Ù…ÙŠÙ„ Ø§Ù„ØµÙØ­Ø§Øªâ€¦</string>
+    <string name="transition_pages_loading">Ø¬Ø§Ø±ÙŠ ØªØ­Ù…ÙŠÙ„ Ø§Ù„ØµÙØ­Ø§Øª...</string>
     <string name="transition_pages_error">ÙØ´Ù„ ØªØ­Ù…ÙŠÙ„ Ø§Ù„ØµÙØ­Ø§Øª: %1$s</string>
     <string name="page_list_empty_error">Ù„Ù… ÙŠØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ ØµÙØ­Ø§Øª</string>
     <string name="loader_not_implemented_error">Ø§Ù„Ù…ØµØ¯Ø± ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯</string>
@@ -877,7 +877,7 @@
     <string name="duplicate_match_exact">Ù…Ø·Ø§Ø¨Ù‚</string>
     <string name="duplicate_match_contains">ÙŠØ­ØªÙˆÙŠ</string>
     <string name="duplicate_match_url">Ù†ÙØ³ Ø§Ù„Ø±Ø§Ø¨Ø·</string>
-    <string name="action_clear_category">Ù…Ø³Ø­ Ø§Ù„ØªØµÙ†ÙŠÙâ€¦</string>
+    <string name="action_clear_category">Ù…Ø³Ø­ Ø§Ù„ØªØµÙ†ÙŠÙ...</string>
     <string name="duplicate_listing_mode">Ø¹Ø±Ø¶ Ø§Ù„ÙƒÙ„</string>
     <string name="duplicate_listing_truncated">Ø¹Ø±Ø¶ 2000 Ù…Ù† Ø£ØµÙ„ %1$d Ù†ØªÙŠØ¬Ø© Ù…Ø·Ø§Ø¨Ù‚Ø©. Ø¶ÙŠÙ‘Ù‚ Ø¨Ø§Ø³ØªØ®Ø¯Ø§Ù… ØªØµÙÙŠØ§Øª Ø§Ù„ØªØµÙ†ÙŠÙØŒ Ø£Ùˆ Ø§Ø³ØªØ®Ø¯Ù… \"ØªØ­Ø¯ÙŠØ¯ Ø§Ù„ÙƒÙ„\" Ù„Ù„ØªØ¹Ø§Ù…Ù„ Ù…Ø¹ ÙƒÙ„ %1$d.</string>
     <string name="duplicate_filters_sort">Ø§Ù„ØªØµÙÙŠØ§Øª ÙˆØ§Ù„ØªØ±ØªÙŠØ¨</string>
@@ -889,9 +889,9 @@
     <string name="duplicate_sort_label">Ø§Ù„ØªØ±ØªÙŠØ¨:</string>
     <string name="duplicate_sort_name">Ø§Ù„Ø§Ø³Ù…</string>
     <string name="duplicate_sort_latest">Ø§Ù„Ø£Ø­Ø¯Ø«</string>
-    <string name="duplicate_sort_ch_desc">ÙØµÙ„â†“</string>
-    <string name="duplicate_sort_dl_desc">ØªØ­Ù…ÙŠÙ„â†“</string>
-    <string name="duplicate_sort_read_desc">Ù‚Ø±Ø§Ø¡Ø©â†“</string>
+    <string name="duplicate_sort_ch_desc">ÙØµÙ„↓</string>
+    <string name="duplicate_sort_dl_desc">ØªØ­Ù…ÙŠÙ„↓</string>
+    <string name="duplicate_sort_read_desc">Ù‚Ø±Ø§Ø¡Ø©↓</string>
     <string name="duplicate_category_label">Ø§Ù„ØªØµÙ†ÙŠÙ:</string>
     <string name="duplicate_category_clear">Ù…Ø³Ø­</string>
     <string name="duplicate_source_priority">Ø£ÙˆÙ„ÙˆÙŠØ© Ø§Ù„Ù…ØµØ¯Ø±</string>
@@ -952,7 +952,7 @@
     <string name="download_incomplete_error">ØªØ­Ù…ÙŠÙ„ ØºÙŠØ± Ù…ÙƒØªÙ…Ù„: %1$d Ù…Ù† %2$d ØµÙØ­Ø© ÙØ´Ù„Øª</string>
     <string name="download_queue_size_warning">ØªØ­Ø°ÙŠØ±: Ù‚Ø¯ ØªØ¤Ø¯ÙŠ Ø¹Ù…Ù„ÙŠØ§Øª Ø§Ù„ØªØ­Ù…ÙŠÙ„ Ø§Ù„ÙƒØ¨ÙŠØ±Ø© Ø¥Ù„Ù‰ Ø¥Ø¨Ø·Ø§Ø¡ Ø§Ù„Ù…ØµØ§Ø¯Ø± Ùˆ/Ø£Ùˆ Ø­Ø¸Ø± %s. Ø§Ø¶ØºØ· Ù„Ù…Ø¹Ø±ÙØ© Ø§Ù„Ù…Ø²ÙŠØ¯.</string>
 
-    <string name="notification_updating_progress">Ø¬Ø§Ø±ÙŠ ØªØ­Ø¯ÙŠØ« Ø§Ù„Ù…ÙƒØªØ¨Ø©â€¦ (%s)</string>
+    <string name="notification_updating_progress">Ø¬Ø§Ø±ÙŠ ØªØ­Ø¯ÙŠØ« Ø§Ù„Ù…ÙƒØªØ¨Ø©... (%s)</string>
     <string name="notification_size_warning">ØªØ¶Ø± Ø§Ù„ØªØ­Ø¯ÙŠØ«Ø§Øª Ø§Ù„ÙƒØ¨ÙŠØ±Ø© Ø¨Ø§Ù„Ù…ØµØ§Ø¯Ø± ÙˆÙ‚Ø¯ ØªØ¤Ø¯ÙŠ Ø¥Ù„Ù‰ ØªØ­Ø¯ÙŠØ«Ø§Øª Ø£Ø¨Ø·Ø£ ÙˆØ§Ø³ØªÙ‡Ù„Ø§Ùƒ Ù…ØªØ²Ø§ÙŠØ¯ Ù„Ù„Ø¨Ø·Ø§Ø±ÙŠØ©. Ø§Ø¶ØºØ· Ù„Ù…Ø¹Ø±ÙØ© Ø§Ù„Ù…Ø²ÙŠØ¯.</string>
     <string name="notification_new_chapters">ØªÙ… Ø§Ù„Ø¹Ø«ÙˆØ± Ø¹Ù„Ù‰ ÙØµÙˆÙ„ Ø¬Ø¯ÙŠØ¯Ø©</string>
     <string name="notification_chapters_single">Ø§Ù„ÙØµÙ„ %1$s</string>
@@ -979,7 +979,7 @@
     <string name="update_check_eol">Ø¥ØµØ¯Ø§Ø± Android Ù‡Ø°Ø§ Ù„Ù… ÙŠØ¹Ø¯ Ù…Ø¯Ø¹ÙˆÙ…Ø§Ù‹</string>
     <string name="update_check_no_new_updates">Ù„Ø§ ØªÙˆØ¬Ø¯ ØªØ­Ø¯ÙŠØ«Ø§Øª Ø¬Ø¯ÙŠØ¯Ø© Ù…ØªØ§Ø­Ø©</string>
 
-    <string name="update_check_notification_download_in_progress">Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù…ÙŠÙ„â€¦</string>
+    <string name="update_check_notification_download_in_progress">Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ­Ù…ÙŠÙ„...</string>
     <string name="update_check_notification_download_complete">Ø§Ø¶ØºØ· Ù„ØªØ«Ø¨ÙŠØª Ø§Ù„ØªØ­Ø¯ÙŠØ«</string>
     <string name="update_check_notification_download_error">Ø®Ø·Ø£ ÙÙŠ Ø§Ù„ØªØ­Ù…ÙŠÙ„</string>
     <string name="update_check_notification_update_available">ÙŠØªÙˆÙØ± Ø¥ØµØ¯Ø§Ø± Ø¬Ø¯ÙŠØ¯!</string>
@@ -1029,7 +1029,7 @@
     <string name="exception_offline">Ù„Ø§ ÙŠÙˆØ¬Ø¯ Ø§ØªØµØ§Ù„ Ø¨Ø§Ù„Ø¥Ù†ØªØ±Ù†Øª</string>
     <string name="exception_unknown_host">ØªØ¹Ø°Ø± Ø§Ù„ÙˆØµÙˆÙ„ Ø¥Ù„Ù‰ %s</string>
 
-    <string name="notes_placeholder">Ø§Ø³ØªÙ…ØªØ¹Øª Ø¨Ø§Ù„Ø¬Ø²Ø¡ Ø§Ù„Ø°ÙŠâ€¦</string>
+    <string name="notes_placeholder">Ø§Ø³ØªÙ…ØªØ¹Øª Ø¨Ø§Ù„Ø¬Ø²Ø¡ Ø§Ù„Ø°ÙŠ...</string>
 
     <string name="migrationConfigScreen.selectedHeader">Ø§Ù„Ù…Ø­Ø¯Ø¯</string>
     <string name="migrationConfigScreen.availableHeader">Ø§Ù„Ù…ØªØ§Ø­</string>
@@ -1087,9 +1087,9 @@
     <string name="pref_translation_chunk_characters">Ø£Ø­Ø±Ù</string>
     <string name="pref_translation_chunk_words">ÙƒÙ„Ù…Ø§Øª</string>
     <string name="pref_translation_chunk_size">Ø­Ø¬Ù… ØªØ¬Ø²Ø¦Ø© Ø§Ù„ØªØ±Ø¬Ù…Ø©</string>
-    <string name="pref_translation_chunk_paragraphs_rec">ÙÙ‚Ø±Ø§Øª Ù„ÙƒÙ„ Ø¬Ø²Ø¡ (Ù…ÙˆØµÙ‰ Ø¨Ù‡: 20â€“100)</string>
-    <string name="pref_translation_chunk_characters_rec">Ø£Ø­Ø±Ù Ù„ÙƒÙ„ Ø¬Ø²Ø¡ (Ù…ÙˆØµÙ‰ Ø¨Ù‡: 1000â€“5000)</string>
-    <string name="pref_translation_chunk_words_rec">ÙƒÙ„Ù…Ø§Øª Ù„ÙƒÙ„ Ø¬Ø²Ø¡ (Ù…ÙˆØµÙ‰ Ø¨Ù‡: 200â€“2000)</string>
+    <string name="pref_translation_chunk_paragraphs_rec">ÙÙ‚Ø±Ø§Øª Ù„ÙƒÙ„ Ø¬Ø²Ø¡ (Ù…ÙˆØµÙ‰ Ø¨Ù‡: 20-100)</string>
+    <string name="pref_translation_chunk_characters_rec">Ø£Ø­Ø±Ù Ù„ÙƒÙ„ Ø¬Ø²Ø¡ (Ù…ÙˆØµÙ‰ Ø¨Ù‡: 1000-5000)</string>
+    <string name="pref_translation_chunk_words_rec">ÙƒÙ„Ù…Ø§Øª Ù„ÙƒÙ„ Ø¬Ø²Ø¡ (Ù…ÙˆØµÙ‰ Ø¨Ù‡: 200-2000)</string>
     <string name="pref_translation_chunk_units">ÙˆØ­Ø¯Ø§Øª Ù„ÙƒÙ„ Ø¬Ø²Ø¡</string>
     <string name="pref_translation_contextual_anchoring">ØªØ«Ø¨ÙŠØª Ø³ÙŠØ§Ù‚ÙŠ</string>
     <string name="pref_translation_contextual_anchoring_desc">Ø¥Ø±Ø³Ø§Ù„ Ø§Ù„ÙÙ‚Ø±Ø§Øª Ø§Ù„Ù…ØªØ±Ø¬Ù…Ø© Ø§Ù„Ø³Ø§Ø¨Ù‚Ø© ÙƒØ³ÙŠØ§Ù‚ Ù„Ù…Ø­Ø±ÙƒØ§Øª LLM Ù„ØªØ­Ù‚ÙŠÙ‚ ØªÙ†Ø§Ø³Ù‚ Ø£ÙØ¶Ù„</string>
@@ -1098,12 +1098,12 @@
     <string name="pref_translation_offline_suffix"> (ØºÙŠØ± Ù…ØªØµÙ„)</string>
     <string name="pref_translation_queue">Ù‚Ø§Ø¦Ù…Ø© Ø§Ù†ØªØ¸Ø§Ø± Ø§Ù„ØªØ±Ø¬Ù…Ø©</string>
     <string name="pref_translation_status">Ø§Ù„Ø­Ø§Ù„Ø©</string>
-    <string name="pref_translation_status_cancelling">Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø¥Ù„ØºØ§Ø¡â€¦</string>
-    <string name="pref_translation_status_paused">Ù…ØªÙˆÙ‚Ù Ù…Ø¤Ù‚ØªØ§Ù‹ â€” %1$d/%2$d Ù…ÙƒØªÙ…Ù„</string>
+    <string name="pref_translation_status_cancelling">Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø¥Ù„ØºØ§Ø¡...</string>
+    <string name="pref_translation_status_paused">Ù…ØªÙˆÙ‚Ù Ù…Ø¤Ù‚ØªØ§Ù‹ - %1$d/%2$d Ù…ÙƒØªÙ…Ù„</string>
     <string name="pref_translation_status_chunk_info"> (Ø§Ù„Ø¬Ø²Ø¡ %1$d/%2$d)</string>
     <string name="pref_translation_status_translating">Ø¬Ø§Ø±ÙŠ Ø§Ù„ØªØ±Ø¬Ù…Ø©: %1$s%2$s (%3$d/%4$d)</string>
-    <string name="pref_translation_status_done">Ø§ÙƒØªÙ…Ù„ â€” ØªÙ…Øª ØªØ±Ø¬Ù…Ø© %d ÙØµÙ„Ø§Ù‹</string>
-    <string name="pref_translation_status_idle">Ø®Ø§Ù…Ù„ â€” Ù„Ø§ ØªÙˆØ¬Ø¯ Ù…Ù‡Ø§Ù… ÙÙŠ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±</string>
+    <string name="pref_translation_status_done">Ø§ÙƒØªÙ…Ù„ - ØªÙ…Øª ØªØ±Ø¬Ù…Ø© %d ÙØµÙ„Ø§Ù‹</string>
+    <string name="pref_translation_status_idle">Ø®Ø§Ù…Ù„ - Ù„Ø§ ØªÙˆØ¬Ø¯ Ù…Ù‡Ø§Ù… ÙÙŠ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±</string>
     <string name="pref_translation_resume">Ø§Ø³ØªØ¦Ù†Ø§Ù</string>
     <string name="pref_translation_pause">Ø¥ÙŠÙ‚Ø§Ù Ù…Ø¤Ù‚Øª</string>
     <string name="pref_translation_resume_desc">Ø§Ø³ØªØ¦Ù†Ø§Ù Ù…Ø¹Ø§Ù„Ø¬Ø© Ø§Ù„ØªØ±Ø¬Ù…Ø§Øª ÙÙŠ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±</string>
@@ -1113,7 +1113,7 @@
     <string name="pref_translation_clear_queue">Ù…Ø³Ø­ Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±</string>
     <string name="pref_translation_clear_queue_desc">Ø¥Ø²Ø§Ù„Ø© Ø¬Ù…ÙŠØ¹ Ø§Ù„ØªØ±Ø¬Ù…Ø§Øª Ø§Ù„Ù…Ø¹Ù„Ù‚Ø© Ù…Ù† Ù‚Ø§Ø¦Ù…Ø© Ø§Ù„Ø§Ù†ØªØ¸Ø§Ø±</string>
     <string name="pref_translation_test_engine">Ø§Ø®ØªØ¨Ø§Ø± %s</string>
-    <string name="pref_translation_testing">Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±â€¦</string>
+    <string name="pref_translation_testing">Ø¬Ø§Ø±ÙŠ Ø§Ù„Ø§Ø®ØªØ¨Ø§Ø±...</string>
     <string name="pref_translation_test_send">Ø¥Ø±Ø³Ø§Ù„ ØªØ±Ø¬Ù…Ø© ØªØ¬Ø±ÙŠØ¨ÙŠØ©</string>
     <string name="pref_translation_test_text">Ù…Ø±Ø­Ø¨Ø§Ù‹ØŒ Ù‡Ø°Ø§ Ø§Ø®ØªØ¨Ø§Ø±.</string>
     <string name="pref_translation_system_prompt">Ù…ÙˆØ¬Ù‡ Ø§Ù„Ù†Ø¸Ø§Ù…</string>
@@ -1168,7 +1168,7 @@
     <string name="translation_selected_already_translated">Ø§Ù„ÙØµÙˆÙ„ Ø§Ù„Ù…Ø­Ø¯Ø¯Ø© Ù…ØªØ±Ø¬Ù…Ø© Ø¨Ø§Ù„ÙØ¹Ù„</string>
 
     <!-- ØªØ­Ø¯ÙŠØ« Ø¯ÙØ¹Ø© -->
-    <string name="batch_updating_entries">Ø¬Ø§Ø±ÙŠ ØªØ­Ø¯ÙŠØ« %d Ø¥Ø¯Ø®Ø§Ù„Ø§Ù‹â€¦</string>
+    <string name="batch_updating_entries">Ø¬Ø§Ø±ÙŠ ØªØ­Ø¯ÙŠØ« %d Ø¥Ø¯Ø®Ø§Ù„Ø§Ù‹...</string>
     <string name="batch_update_complete">ØªÙ… ØªØ­Ø¯ÙŠØ« %d Ø¥Ø¯Ø®Ø§Ù„Ø§Ù‹</string>
     <string name="batch_update_complete_with_failures">ØªÙ… ØªØ­Ø¯ÙŠØ« %1$d/%2$d Ø¥Ø¯Ø®Ø§Ù„Ø§Ù‹ (%3$d ÙØ´Ù„)</string>
 

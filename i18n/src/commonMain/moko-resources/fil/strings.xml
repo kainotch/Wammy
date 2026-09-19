@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="action_webview_refresh">I-refresh</string>
     <string name="action_webview_forward">Sumulong</string>
@@ -109,7 +109,7 @@
     <string name="pref_category_reader">Pagbasa</string>
     <string name="pref_category_library">Aklatan</string>
     <string name="pref_category_general">Pangkalahatan</string>
-    <string name="loading">Naglo-load…</string>
+    <string name="loading">Naglo-load...</string>
     <string name="app_not_available">Hindi magagamit ang app</string>
     <string name="second_to_last">Pangalawa sa huling kabanata</string>
     <string name="last_read_chapter">Huling nabasang kabanata</string>
@@ -252,7 +252,7 @@
     <string name="information_webview_required">Kinakailangan ng app ang WebView upang gumana ito</string>
     <string name="information_cloudflare_bypass_failure">Bigong ma-bypass ang Cloudflare</string>
     <string name="update_check_notification_update_available">May bagong bersyon!</string>
-    <string name="update_check_notification_download_in_progress">Dina-download…</string>
+    <string name="update_check_notification_download_in_progress">Dina-download...</string>
     <string name="update_check_no_new_updates">Walang bagong update</string>
     <string name="update_check_confirm">I-download</string>
     <string name="file_select_backup">Pumili ng backup</string>
@@ -274,7 +274,7 @@
     <string name="loader_not_implemented_error">Di makita ang source</string>
     <string name="page_list_empty_error">Walang nakitang mga pahina</string>
     <string name="transition_pages_error">Bigong mai-load ang mga pahinang: %1$s</string>
-    <string name="transition_pages_loading">Nilo-load ang mga pahina…</string>
+    <string name="transition_pages_loading">Nilo-load ang mga pahina...</string>
     <string name="transition_no_previous">Walang kabanata bago ito</string>
     <string name="transition_no_next">Wala nang susunod na kabanata</string>
     <string name="transition_previous">Nakaraan:</string>
@@ -342,7 +342,7 @@
     <string name="browse">Maghanap</string>
     <string name="latest">Pinakabago</string>
     <string name="action_global_search_query">Hinanap ang \"%1$s\" sa lahat</string>
-    <string name="action_global_search_hint">Panlahatang paghahanap…</string>
+    <string name="action_global_search_hint">Panlahatang paghahanap...</string>
     <string name="pinned_sources">Naka-pin</string>
     <string name="last_used_source">Huling ginamit</string>
     <string name="other_source">Iba pa</string>
@@ -529,7 +529,7 @@
     <string name="ext_installer_shizuku_stopped">Di tumatakbo ang Shizuku</string>
     <string name="ext_installer_legacy">Legasiya</string>
     <string name="ext_installer_pref">Taga-install</string>
-    <string name="ext_install_service_notif">Ini-install ang extension…</string>
+    <string name="ext_install_service_notif">Ini-install ang extension...</string>
     <string name="action_sort_count">Dami ng entry</string>
     <string name="pref_verbose_logging">Verbose na pagla-log</string>
     <string name="pref_verbose_logging_summary">I-print ang detalyadong mga log sa system log (nakakabawas sa performance ng app)</string>
@@ -619,7 +619,7 @@
     <string name="popular">Sikat</string>
     <string name="missing_storage_permission">Hindi binigay ang mga permiso sa storage</string>
     <string name="skipped_reason_not_always_update">Nilaktawan dahil hindi kailangan ang pag-update sa serye</string>
-    <string name="action_search_hint">Maghanap…</string>
+    <string name="action_search_hint">Maghanap...</string>
     <string name="pref_reader_summary">Paraan ng pagbasa, pagpapakita, nabigasyon</string>
     <string name="pref_downloads_summary">Awtomatikong pag-download, i-download nang maaga</string>
     <string name="pref_tracking_summary">Isahang pag-sync sa progress, pinahusay na pag-sync</string>
@@ -829,7 +829,7 @@
     <string name="pref_behavior">Pagkilos</string>
     <string name="pref_mark_duplicate_read_chapter_read_existing">Matapos basahin ang kabanata</string>
     <string name="pref_mark_duplicate_read_chapter_read_new">Pagkatapos kumuha ng bagong kabanata</string>
-    <string name="notes_placeholder">Masaya ang bahagi kung saan…</string>
+    <string name="notes_placeholder">Masaya ang bahagi kung saan...</string>
     <string name="action_notes">Mga note</string>
     <string name="action_edit_notes">I-edit ang mga note</string>
     <string name="possible_duplicates_title">Mga posibleng duplikado</string>
@@ -837,7 +837,7 @@
     <string name="clear_database_text">Aalisin mo na ang mga entry mula sa database</string>
     <string name="clear_db_exclude_read">Panatilihin ang mga entry na may mga nabasang kabanata</string>
     <string name="clear_database_history_warning">Mga nabasang kabanata at ang progress ng mga entry na wala sa aklatan ay mawawala</string>
-    <string name="logging_in">Nagla-log in…</string>
+    <string name="logging_in">Nagla-log in...</string>
     <string name="storage_failed_to_create_download_directory">Nabigong lumikha ng directory para sa pag-download</string>
     <string name="storage_failed_to_create_directory">Nabigong lumikha ng directory: %s</string>
     <string name="pref_update_library_manga_titles">I-update ang mga pamagat ng manga upang tumugma sa source</string>
@@ -909,7 +909,7 @@
     <string name="extensionStoresScreen.emptyLabel">Wala ka pang idinagdag na extension store</string>
     <string name="extensionStoresScreen.addStore.title">Idagdag ang extension store</string>
     <string name="extensionStoresScreen.addStore.alreadyExists">Ang extension store na ito ay umiiral na</string>
-    <string name="extensionStoresScreen.addStore.processing">Nagpoproseso…</string>
+    <string name="extensionStoresScreen.addStore.processing">Nagpoproseso...</string>
     <string name="extensionStoresScreen.addStoreInput.inputLabel">URL ng Store index</string>
     <string name="extensionStoresScreen.addStoreDeeplink.bodyText">Gusto mo bang idagdag ang extension store na nasa ibaba?</string>
     <string name="extensionStoresScreen.deleteStore.title">Tanggalin ang extension store</string>
@@ -918,6 +918,6 @@
     <string name="pref_vertical_navigator">Gamitin ang vertical na navigator sa</string>
     <string name="pref_vertical_navigator_height">Taas ng vertical na navigator</string>
     <string name="considering">Pinag-iisipan</string>
-    <string name="downloading_with_progress">Dina-download… (%d%%)</string>
+    <string name="downloading_with_progress">Dina-download... (%d%%)</string>
     <string name="pref_filter_update_categories_details">Hindi ipapakita ang mga update sa mga nakabukod na kategorya, kahit kabilang pa ang mga ito sa mga napiling kategorya.</string>
 </resources>

@@ -74,7 +74,7 @@
     <string name="action_sort_tracker_score">Tracker score</string>
     <string name="action_sort_random">Random</string>
     <string name="action_search">Search</string>
-    <string name="action_search_hint">Searchâ€¦</string>
+    <string name="action_search_hint">Search...</string>
     <string name="action_search_settings">Search settings</string>
     <string name="action_global_search">Global search</string>
     <string name="action_select_all">Select all</string>
@@ -172,7 +172,7 @@
     <string name="action_add_anyway">Add anyway</string>
 
     <!-- Operations -->
-    <string name="loading">Loadingâ€¦</string>
+    <string name="loading">Loading...</string>
     <string name="internal_error">InternalError: Check crash logs for further information</string>
 
     <!-- Shortcuts-->
@@ -355,7 +355,7 @@
     <string name="ext_nsfw_short">18+</string>
     <string name="ext_nsfw_warning">Sources from this extension may contain NSFW (18+) content</string>
     <string name="ext_permission_install_apps_warning">Permissions are needed to install extensions. Tap here to grant.</string>
-    <string name="ext_install_service_notif">Installing extensionâ€¦</string>
+    <string name="ext_install_service_notif">Installing extension...</string>
     <string name="ext_installer_pref">Installer</string>
     <string name="ext_installer_legacy">Legacy</string>
     <string name="ext_installer_packageinstaller" translatable="false">PackageInstaller</string>
@@ -364,7 +364,7 @@
     <string name="ext_installer_shizuku_stopped">Shizuku is not running</string>
     <string name="ext_installer_shizuku_unavailable_dialog">Install and start Shizuku to use Shizuku as extension installer.</string>
     <string name="ext_revoke_trust">Revoke trusted unknown extensions</string>
-    <string name="downloading_with_progress">Downloadingâ€¦ (%d%%)</string>
+    <string name="downloading_with_progress">Downloading... (%d%%)</string>
 
     <!-- Extension repos -->
     <string name="action_open_repo">Open source repo</string>
@@ -383,7 +383,7 @@
     <string name="extensionStoresScreen.emptyLabel">You haven\'t added an extension store yet</string>
     <string name="extensionStoresScreen.addStore.title">Add extension store</string>
     <string name="extensionStoresScreen.addStore.alreadyExists">This extension store already exists</string>
-    <string name="extensionStoresScreen.addStore.processing">Processingâ€¦</string>
+    <string name="extensionStoresScreen.addStore.processing">Processing...</string>
     <string name="extensionStoresScreen.addStoreInput.inputLabel">Store index URL</string>
     <string name="extensionStoresScreen.addStoreDeeplink.bodyText">Do you wish to add the extension store below?</string>
     <string name="extensionStoresScreen.deleteStore.title">Remove extension store</string>
@@ -626,7 +626,7 @@
     <string name="pref_clear_database">Clear database</string>
     <string name="pref_clear_database_summary">Delete history for entries that are not saved in your library</string>
     <string name="clear_database_source_item_count">%1$d non-library entries in database</string>
-    <string name="clear_database_text">Youâ€™re about to remove entries from the database</string>
+    <string name="clear_database_text">You're about to remove entries from the database</string>
     <string name="clear_database_history_warning">Read chapters and progress of non-library entries will be lost</string>
     <string name="clear_db_exclude_read">Keep entries with read chapters</string>
     <string name="clear_database_completed">Entries deleted</string>
@@ -683,7 +683,7 @@
     <string name="email">Email address</string>
     <string name="password">Password</string>
     <string name="login">Login</string>
-    <string name="logging_in">Logging inâ€¦</string>
+    <string name="logging_in">Logging in...</string>
     <string name="login_success">Logged in</string>
     <string name="logout_title">Log out from %1$s?</string>
     <string name="logout">Log out</string>
@@ -707,7 +707,7 @@
     <string name="other_source">Other</string>
     <string name="last_used_source">Last used</string>
     <string name="pinned_sources">Pinned</string>
-    <string name="action_global_search_hint">Global searchâ€¦</string>
+    <string name="action_global_search_hint">Global search...</string>
     <string name="action_global_search_query">Search for \"%1$s\" globally</string>
     <string name="latest">Latest</string>
     <string name="popular">Popular</string>
@@ -857,7 +857,7 @@
     <string name="transition_previous">Previous:</string>
     <string name="transition_no_next">There\'s no next chapter</string>
     <string name="transition_no_previous">There\'s no previous chapter</string>
-    <string name="transition_pages_loading">Loading pagesâ€¦</string>
+    <string name="transition_pages_loading">Loading pages...</string>
     <string name="transition_pages_error">Failed to load pages: %1$s</string>
     <string name="page_list_empty_error">No pages found</string>
     <string name="loader_not_implemented_error">Source not found</string>
@@ -930,7 +930,7 @@
     <string name="duplicate_match_exact">Exact</string>
     <string name="duplicate_match_contains">Contains</string>
     <string name="duplicate_match_url">Same URL</string>
-    <string name="action_clear_category">Clear categoryâ€¦</string>
+    <string name="action_clear_category">Clear category...</string>
     <string name="duplicate_listing_mode">List all</string>
     <string name="duplicate_listing_truncated">Showing 2000 of %1$d matching entries. Narrow with category filters, or use Select All to act on all %1$d.</string>
     <string name="duplicate_scan_groups_truncated">Showing %1$d of %2$d duplicate groups (largest first). Narrow with category filters or switch to List All.</string>
@@ -948,9 +948,9 @@
     <string name="duplicate_sort_label">Sort:</string>
     <string name="duplicate_sort_name">Name</string>
     <string name="duplicate_sort_latest">Latest</string>
-    <string name="duplicate_sort_ch_desc">Châ†“</string>
-    <string name="duplicate_sort_dl_desc">DLâ†“</string>
-    <string name="duplicate_sort_read_desc">Readâ†“</string>
+    <string name="duplicate_sort_ch_desc">Ch↓</string>
+    <string name="duplicate_sort_dl_desc">DL↓</string>
+    <string name="duplicate_sort_read_desc">Read↓</string>
     <string name="duplicate_category_label">Category:</string>
     <string name="duplicate_category_clear">Clear</string>
     <string name="duplicate_source_priority">Source Priority</string>
@@ -1016,7 +1016,7 @@
     <string name="download_queue_size_warning">Warning: large bulk downloads may lead to sources becoming slower and/or blocking %s. Tap to learn more.</string>
 
     <!-- Library update service notifications -->
-    <string name="notification_updating_progress">Updating libraryâ€¦ (%s)</string>
+    <string name="notification_updating_progress">Updating library... (%s)</string>
     <string name="notification_size_warning">Large updates harm sources and may lead to slower updates and also increased battery usage. Tap to learn more.</string>
     <string name="notification_new_chapters">New chapters found</string>
     <string name="notification_chapters_single">Chapter %1$s</string>
@@ -1047,7 +1047,7 @@
     <string name="update_check_no_new_updates">No new updates available</string>
 
     <!--UpdateCheck Notifications-->
-    <string name="update_check_notification_download_in_progress">Downloadingâ€¦</string>
+    <string name="update_check_notification_download_in_progress">Downloading...</string>
     <string name="update_check_notification_update_available">New version available!</string>
 
     <!-- Information Text -->
@@ -1105,7 +1105,7 @@
     <string name="exception_unknown_host">Couldn\'t reach %s</string>
 
     <!-- Notes screen -->
-    <string name="notes_placeholder">Enjoyed the part whereâ€¦</string>
+    <string name="notes_placeholder">Enjoyed the part where...</string>
 
     <string name="migrationConfigScreen.selectedHeader">Selected</string>
     <string name="migrationConfigScreen.availableHeader">Available</string>
@@ -1164,9 +1164,9 @@
     <string name="pref_translation_chunk_characters">Characters</string>
     <string name="pref_translation_chunk_words">Words</string>
     <string name="pref_translation_chunk_size">Translation chunk size</string>
-    <string name="pref_translation_chunk_paragraphs_rec">Paragraphs per chunk (recommended: 20â€“100)</string>
-    <string name="pref_translation_chunk_characters_rec">Characters per chunk (recommended: 1000â€“5000)</string>
-    <string name="pref_translation_chunk_words_rec">Words per chunk (recommended: 200â€“2000)</string>
+    <string name="pref_translation_chunk_paragraphs_rec">Paragraphs per chunk (recommended: 20–100)</string>
+    <string name="pref_translation_chunk_characters_rec">Characters per chunk (recommended: 1000–5000)</string>
+    <string name="pref_translation_chunk_words_rec">Words per chunk (recommended: 200–2000)</string>
     <string name="pref_translation_chunk_units">Units per chunk</string>
     <string name="pref_translation_contextual_anchoring">Contextual anchoring</string>
     <string name="pref_translation_contextual_anchoring_desc">Send previous translated paragraphs as context to LLM engines for better consistency</string>
@@ -1175,12 +1175,12 @@
     <string name="pref_translation_offline_suffix"> (Offline)</string>
     <string name="pref_translation_queue">Translation Queue</string>
     <string name="pref_translation_status">Status</string>
-    <string name="pref_translation_status_cancelling">Cancellingâ€¦</string>
-    <string name="pref_translation_status_paused">Paused â€” %1$d/%2$d completed</string>
+    <string name="pref_translation_status_cancelling">Cancelling...</string>
+    <string name="pref_translation_status_paused">Paused — %1$d/%2$d completed</string>
     <string name="pref_translation_status_chunk_info"> (chunk %1$d/%2$d)</string>
     <string name="pref_translation_status_translating">Translating: %1$s%2$s (%3$d/%4$d)</string>
-    <string name="pref_translation_status_done">Done â€” %d chapters translated</string>
-    <string name="pref_translation_status_idle">Idle â€” no tasks in queue</string>
+    <string name="pref_translation_status_done">Done — %d chapters translated</string>
+    <string name="pref_translation_status_idle">Idle — no tasks in queue</string>
     <string name="pref_translation_resume">Resume</string>
     <string name="pref_translation_pause">Pause</string>
     <string name="pref_translation_resume_desc">Resume processing queued translations</string>
@@ -1190,7 +1190,7 @@
     <string name="pref_translation_clear_queue">Clear Queue</string>
     <string name="pref_translation_clear_queue_desc">Remove all pending translations from the queue</string>
     <string name="pref_translation_test_engine">Test %s</string>
-    <string name="pref_translation_testing">Testingâ€¦</string>
+    <string name="pref_translation_testing">Testing...</string>
     <string name="pref_translation_test_send">Send a test translation</string>
     <string name="pref_translation_test_text">Hello, this is a test.</string>
     <string name="pref_translation_system_prompt">System Prompt</string>
@@ -1252,7 +1252,7 @@
     <string name="translation_selected_already_translated">Selected chapters are already translated</string>
 
     <!-- Batch update -->
-    <string name="batch_updating_entries">Updating %d entriesâ€¦</string>
+    <string name="batch_updating_entries">Updating %d entries...</string>
     <string name="batch_update_complete">Updated %d entries</string>
     <string name="batch_update_complete_with_failures">Updated %1$d/%2$d entries (%3$d failed)</string>
 
@@ -1274,7 +1274,7 @@
     <string name="supportUsScreen.contactPlatform">Discord</string>
 
     <string name="donationCampaign.title">Enjoying the app?</string>
-    <string name="donationCampaign.paragraph1">Hi! Iâ€™m the main developer behind Mihon, and Iâ€™d like to ask you to consider supporting its development financially. With enough support, Iâ€™ll be able to work on Mihon full-time and focus on long-standing issues as well as highly requested features.</string>
+    <string name="donationCampaign.paragraph1">Hi! I'm the main developer behind Mihon, and I'd like to ask you to consider supporting its development financially. With enough support, I'll be able to work on Mihon full-time and focus on long-standing issues as well as highly requested features.</string>
     <string name="donationCampaign.paragraph2">You can donate through either Patreon (preferred) or OpenCollective. If you have questions or would like to support using alternative methods, feel free to reach out to me through Mihon's Discord server.</string>
     <string name="donationCampaign.paragraph3">Regardless, Mihon will continue to be maintained by me and the volunteers, and it will stay open source.</string>
     <string name="donationCampaign.contactPlatform">Discord</string>
