@@ -18,6 +18,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Settings
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody.Companion.asRequestBody
+import okhttp3.MultipartBody
+import okhttp3.Request
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import eu.kanade.tachiyomi.network.NetworkHelper
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -206,29 +217,50 @@ class ProfileScreen : Screen {
                                             isUpdating = true
                                             if (newPhotoUrl.startsWith("file://")) {
                                                 val fileUri = android.net.Uri.parse(newPhotoUrl)
-                                                // Always use "avatar.jpg" so we overwrite their old picture and save storage space
-                                                val storageRef = com.google.firebase.storage.FirebaseStorage.getInstance().reference.child("profile_pics/${user?.uid}/avatar.jpg")
+                                                val file = java.io.File(fileUri.path!!)
+                                                val client = Injekt.get<NetworkHelper>().client
                                                 
-                                                storageRef.putFile(fileUri)
-                                                    .addOnSuccessListener {
-                                                        storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
-                                                            val profileUpdates = com.google.firebase.auth.userProfileChangeRequest {
-                                                                displayName = newName
-                                                                photoUri = downloadUri
-                                                            }
-                                                            user?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
-                                                                isUpdating = false
-                                                                showEditDialog = false
-                                                                if (!task.isSuccessful) {
-                                                                    Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
+                                                GlobalScope.launch(Dispatchers.IO) {
+                                                    try {
+                                                        val requestBody = MultipartBody.Builder()
+                                                            .setType(MultipartBody.FORM)
+                                                            .addFormDataPart("reqtype", "fileupload")
+                                                            .addFormDataPart("fileToUpload", file.name, file.asRequestBody("image/jpeg".toMediaTypeOrNull()))
+                                                            .build()
+                                                            
+                                                        val request = Request.Builder()
+                                                            .url("https://catbox.moe/user/api.php")
+                                                            .post(requestBody)
+                                                            .build()
+                                                            
+                                                        val response = client.newCall(request).execute()
+                                                        val responseUrl = response.body?.string() ?: ""
+                                                        
+                                                        withContext(Dispatchers.Main) {
+                                                            if (response.isSuccessful && responseUrl.startsWith("http")) {
+                                                                val profileUpdates = com.google.firebase.auth.userProfileChangeRequest {
+                                                                    displayName = newName
+                                                                    photoUri = android.net.Uri.parse(responseUrl)
                                                                 }
+                                                                user?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
+                                                                    isUpdating = false
+                                                                    showEditDialog = false
+                                                                    if (!task.isSuccessful) {
+                                                                        Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
+                                                                    }
+                                                                }
+                                                            } else {
+                                                                isUpdating = false
+                                                                Toast.makeText(context, "Failed to upload image to cloud", Toast.LENGTH_SHORT).show()
                                                             }
                                                         }
+                                                    } catch (e: Exception) {
+                                                        withContext(Dispatchers.Main) {
+                                                            isUpdating = false
+                                                            Toast.makeText(context, "Upload error: ${e.message}", Toast.LENGTH_SHORT).show()
+                                                        }
                                                     }
-                                                    .addOnFailureListener {
-                                                        isUpdating = false
-                                                        Toast.makeText(context, "Failed to upload image", Toast.LENGTH_SHORT).show()
-                                                    }
+                                                }
                                             } else {
                                                 val profileUpdates = com.google.firebase.auth.userProfileChangeRequest {
                                                     displayName = newName
