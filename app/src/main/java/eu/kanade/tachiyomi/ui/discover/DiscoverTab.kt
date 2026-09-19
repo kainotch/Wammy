@@ -267,7 +267,8 @@ object DiscoverTab : Tab {
                                 val cached = viewModel.popularCache[firstSource.id]
                                 if (cached == null) {
                                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                        SectionHeader(title = firstSource.name, onSeeAll = {})
+                                        val titleText = if (firstSource.lang == "all" || firstSource.lang.isEmpty()) firstSource.name else "${firstSource.name} (${firstSource.lang.uppercase()})"
+                                        SectionHeader(title = titleText, onSeeAll = {})
                                         SkeletonCarousel()
                                     }
                                     LaunchedEffect(firstSource.id) {
@@ -276,7 +277,8 @@ object DiscoverTab : Tab {
                                     }
                                 } else if (cached.isNotEmpty()) {
                                     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                                        SectionHeader(title = firstSource.name, onSeeAll = {})
+                                        val titleText = if (firstSource.lang == "all" || firstSource.lang.isEmpty()) firstSource.name else "${firstSource.name} (${firstSource.lang.uppercase()})"
+                                        SectionHeader(title = titleText, onSeeAll = {})
                                         LazyRow(
                                             contentPadding = PaddingValues(horizontal = 16.dp),
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -358,7 +360,8 @@ object DiscoverTab : Tab {
                                 val cached = viewModel.popularCache[source.id]
                                 if (cached == null) {
                                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                        SectionHeader(title = source.name, onSeeAll = {})
+                                        val titleText = if (source.lang == "all" || source.lang.isEmpty()) source.name else "${source.name} (${source.lang.uppercase()})"
+                                        SectionHeader(title = titleText, onSeeAll = {})
                                         SkeletonCarousel()
                                     }
                                     LaunchedEffect(source.id) {
@@ -367,7 +370,8 @@ object DiscoverTab : Tab {
                                     }
                                 } else if (cached.isNotEmpty()) {
                                     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                                        SectionHeader(title = source.name, onSeeAll = {})
+                                        val titleText = if (source.lang == "all" || source.lang.isEmpty()) source.name else "${source.name} (${source.lang.uppercase()})"
+                                        SectionHeader(title = titleText, onSeeAll = {})
                                         LazyRow(
                                             contentPadding = PaddingValues(horizontal = 16.dp),
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
