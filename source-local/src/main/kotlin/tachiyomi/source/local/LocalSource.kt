@@ -383,7 +383,7 @@ class LocalSource(
 
     companion object {
         const val ID = 0L
-        const val HELP_URL = "https://wammy-otaku.github.io/docs/guides/local-source/"
+        const val HELP_URL = "https://kainotch.github.io/wammy-otaku.github.io/docs/guides/local-source/"
 
         private val LATEST_THRESHOLD = 7.days.inWholeMilliseconds
     }

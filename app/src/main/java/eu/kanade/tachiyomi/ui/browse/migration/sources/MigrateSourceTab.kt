@@ -31,7 +31,7 @@ fun Screen.migrateSourceTab(): TabContent {
                 title = stringResource(MR.strings.migration_help_guide),
                 icon = Icons.AutoMirrored.Outlined.HelpOutline,
                 onClick = {
-                    uriHandler.openUri("https://wammy-otaku.github.io/docs/faq.html")
+                    uriHandler.openUri("https://kainotch.github.io/wammy-otaku.github.io/docs/faq.html")
                 },
             ),
         ),
