@@ -616,6 +616,7 @@ fun HeroCarousel(
                         text = manga.title,
                         color = Color.White,
                         fontSize = 22.sp,
+                        lineHeight = 28.sp,
                         fontWeight = FontWeight.Bold,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
