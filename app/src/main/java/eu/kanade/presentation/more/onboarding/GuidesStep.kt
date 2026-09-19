@@ -56,7 +56,7 @@ internal class GuidesStep(
     }
 }
 
-const val GETTING_STARTED_URL = "https://wammy-otaku.github.io/docs/getting-started.html"
+const val GETTING_STARTED_URL = "https://kainotch.github.io/wammy-otaku.github.io/docs/getting-started.html"
 
 @PreviewLightDark
 @Composable

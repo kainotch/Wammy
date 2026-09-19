@@ -383,7 +383,7 @@ class LibraryUpdateNotifier(
 
     companion object {
         const val HELP_WARNING_URL =
-            "https://wammy-otaku.github.io/docs/faq.html#library"
+            "https://kainotch.github.io/wammy-otaku.github.io/docs/faq.html#library"
     }
 }
 

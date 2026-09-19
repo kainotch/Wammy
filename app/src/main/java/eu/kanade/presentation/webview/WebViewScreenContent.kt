@@ -298,7 +298,7 @@ fun WebViewScreenContent(
                                     .clip(MaterialTheme.shapes.small)
                                     .clickable {
                                         uriHandler.openUri(
-                                            "https://wammy-otaku.github.io/docs/faq.html",
+                                            "https://kainotch.github.io/wammy-otaku.github.io/docs/faq.html",
                                         )
                                     },
                             )
