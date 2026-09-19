@@ -160,7 +160,7 @@ class ProfileScreen : Screen {
                                 if (uri != null) {
                                     try {
                                         val inputStream = context.contentResolver.openInputStream(uri)
-                                        val file = File(context.filesDir, "profile_pic.jpg")
+                                        val file = File(context.filesDir, "profile_pic_${System.currentTimeMillis()}.jpg")
                                         val outputStream = FileOutputStream(file)
                                         inputStream?.copyTo(outputStream)
                                         inputStream?.close()
@@ -204,17 +204,44 @@ class ProfileScreen : Screen {
                                     TextButton(
                                         onClick = {
                                             isUpdating = true
-                                            val profileUpdates = com.google.firebase.auth.userProfileChangeRequest {
-                                                displayName = newName
-                                                if (newPhotoUrl.isNotEmpty()) {
-                                                    photoUri = android.net.Uri.parse(newPhotoUrl)
+                                            if (newPhotoUrl.startsWith("file://")) {
+                                                val fileUri = android.net.Uri.parse(newPhotoUrl)
+                                                // Always use "avatar.jpg" so we overwrite their old picture and save storage space
+                                                val storageRef = com.google.firebase.storage.FirebaseStorage.getInstance().reference.child("profile_pics/${user?.uid}/avatar.jpg")
+                                                
+                                                storageRef.putFile(fileUri)
+                                                    .addOnSuccessListener {
+                                                        storageRef.downloadUrl.addOnSuccessListener { downloadUri ->
+                                                            val profileUpdates = com.google.firebase.auth.userProfileChangeRequest {
+                                                                displayName = newName
+                                                                photoUri = downloadUri
+                                                            }
+                                                            user?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
+                                                                isUpdating = false
+                                                                showEditDialog = false
+                                                                if (!task.isSuccessful) {
+                                                                    Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
+                                                                }
+                                                            }
+                                                        }
+                                                    }
+                                                    .addOnFailureListener {
+                                                        isUpdating = false
+                                                        Toast.makeText(context, "Failed to upload image", Toast.LENGTH_SHORT).show()
+                                                    }
+                                            } else {
+                                                val profileUpdates = com.google.firebase.auth.userProfileChangeRequest {
+                                                    displayName = newName
+                                                    if (newPhotoUrl.isNotEmpty()) {
+                                                        photoUri = android.net.Uri.parse(newPhotoUrl)
+                                                    }
                                                 }
-                                            }
-                                            user?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
-                                                isUpdating = false
-                                                showEditDialog = false
-                                                if (!task.isSuccessful) {
-                                                    Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
+                                                user?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
+                                                    isUpdating = false
+                                                    showEditDialog = false
+                                                    if (!task.isSuccessful) {
+                                                        Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
+                                                    }
                                                 }
                                             }
                                         },
