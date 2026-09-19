@@ -449,12 +449,6 @@ fun SectionHeader(title: String, onSeeAll: () -> Unit) {
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
         )
-        Text(
-            text = "See All >",
-            fontSize = 14.sp,
-            color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.6f),
-            modifier = Modifier.clickable(onClick = onSeeAll)
-        )
     }
 }
 
