@@ -57,7 +57,7 @@ class DiscoverViewModel(
     init {
         viewModelScope.launch {
             combine(
-                getHistory.subscribe(""),
+                getHistory.subscribeGrouped(""),
                 preferences.homeTabIsNovel.changes()
             ) { historyList, isNovel ->
                 historyList.filter { it.isNovel == isNovel }.take(10)
