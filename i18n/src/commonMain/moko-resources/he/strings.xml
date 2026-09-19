@@ -14,7 +14,7 @@
     <string name="information_empty_library">×”×¡×¤×¨×™×™×” ×©×œ×š ×¨×™×§×”</string>
     <string name="information_no_downloads">××™×Ÿ ×”×•×¨×“×•×ª</string>
     <string name="update_check_notification_update_available">×’×¨×¡×” ×—×“×©×” ×–×ž×™× ×”!</string>
-    <string name="update_check_notification_download_in_progress">×ž×•×¨×™×“â€¦</string>
+    <string name="update_check_notification_download_in_progress">×ž×•×¨×™×“...</string>
     <string name="update_check_no_new_updates">××™×Ÿ ×¢×“×›×•× ×™× ×—×“×©×™× ×–×ž×™× ×™×</string>
     <string name="update_check_confirm">×”×•×¨×“×”</string>
     <string name="file_select_backup">×‘×—×¨ ×§×•×‘×¥ ×’×™×‘×•×™</string>
@@ -32,7 +32,7 @@
     <string name="migration_dialog_what_to_include">×‘×—×¨ × ×ª×•× ×™× ×›×“×™ ×œ×›×œ×•×œ</string>
     <string name="updating_library">×ž×¢×“×›×Ÿ ×¡×¤×¨×™×™×”</string>
     <string name="transition_pages_error">×˜×¢×™× ×ª ×”×¢×ž×•×“×™× × ×›×©×œ×”: %1$s</string>
-    <string name="transition_pages_loading">×˜×•×¢×Ÿ ×“×¤×™×â€¦</string>
+    <string name="transition_pages_loading">×˜×•×¢×Ÿ ×“×¤×™×...</string>
     <string name="transition_no_previous">××™×Ÿ ×¤×¨×§ ×§×•×“×</string>
     <string name="transition_no_next">××™×Ÿ ×¤×¨×§ ×”×‘×</string>
     <string name="transition_previous">×§×•×“×:</string>
@@ -81,7 +81,7 @@
     <string name="unknown">×œ× ×™×“×•×¢</string>
     <string name="ongoing">× ×ž×©×š</string>
     <string name="latest">×”×ž××•×—×¨ ×‘×™×•×ª×¨</string>
-    <string name="action_global_search_hint">×—×™×¤×•×© ×’×œ×•×‘×œ×™â€¦</string>
+    <string name="action_global_search_hint">×—×™×¤×•×© ×’×œ×•×‘×œ×™...</string>
     <string name="other_source">××—×¨</string>
     <string name="local_source">×ž×× ×’×” ×ž×§×•×ž×™×ª</string>
     <string name="no_results_found">×œ× × ×ž×¦××• ×ª×•×¦××•×ª</string>
@@ -145,7 +145,7 @@
     <string name="pref_category_library">×¡×¤×¨×™×™×”</string>
     <string name="pref_category_general">×›×œ×œ×™</string>
     <string name="app_not_available">×”××¤×œ×™×§×¦×™×” ××™× ×” ×–×ž×™× ×”</string>
-    <string name="loading">×˜×•×¢×Ÿâ€¦</string>
+    <string name="loading">×˜×•×¢×Ÿ...</string>
     <string name="action_webview_refresh">×¨×¢× ×•×Ÿ</string>
     <string name="action_webview_forward">×§×“×™×ž×”</string>
     <string name="action_webview_back">×—×–×¨×”</string>
@@ -368,7 +368,7 @@
     <string name="ext_update_all">×¢×“×›×Ÿ ×”×›×œ</string>
     <string name="ext_trust">×”××ž×Ÿ</string>
     <string name="ext_nsfw_warning">×¢×œ×•×œ ×œ×”×›×™×œ ×ª×•×›×Ÿ ×©×œ× ×ž×ª××™× ×œ×ž×§×•× ×”×¢×‘×•×“×” (18+)</string>
-    <string name="ext_install_service_notif">×ž×ª×§×™×Ÿ ×”×¨×—×‘×”â€¦</string>
+    <string name="ext_install_service_notif">×ž×ª×§×™×Ÿ ×”×¨×—×‘×”...</string>
     <string name="include">×›×œ×•×œ: %s</string>
     <string name="pref_show_navigation_mode_summary">×”×¨××” ×œ×–×ž×Ÿ ×§×¦×¨ ×›×©×¤×•×ª×—×™× ××ª ×ž×¦×‘ ×”×§×¨×™××”</string>
     <string name="pref_show_reading_mode">×”×¨××” ×ž×¦×‘ ×§×¨×™××”</string>
@@ -558,7 +558,7 @@
     <string name="pref_dual_page_invert_summary">×× ×”×ž×§×•× ×©×œ ×”×¢×ž×•×“ ×”×ž×¤×•×¦×œ ×œ× ×ª×•×× ×œ×›×™×•×•×Ÿ ×”×§×¨×™××”</string>
     <string name="tapping_inverted_none">×›×œ×•×</string>
     <string name="pref_viewer_nav">××™×–×•×¨×™ × ×’×™×¢×”</string>
-    <string name="action_search_hint">×—×™×¤×•×©â€¦</string>
+    <string name="action_search_hint">×—×™×¤×•×©...</string>
     <string name="action_open_random_manga">×¤×ª×™×—×ª ×¤×¨×™×˜ ××§×¨××™</string>
     <string name="getting_started_guide">×ž×“×¨×™×š ×œ×ž×ª×—×™×œ</string>
     <string name="label_stats">×¡×˜×˜×™×¡×˜×™×§×•×ª</string>

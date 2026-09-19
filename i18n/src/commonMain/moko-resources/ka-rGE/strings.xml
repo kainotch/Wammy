@@ -70,7 +70,7 @@
     <string name="action_webview_back">áƒ£áƒ™áƒáƒœ</string>
     <string name="action_webview_forward">áƒ¬áƒ˜áƒœ</string>
     <string name="action_webview_refresh">áƒ’áƒáƒœáƒáƒ®áƒšáƒ”áƒ‘áƒ</string>
-    <string name="loading">áƒ˜áƒ¢áƒ•áƒ˜áƒ áƒ—áƒ”áƒ‘áƒâ€¦</string>
+    <string name="loading">áƒ˜áƒ¢áƒ•áƒ˜áƒ áƒ—áƒ”áƒ‘áƒ...</string>
     <string name="app_not_available">áƒáƒžáƒšáƒ˜áƒ™áƒáƒªáƒ˜áƒ áƒáƒ  áƒáƒ áƒ˜áƒ¡ áƒ®áƒ”áƒšáƒ›áƒ˜áƒ¡áƒáƒ¬áƒ•áƒ“áƒáƒ›áƒ˜</string>
     <string name="pref_category_general">áƒ–áƒáƒ’áƒáƒ“áƒ˜</string>
     <string name="pref_category_library">áƒ‘áƒ˜áƒ‘áƒšáƒ˜áƒáƒ—áƒ”áƒ™áƒ</string>
@@ -237,7 +237,7 @@
     <string name="local_source">áƒšáƒáƒªáƒáƒšáƒ£áƒ áƒ˜ áƒ¬áƒ§áƒáƒ áƒ</string>
     <string name="other_source">áƒ¡áƒ®áƒ•áƒ</string>
     <string name="last_used_source">áƒ‘áƒáƒšáƒáƒ¡ áƒ’áƒáƒ›áƒáƒ§áƒ”áƒœáƒ”áƒ‘áƒ£áƒšáƒ˜</string>
-    <string name="action_global_search_hint">áƒ’áƒšáƒáƒ‘áƒáƒšáƒ£áƒ áƒ˜ áƒ«áƒ”áƒ‘áƒœáƒâ€¦</string>
+    <string name="action_global_search_hint">áƒ’áƒšáƒáƒ‘áƒáƒšáƒ£áƒ áƒ˜ áƒ«áƒ”áƒ‘áƒœáƒ...</string>
     <string name="latest">áƒ£áƒ™áƒáƒœáƒáƒ¡áƒ™áƒœáƒ”áƒšáƒ˜</string>
     <string name="browse">áƒ“áƒáƒ—áƒ•áƒáƒšáƒ˜áƒ”áƒ áƒ”áƒ‘áƒ</string>
     <string name="ongoing">áƒ›áƒ˜áƒ›áƒ“áƒ˜áƒœáƒáƒ áƒ”</string>
@@ -296,7 +296,7 @@
     <string name="transition_previous">áƒ¬áƒ˜áƒœáƒ:</string>
     <string name="transition_no_next">áƒ¨áƒ”áƒ›áƒ“áƒ”áƒ’áƒ˜ áƒ—áƒáƒ•áƒ˜ áƒáƒ  áƒáƒ áƒ˜áƒ¡</string>
     <string name="transition_no_previous">áƒ¬áƒ˜áƒœáƒ áƒ—áƒáƒ•áƒ˜ áƒáƒ  áƒáƒ áƒ˜áƒ¡</string>
-    <string name="transition_pages_loading">áƒ’áƒ•áƒ”áƒ áƒ“áƒ”áƒ‘áƒ˜ áƒ˜áƒ¢áƒ•áƒ˜áƒ áƒ—áƒ”áƒ‘áƒâ€¦</string>
+    <string name="transition_pages_loading">áƒ’áƒ•áƒ”áƒ áƒ“áƒ”áƒ‘áƒ˜ áƒ˜áƒ¢áƒ•áƒ˜áƒ áƒ—áƒ”áƒ‘áƒ...</string>
     <string name="transition_pages_error">áƒ’áƒ•áƒ”áƒ áƒ“áƒ”áƒ‘áƒ˜áƒ¡ áƒ©áƒáƒ¢áƒ•áƒ˜áƒ áƒ—áƒ•áƒ áƒ•áƒ”áƒ  áƒ›áƒáƒ®áƒ”áƒ áƒ®áƒ“áƒ: %1$s</string>
     <string name="page_list_empty_error">áƒ•áƒ”áƒ áƒªáƒ”áƒ áƒ—áƒ˜ áƒ’áƒ•áƒ”áƒ áƒ“áƒ˜ áƒ•áƒ”áƒ  áƒ›áƒáƒ˜áƒ«áƒ”áƒ•áƒœáƒ</string>
     <string name="updating_library">áƒ‘áƒ˜áƒ‘áƒšáƒ˜áƒáƒ—áƒ”áƒ™áƒ˜áƒ¡ áƒ’áƒáƒœáƒáƒ®áƒšáƒ”áƒ‘áƒ</string>
@@ -316,7 +316,7 @@
     <string name="file_select_backup">áƒáƒ›áƒáƒ˜áƒ áƒ©áƒ˜áƒ” áƒ áƒ”áƒ–áƒ”áƒ áƒ•áƒ˜áƒ¡ áƒ¤áƒáƒ˜áƒšáƒ˜</string>
     <string name="update_check_confirm">áƒ’áƒáƒ“áƒ›áƒáƒ¬áƒ”áƒ áƒ</string>
     <string name="update_check_no_new_updates">áƒ’áƒáƒœáƒáƒ®áƒšáƒ”áƒ‘áƒ áƒ•áƒ”áƒ  áƒ›áƒáƒ˜áƒ«áƒ”áƒ‘áƒœáƒ</string>
-    <string name="update_check_notification_download_in_progress">áƒ’áƒáƒ“áƒ›áƒáƒ¬áƒ”áƒ áƒâ€¦</string>
+    <string name="update_check_notification_download_in_progress">áƒ’áƒáƒ“áƒ›áƒáƒ¬áƒ”áƒ áƒ...</string>
     <string name="update_check_notification_update_available">áƒ®áƒ”áƒšáƒ›áƒ˜áƒ¡áƒáƒ¬áƒ•áƒ“áƒáƒ›áƒ˜áƒ áƒáƒ®áƒáƒšáƒ˜ áƒ•áƒ”áƒ áƒ¡áƒ˜áƒ!</string>
     <string name="information_no_downloads">áƒ’áƒáƒ“áƒ›áƒáƒ¬áƒ”áƒ áƒ”áƒ‘áƒ˜ áƒáƒ  áƒáƒ áƒ˜áƒ¡</string>
     <string name="information_no_recent">áƒ’áƒáƒœáƒáƒ®áƒšáƒ”áƒ‘áƒ”áƒ‘áƒ˜ áƒáƒ  áƒáƒ áƒ˜áƒ¡</string>

@@ -20,7 +20,7 @@
     <string name="action_save">MentÃ©s</string>
     <string name="action_reset">VisszaÃ¡llÃ­tÃ¡s</string>
     <string name="action_undo">VisszavonÃ¡s</string>
-    <string name="loading">BetÃ¶ltÃ©sâ€¦</string>
+    <string name="loading">BetÃ¶ltÃ©s...</string>
     <string name="pref_category_general">ÃltalÃ¡nos</string>
     <string name="pref_category_reader">OlvasÃ³</string>
     <string name="pref_category_downloads">LetÃ¶ltÃ©sek</string>
@@ -392,7 +392,7 @@
     <string name="on">Be</string>
     <string name="pref_double_tap_anim_speed">Dupla koppintÃ¡s animÃ¡ciÃ³jÃ¡nak sebessÃ©ge</string>
     <string name="ext_installer_pref">TelepÃ­tÅ‘</string>
-    <string name="ext_install_service_notif">BÅ‘vÃ­tmÃ©ny telepÃ­tÃ©seâ€¦</string>
+    <string name="ext_install_service_notif">BÅ‘vÃ­tmÃ©ny telepÃ­tÃ©se...</string>
     <string name="action_sort_count">Ã–sszes elem</string>
     <string name="ext_update_all">Az Ã¶sszes frissÃ­tÃ©se</string>
     <string name="action_display_language_badge">Nyelv</string>
@@ -419,7 +419,7 @@
     <string name="action_global_search_query">GlobÃ¡lis keresÃ©s erre: \"%1$s\"</string>
     <string name="no_more_results">Nincs tÃ¶bb talÃ¡lat</string>
     <string name="no_results_found">Nincs talÃ¡lat</string>
-    <string name="action_global_search_hint">GlobÃ¡lis keresÃ©sâ€¦</string>
+    <string name="action_global_search_hint">GlobÃ¡lis keresÃ©s...</string>
     <string name="sort_by_upload_date">FeltÃ¶ltÃ©si dÃ¡tum szerint</string>
     <string name="dialog_with_checkbox_remove_description">Ez eltÃ¡volÃ­tja a fejezet olvasÃ¡si dÃ¡tumÃ¡t. Biztos benne?</string>
     <string name="pref_update_only_completely_read">Olvasatlan fejezet(ek)et tartalmazÃ³ elemek kihagyÃ¡sa</string>
@@ -524,7 +524,7 @@
     <string name="migration_dialog_what_to_include">VÃ¡laszon beletartozÃ³ adatokat</string>
     <string name="chapter_settings_updated">Fejezet beÃ¡llÃ­tÃ¡sai frissÃ¼ltek</string>
     <string name="download_notifier_downloader_title">LetÃ¶ltÅ‘</string>
-    <string name="update_check_notification_download_in_progress">LetÃ¶ltÃ©sâ€¦</string>
+    <string name="update_check_notification_download_in_progress">LetÃ¶ltÃ©s...</string>
     <string name="source_filter_empty_screen">Nincs telepÃ­tett forrÃ¡s</string>
     <string name="migration_help_guide">ForrÃ¡s imortÃ¡lÃ¡si ÃºtmutatÃ³</string>
     <string name="picture_saved">KÃ©p elmentve</string>
@@ -564,7 +564,7 @@
     <string name="transition_no_next">Nincs tÃ¶bb fejezet</string>
     <string name="transition_no_previous">Nincs elÅ‘zÅ‘ fejezet</string>
     <string name="transition_pages_error">%1$s oldalt nem lehetett betÃ¶lteni</string>
-    <string name="transition_pages_loading">Oldalak betÃ¶ltÃ©seâ€¦</string>
+    <string name="transition_pages_loading">Oldalak betÃ¶ltÃ©se...</string>
     <string name="action_track">NyilvÃ¡ntart</string>
     <string name="extension_api_error">Nem sikerÃ¼lt a kiterjesztÃ©si lista megnyitÃ¡sa</string>
     <string name="disabled_nav">Kikapcsolva</string>
@@ -607,7 +607,7 @@
     <string name="appwidget_updates_description">LÃ¡sd nemrÃ©g frissÃ­tett mangÃ¡dat</string>
     <string name="appwidget_unavailable_locked">Widget nem elÃ©rhetÅ‘ amikor az alkalmazÃ¡s zÃ¡rolva van</string>
     <string name="pref_appearance_summary">TÃ©ma, dÃ¡tum Ã©s idÅ‘ formÃ¡tuma</string>
-    <string name="action_search_hint">KeresÃ©sâ€¦</string>
+    <string name="action_search_hint">KeresÃ©s...</string>
     <string name="pref_invalidate_download_cache_summary">KÃ©nyszerÃ­tse az alkalmazÃ¡st a letÃ¶ltÃ¶tt fejezetek ÃºjbÃ³li ellenÅ‘rzÃ©sÃ©re</string>
     <string name="auto_download_while_reading">Automatikus letÃ¶ltÃ©s olvasÃ¡s kÃ¶zben</string>
     <string name="label_started">Elkezdett</string>
@@ -832,5 +832,5 @@
     <string name="author">SzerzÅ‘</string>
     <string name="action_toggle_private_on">PrivÃ¡t nyilvÃ¡ntartÃ¡s</string>
     <string name="action_toggle_private_off">NyilvÃ¡nos nyilvÃ¡ntartÃ¡s</string>
-    <string name="notes_placeholder">Ã‰lveztem azt a rÃ©szt, aholâ€¦</string>
+    <string name="notes_placeholder">Ã‰lveztem azt a rÃ©szt, ahol...</string>
 </resources>

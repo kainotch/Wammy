@@ -95,7 +95,7 @@
     <string name="action_disable">O\'chirish</string>
     <string name="action_sort">Saralash</string>
     <string name="action_newest">Eng yangi</string>
-    <string name="loading">Yuklanmoqdaâ€¦</string>
+    <string name="loading">Yuklanmoqda...</string>
     <string name="internal_error">InternalError: Qo\'shimcha ma\'lumot uchun xatolar ro\'yhatini ko\'ring</string>
     <string name="theme_light">O\'chiq</string>
     <string name="theme_greenapple">Yashil olma</string>
@@ -133,7 +133,7 @@
     <string name="pref_downloads_summary">Avto yuklash, oldindan yuklash</string>
     <string name="pref_advanced_summary">Xatolar ro\'yhatini yuklash, quvvat sarfini optimizatsiyalash</string>
     <string name="action_pause">Pauza</string>
-    <string name="action_search_hint">Qidirishâ€¦</string>
+    <string name="action_search_hint">Qidirish...</string>
     <string name="action_unpin">Bo\'shatish</string>
     <string name="cancel_all_for_series">Ushbu qism uchun barchasini bekor qilish</string>
     <string name="action_order_by_chapter_number">Bob soni</string>
@@ -233,7 +233,7 @@
     <string name="lock_never">Hech qachon</string>
     <string name="pref_show_reading_mode_summary">O\'qish boshlanganida o\'qish rejimini birozga ko\'rsatish</string>
     <string name="pref_update_only_non_completed">Qism yakunlangan</string>
-    <string name="ext_install_service_notif">Kengaytma o\'rnatilmoqdaâ€¦</string>
+    <string name="ext_install_service_notif">Kengaytma o\'rnatilmoqda...</string>
     <string name="pref_category_library_update">Global yangilanish</string>
     <string name="pref_library_update_refresh_metadata">Metama\'lumotlarni yangilash</string>
     <string name="exclude">Istisno qilish: %s</string>

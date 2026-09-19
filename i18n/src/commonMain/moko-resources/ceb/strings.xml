@@ -105,7 +105,7 @@
     <string name="action_close">Suod nga</string>
     <string name="action_webview_back">Balik</string>
     <string name="action_webview_refresh">I-refresh</string>
-    <string name="loading">Nagprosesoâ€¦</string>
+    <string name="loading">Nagproseso...</string>
     <string name="app_not_available">Dili magamit ang app</string>
     <string name="pref_category_general">Heneral</string>
     <string name="pref_category_appearance">Panagway</string>
@@ -194,7 +194,7 @@
     <string name="extension_api_error">Napakyas sa pagkuha sa listahan sa mga extension</string>
     <string name="ext_nsfw_short">18+</string>
     <string name="ext_nsfw_warning">Ang mga tinubdan gikan niini nga extension mahimong adunay sulod nga NSFW (18+)</string>
-    <string name="ext_install_service_notif">Nag-instalar og extensionâ€¦</string>
+    <string name="ext_install_service_notif">Nag-instalar og extension...</string>
     <string name="ext_installer_pref">Installer</string>
     <string name="ext_installer_legacy">Kabilin</string>
     <string name="ext_installer_shizuku_stopped">Si Shizuku wala modagan</string>
@@ -431,7 +431,7 @@
     <string name="unknown_error">Wala mailhi nga sayup</string>
     <string name="username">Username</string>
     <string name="action_display_show_continue_reading_button">Ipakita ang buton sa pagpadayon sa pagbasa</string>
-    <string name="action_search_hint">Pangitaaâ€¦</string>
+    <string name="action_search_hint">Pangitaa...</string>
     <string name="action_open_random_manga">Abli nga random ang pagsulod</string>
     <string name="label_stats">Istatistika</string>
     <string name="label_started">Nagsugod</string>

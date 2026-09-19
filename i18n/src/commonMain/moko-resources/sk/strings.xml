@@ -64,7 +64,7 @@
     <string name="action_undo">Krok spÃ¤Å¥</string>
     <string name="action_open_log">OtvoriÅ¥ log</string>
     <string name="action_restore">ObnoviÅ¥</string>
-    <string name="loading">NaÄÃ­tava saâ€¦</string>
+    <string name="loading">NaÄÃ­tava sa...</string>
     <string name="app_not_available">AplikÃ¡cia nedostupnÃ¡</string>
     <string name="pref_category_general">VÅ¡eobecnÃ©</string>
     <string name="pref_category_reader">PrehliadaÄ</string>
@@ -203,7 +203,7 @@
     <string name="no_more_results">Å½iadne ÄalÅ¡ie vÃ½sledky</string>
     <string name="local_source">LokÃ¡lny zdroj</string>
     <string name="other_source">OstatnÃ©</string>
-    <string name="action_global_search_hint">GlobÃ¡lne vyhÄ¾adÃ¡vanieâ€¦</string>
+    <string name="action_global_search_hint">GlobÃ¡lne vyhÄ¾adÃ¡vanie...</string>
     <string name="latest">NajnovÅ¡Ã­</string>
     <string name="browse">PrehÄ¾adÃ¡vaÅ¥</string>
     <string name="ongoing">PokraÄujÃºci</string>
@@ -258,7 +258,7 @@
     <string name="transition_previous">PredchÃ¡dzajÃºcÃ­:</string>
     <string name="transition_no_next">Å½iadna ÄalÅ¡ia kapitola</string>
     <string name="transition_no_previous">Å½iadna predchÃ¡dzajÃºca kapitola</string>
-    <string name="transition_pages_loading">NaÄÃ­tÃ¡nÃ­ strÃ¡nokâ€¦</string>
+    <string name="transition_pages_loading">NaÄÃ­tÃ¡nÃ­ strÃ¡nok...</string>
     <string name="transition_pages_error">Chyba pri naÄÃ­tÃ¡nÃ­ strÃ¡nok: %1$s</string>
     <string name="migration_dialog_what_to_include">Vyberte data, ktorÃ© chcete zahrnÃºÅ¥</string>
     <string name="migrate">MigrovaÅ¥</string>
@@ -271,7 +271,7 @@
     <string name="file_select_backup">Vyberte zÃ¡loÅ¾nÃ½ sÃºbor</string>
     <string name="update_check_confirm">StiahnuÅ¥</string>
     <string name="update_check_no_new_updates">Å½iadnÃ© novÃ© aktualizÃ¡cie</string>
-    <string name="update_check_notification_download_in_progress">PrebiehÃ¡ stahovanieâ€¦</string>
+    <string name="update_check_notification_download_in_progress">PrebiehÃ¡ stahovanie...</string>
     <string name="update_check_notification_update_available">DostupnÃ¡ novÃ¡ aktualizÃ¡cia!</string>
     <string name="information_no_downloads">Å½iadne sÅ¥ahovanie</string>
     <string name="information_no_recent">Å½iadne nedÃ¡vne aktualizÃ¡cie</string>
@@ -510,7 +510,7 @@
     <string name="network_not_metered">Iba v nemeranej sieti</string>
     <string name="ext_update_all">AktualizovaÅ¥ vÅ¡etko</string>
     <string name="extension_api_error">Nepodarilo sa zÃ­skaÅ¥ zoznam rozÅ¡Ã­renÃ­</string>
-    <string name="ext_install_service_notif">InÅ¡taluje sa rozÅ¡Ã­renieâ€¦</string>
+    <string name="ext_install_service_notif">InÅ¡taluje sa rozÅ¡Ã­renie...</string>
     <string name="pref_read_with_tapping_inverted">InvertovaÅ¥ oblasti dotyku</string>
     <string name="pref_create_folder_per_manga">UloÅ¾enie strÃ¡nok do samostatnÃ½ch prieÄinkov</string>
     <string name="gray_background">Å edivÃ¡</string>
@@ -625,7 +625,7 @@
     <string name="label_downloaded">StiahnutÃ©</string>
     <string name="label_stats">Å tatistiky</string>
     <string name="label_started">ZaÄatÃ©</string>
-    <string name="action_search_hint">HÄ¾adaÅ¥â€¦</string>
+    <string name="action_search_hint">HÄ¾adaÅ¥...</string>
     <string name="action_open_random_manga">OtvoriÅ¥ nÃ¡hodnÃ½ zÃ¡znam</string>
     <string name="action_copy_link">SkopÃ­rovaÅ¥ link</string>
     <string name="action_apply">PouÅ¾iÅ¥</string>

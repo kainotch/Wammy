@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="update_check_notification_download_in_progress">Ndonlotâ€¦</string>
+    <string name="update_check_notification_download_in_progress">Ndonlot...</string>
     <string name="update_check_confirm">Donlot</string>
     <string name="track_type">Jinis</string>
     <string name="title">Judhul</string>
@@ -128,7 +128,7 @@
     <string name="pref_category_appearance">Tampilan</string>
     <string name="pref_category_general">Umum</string>
     <string name="app_not_available">Aplikasi ora ono</string>
-    <string name="loading">Ngemotâ€¦</string>
+    <string name="loading">Ngemot...</string>
     <string name="action_start_downloading_now">Wiwiti ngunduh saiki</string>
     <string name="action_webview_refresh">Segerke</string>
     <string name="action_webview_forward">Maju</string>
@@ -222,7 +222,7 @@
     <string name="extension_api_error">Gagal kanggo entuk dhaptar ekstensi</string>
     <string name="ext_nsfw_short">18+</string>
     <string name="ext_nsfw_warning">Sumber saka ekstensi iki bisa ngemot konten NSFW (18+)</string>
-    <string name="ext_install_service_notif">Masang ekstensiâ€¦</string>
+    <string name="ext_install_service_notif">Masang ekstensi...</string>
     <string name="ext_installer_pref">Pemasang</string>
     <string name="ext_installer_shizuku_stopped">Shizuku ora lumaku</string>
     <string name="ext_installer_shizuku_unavailable_dialog">Pasang lan wiwit Shizuku kanggo migunakake Shizuku dadi pemasang ekstensi.</string>
@@ -299,7 +299,7 @@
     <string name="label_local">Lokal</string>
     <string name="label_started">Diwiwiti</string>
     <string name="label_downloaded">Diundhuh</string>
-    <string name="action_search_hint">Telusuriâ€¦</string>
+    <string name="action_search_hint">Telusuri...</string>
     <string name="delete_downloaded">Ngehapus downloadan</string>
     <string name="selected">Dipunpilih</string>
     <string name="not_selected">Mboten dipunpilih</string>

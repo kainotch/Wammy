@@ -38,7 +38,7 @@
     <string name="transition_previous">Aiempi:</string>
     <string name="transition_no_next">Seuraavaa lukua ei ole</string>
     <string name="transition_no_previous">Aiempaa lukua ei ole</string>
-    <string name="transition_pages_loading">Ladataan sivujaâ€¦</string>
+    <string name="transition_pages_loading">Ladataan sivuja...</string>
     <string name="transition_pages_error">Sivujen lataus epÃ¤onnistui: %1$s</string>
     <string name="migration_dialog_what_to_include">Valitse sisÃ¤llytettÃ¤vÃ¤ tieto</string>
     <string name="migrate">Vaihda</string>
@@ -51,7 +51,7 @@
     <string name="file_select_backup">Valitse varmuuskopio-tiedosto</string>
     <string name="update_check_confirm">Lataa</string>
     <string name="update_check_no_new_updates">Ei pÃ¤ivityksiÃ¤ saatavilla</string>
-    <string name="update_check_notification_download_in_progress">Ladataanâ€¦</string>
+    <string name="update_check_notification_download_in_progress">Ladataan...</string>
     <string name="update_check_notification_update_available">Uusi versio saatavilla!</string>
     <string name="information_no_downloads">Ei latauksia</string>
     <string name="information_no_recent">Ei viimeisimpiÃ¤ pÃ¤ivityksiÃ¤</string>
@@ -105,7 +105,7 @@
     <string name="action_undo">Kumoa</string>
     <string name="action_open_log">Avaa loki</string>
     <string name="action_restore">Palauta</string>
-    <string name="loading">Ladataanâ€¦</string>
+    <string name="loading">Ladataan...</string>
     <string name="app_not_available">Sovellus ei ole saatavilla</string>
     <string name="pref_category_general">Yleiset</string>
     <string name="pref_category_reader">Lukija</string>
@@ -225,7 +225,7 @@
     <string name="unknown_error">Tuntematon virhe</string>
     <string name="updating_category">PÃ¤ivitetÃ¤Ã¤n kategoriaa</string>
     <string name="no_more_results">Ei enempÃ¤Ã¤ tuloksia</string>
-    <string name="action_global_search_hint">Globaali hakuâ€¦</string>
+    <string name="action_global_search_hint">Globaali haku...</string>
     <string name="delete_downloads_for_manga">Poista ladatut luvut?</string>
     <string name="copied_to_clipboard">Kopioitu leikepÃ¶ydÃ¤lle
 \n%1$s</string>
@@ -524,7 +524,7 @@
     <string name="ext_installer_shizuku_unavailable_dialog">Asenna ja aja Shizuku kÃ¤yttÃ¤Ã¤ksesi Shizukua laajennusten asentamiseen.</string>
     <string name="ext_update_all">PÃ¤ivitÃ¤ kaikki</string>
     <string name="extension_api_error">Laajennusluettelon halu epÃ¤onnistui</string>
-    <string name="ext_install_service_notif">Asennetaan laajennustaâ€¦</string>
+    <string name="ext_install_service_notif">Asennetaan laajennusta...</string>
     <string name="ext_installer_pref">Asentaja</string>
     <string name="action_remove_everything">Poista kaikki</string>
     <string name="action_sort_last_manga_update">Viimeisin manga pÃ¤ivitys</string>
@@ -541,7 +541,7 @@
     <string name="pref_landscape_zoom">Zoomaa vaakasuuntaisiin kuviin</string>
     <string name="pref_highest">Korkein</string>
     <string name="ext_info_language">Kieli</string>
-    <string name="action_search_hint">Hakuâ€¦</string>
+    <string name="action_search_hint">Haku...</string>
     <string name="theme_lavender">Laventeli</string>
     <string name="pref_app_language">Sovelluksen kieli</string>
     <string name="ext_info_version">Versio</string>

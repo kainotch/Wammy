@@ -83,7 +83,7 @@
     <string name="pref_category_appearance">IÅ¡vaizda</string>
     <string name="pref_category_general">Bendriniai</string>
     <string name="app_not_available">Programa negalima</string>
-    <string name="loading">Ä®keliamaâ€¦</string>
+    <string name="loading">Ä®keliama...</string>
     <string name="action_start_downloading_now">AtsisiÅ³sti dabar</string>
     <string name="action_webview_refresh">Naujinti</string>
     <string name="action_webview_forward">Ä® priekÄ¯</string>
@@ -216,7 +216,7 @@
     <string name="ext_installer_pref">Diegimo programa</string>
     <string name="pref_update_only_completely_read">Kai yra neskaitytÅ³ skyriÅ³</string>
     <string name="pref_update_only_started">Kai dar neprasidÄ—jo</string>
-    <string name="ext_install_service_notif">Instaliuojamas papildinysâ€¦</string>
+    <string name="ext_install_service_notif">Instaliuojamas papildinys...</string>
     <string name="pref_keep_screen_on">Palikti ekranÄ… Ä¯jungta</string>
     <string name="pref_skip_read_chapters">Praleisti perskaitytus skyrius</string>
     <string name="pref_skip_filtered_chapters">Praleisti perfiltruotus skyrius</string>
@@ -330,7 +330,7 @@
     <string name="pref_download_new_categories_details">Ä®raÅ¡ai neÄ¯trauktose kategorijose nebus atsisiÅ³sti, net jei jie taip pat yra Ä¯traukti Ä¯ kategorijas.</string>
     <string name="learn_more">Palieskite, kad suÅ¾inotumÄ—te daugiau</string>
     <string name="file_select_backup">Pasirinkti atsarginÄ—s kopijos failÄ…</string>
-    <string name="transition_pages_loading">Ä®keliami puslapiaiâ€¦</string>
+    <string name="transition_pages_loading">Ä®keliami puslapiai...</string>
     <string name="transition_no_next">Kito skyriaus nÄ—ra</string>
     <string name="notification_size_warning">Dideli atnaujinimai kenkia Å¡altiniams ir gali lemti lÄ—tesnius atnaujinimus bei didesnÄ¯ akumuliatoriaus naudojimÄ…. BakstelÄ—kite , jei norite suÅ¾inoti daugiau.</string>
     <string name="viewer">Skaitymo rÄ—Å¾imas</string>
@@ -364,7 +364,7 @@
     <string name="copy">Kopijuoti</string>
     <string name="notification_new_chapters">Atrasti nauji skyriai</string>
     <string name="skipped_reason_not_caught_up">Praleista, nes yra neperskaitytÅ³ skyriÅ³</string>
-    <string name="update_check_notification_download_in_progress">AtsiunÄiamaâ€¦</string>
+    <string name="update_check_notification_download_in_progress">AtsiunÄiama...</string>
     <string name="file_select_cover">Pasirinkti virÅ¡elio vaizdÄ…</string>
     <string name="information_empty_category_dialog">JÅ«s dar neturite jokiÅ³ kategorijÅ³.</string>
     <string name="transition_no_previous">Ankstesnio skyriaus nÄ—ra</string>
@@ -540,7 +540,7 @@
     <string name="manga_cover">VirÅ¡elis</string>
     <string name="pinned_sources">Prisegtas</string>
     <string name="email">El. paÅ¡to adresas</string>
-    <string name="action_global_search_hint">PasaulinÄ— paieÅ¡kaâ€¦</string>
+    <string name="action_global_search_hint">PasaulinÄ— paieÅ¡ka...</string>
     <string name="latest">Naujausia</string>
     <string name="local_source_help_guide">Vietos Å¡altiniÅ³ vadovas</string>
     <string name="cover_saved">VirÅ¡elis iÅ¡saugotas</string>
@@ -611,7 +611,7 @@
     <string name="transition_next">Kitas:</string>
     <string name="source_filter_empty_screen">Ä®diegtÅ³ Å¡altiniÅ³ nerasta</string>
     <string name="theme_tidalwave">Potvynio banga</string>
-    <string name="action_search_hint">IeÅ¡kotiâ€¦</string>
+    <string name="action_search_hint">IeÅ¡koti...</string>
     <string name="error_user_agent_string_blank">Vartotojo agento eilutÄ— negali bÅ«ti tuÅ¡Äia</string>
     <string name="update_already_running">Atnaujinimas jau vykdomas</string>
     <string name="updates_last_update_info">Biblioteka paskutinÄ¯ kartÄ… atnaujinta: %s</string>

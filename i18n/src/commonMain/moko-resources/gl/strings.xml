@@ -141,7 +141,7 @@
     <string name="pref_category_library">Biblioteca</string>
     <string name="pref_category_general">Xeral</string>
     <string name="app_not_available">AplicaciÃ³n non dispoÃ±ible</string>
-    <string name="loading">Cargandoâ€¦</string>
+    <string name="loading">Cargando...</string>
     <string name="action_webview_refresh">Recargar</string>
     <string name="action_webview_forward">Adiante</string>
     <string name="action_webview_back">AtrÃ¡s</string>
@@ -248,7 +248,7 @@
     <string name="pref_update_only_completely_read">Con capÃ­tulos sin ler</string>
     <string name="pref_library_update_categories_details">Os elementos das categorÃ­as excluÃ­das non se actualizarÃ¡n aÃ­nda se estÃ¡n tamÃ©n nas categorÃ­as incluÃ­das.</string>
     <string name="ext_info_version">VersiÃ³n</string>
-    <string name="ext_install_service_notif">Instalando a extensiÃ³nâ€¦</string>
+    <string name="ext_install_service_notif">Instalando a extensiÃ³n...</string>
     <string name="ext_installer_legacy">ClÃ¡sico</string>
     <string name="pref_show_navigation_mode">Mostrar a superposiciÃ³n das zonas de toque</string>
     <string name="pref_grayscale">Escala de grises</string>
@@ -425,7 +425,7 @@
     <string name="connected_to_wifi">SÃ³ con Wi-Fi</string>
     <string name="network_not_metered">SÃ³ en conexiÃ³ns ilimitadas</string>
     <string name="webview_data_deleted">BorrÃ¡ronse os datos do WebView</string>
-    <string name="action_global_search_hint">Procura globalâ€¦</string>
+    <string name="action_global_search_hint">Procura global...</string>
     <string name="action_sort_last_manga_update">Ãšltima comprobaciÃ³n de actualizaciÃ³ns</string>
     <string name="action_sort_count">NÃºmero total de entradas</string>
     <string name="action_not_now">Agora non</string>
@@ -437,7 +437,7 @@
     <string name="logout">Pechar sesiÃ³n</string>
     <string name="no_results_found">Non se atoparon resultados</string>
     <string name="plan_to_read">Pendente de ler</string>
-    <string name="action_search_hint">Procurarâ€¦</string>
+    <string name="action_search_hint">Procurar...</string>
     <string name="action_display_language_badge">Idioma</string>
     <string name="action_display_cover_only_grid">CuadrÃ­cula con sÃ³ portadas</string>
     <string name="date">Data</string>
@@ -599,7 +599,7 @@
     <string name="appwidget_updates_description">Ver os elementos da biblioteca actualizados recentemente</string>
     <string name="remove_manga">Vas eliminar \"%s\" da tÃºa biblioteca</string>
     <string name="no_next_chapter">Non se atopou a o capÃ­tulo seguinte</string>
-    <string name="transition_pages_loading">Cargando pÃ¡xinasâ€¦</string>
+    <string name="transition_pages_loading">Cargando pÃ¡xinas...</string>
     <string name="transition_finished">Rematado:</string>
     <string name="chapter_progress">PÃ¡xina: %1$d</string>
     <string name="error_saving_picture">Produciuse un erro ao gardar a imaxe</string>
@@ -638,7 +638,7 @@
     <string name="label_read_duration">Tempo de lectura</string>
     <string name="label_titles_in_global_update">Na actualizaciÃ³n global</string>
     <string name="label_total_chapters">Totais</string>
-    <string name="update_check_notification_download_in_progress">Descargandoâ€¦</string>
+    <string name="update_check_notification_download_in_progress">Descargando...</string>
     <string name="information_empty_category_dialog">AÃ­nda non tes categorÃ­as.</string>
     <string name="information_required_plain">*necesario</string>
     <string name="spen_previous_page">PÃ¡xina anterior</string>
@@ -766,7 +766,7 @@
     <string name="manga_interval_expected_update">Prevese que o seguinte capÃ­tulo saia en %1$s, comprÃ³base cada %2$s.</string>
     <string name="manga_interval_custom_amount">Frecuencia de actualizaciÃ³n personalizada:</string>
     <string name="track_delete_title">Queres deixar de seguir %s?</string>
-    <string name="notification_updating_progress">Actualizando a bibliotecaâ€¦ (%s)</string>
+    <string name="notification_updating_progress">Actualizando a biblioteca... (%s)</string>
     <string name="skipped_reason_not_in_release_period">Omitiuse porque hoxe non se esperaba ningunha publicaciÃ³n</string>
     <string name="file_null_uri_error">Non se elixiu ningÃºn arquivo</string>
     <string name="last_auto_backup_info">Ãšltima copia de seguridade automÃ¡tica: %s</string>
@@ -822,14 +822,14 @@
     <string name="author">Autor</string>
     <string name="possible_duplicates_summary">Xa tes obras na tÃºa biblioteca cun nome similar.\n\nElixe unha delas para comezar a migraciÃ³n ou engÃ¡dea sen mÃ¡is.</string>
     <string name="tracked_privately">Seguindo de maneira privada</string>
-    <string name="notes_placeholder">Gustoume a parte na queâ€¦</string>
+    <string name="notes_placeholder">Gustoume a parte na que...</string>
     <string name="pref_mark_duplicate_read_chapter_read">Marcar os capÃ­tulos duplicados como xa lidos</string>
     <string name="action_notes">Notas</string>
     <string name="action_edit_notes">Editar notas</string>
     <string name="pref_behavior">Comportamento</string>
     <string name="pref_mark_duplicate_read_chapter_read_new">Ao obter capÃ­tulos novos</string>
     <string name="pref_always_decode_long_strip_with_ssiv_2">Cargar imaxes de tira vertical co decodificador antigo</string>
-    <string name="logging_in">Iniciando sesiÃ³nâ€¦</string>
+    <string name="logging_in">Iniciando sesiÃ³n...</string>
     <string name="export">Exportar</string>
     <string name="library_list">Lista da biblioteca</string>
     <string name="library_exported">Exportouse a biblioteca</string>

@@ -156,7 +156,7 @@
     <string name="theme_system">ÒªÐ¸Ò«Ñ‚ÐµÐ¼Ñ€Ð¸ Ð¿ÐµÐºÐµÑ…</string>
     <string name="pref_category_reader">Ð’ÑƒÐ»Ó‘Ñˆ</string>
     <string name="pref_category_tracking">Ð™Ó—Ñ€Ð»ÐµÐ²</string>
-    <string name="loading">Ð¢Ð¸Ð¹ÐµÐ½Ð¸â€¦</string>
+    <string name="loading">Ð¢Ð¸Ð¹ÐµÐ½Ð¸...</string>
     <string name="action_restore">Ð¢Ð°Ð²Ó‘Ñ€</string>
     <string name="action_unpin">Ð¡Ð°Ð»Ñ‚</string>
     <string name="action_migrate">ÐšÑƒÒ«Ð°Ñ€</string>
@@ -254,7 +254,7 @@
     <string name="download_notifier_unknown_error">ÐšÓ—Ñ‚Ð¼ÐµÐ½ Ð¹Ó‘Ð½Ó‘ÑˆÐ° Ð¿ÑƒÐ»Ð° ÑÑ‹Ð¿Ó‘ÐºÑÐµÐ½Ðµ Ñ‚Ð¸Ð¹ÐµÑÐµ Ð¸Ð»ÐµÐ¹Ð¼ÐµÑÑ‚</string>
     <string name="download_notifier_downloader_title">Ð¢Ð¸Ð¹ÐµÐ²Ò«Ó—</string>
     <string name="information_webview_required">Wammy Ð²Ð°Ð»Ð»Ð¸ WebView ÐºÐ¸Ñ€Ð»Ó—</string>
-    <string name="update_check_notification_download_in_progress">Ð¢Ð¸Ð¹ÐµÐ²â€¦</string>
+    <string name="update_check_notification_download_in_progress">Ð¢Ð¸Ð¹ÐµÐ²...</string>
     <string name="update_check_no_new_updates">ÒªÓ—Ð½ÐµÑ‚Ó³ Ñ‚ÑƒÐ¿Ó‘Ð½Ð¼Ð°Ð½</string>
     <string name="update_check_confirm">Ð¢Ð¸ÐµÑÐµ Ð¸Ð»</string>
     <string name="file_select_cover">Ð¥ÑƒÐ¿Ð»Ð°ÑˆÐºÐ° ÑÑƒÐ¹Ð»Ð°</string>
@@ -272,7 +272,7 @@
     <string name="loader_not_implemented_error">ÒªÓ‘Ð» ÐºÑƒÒ« Ñ‚ÑƒÐ¿Ó‘Ð½Ð¼Ð°Ð½</string>
     <string name="page_list_empty_error">ÐŸÓ—Ñ€ ÐµÐ» Ñ‚Ðµ Ñ‚ÑƒÐ¿Ó‘Ð½Ð¼Ð°Ð½</string>
     <string name="transition_pages_error">Ð•Ð»ÑÐµÐ¼ Ñ‚Ð¸Ð¹ÐµÐ½ÐµÐ¹Ð¼ÐµÑ€Ó—Ò«: %1$s</string>
-    <string name="transition_pages_loading">Ð•Ð»ÑÐµÐ½Ðµ Ñ‚Ð¸Ð¹ÐµÐ½Ð¸â€¦</string>
+    <string name="transition_pages_loading">Ð•Ð»ÑÐµÐ½Ðµ Ñ‚Ð¸Ð¹ÐµÐ½Ð¸...</string>
     <string name="transition_no_previous">Ð£Ð¼Ó—Ð½Ñ…Ð¸ ÑÑ‹Ð¿Ó‘Ðº Ò«ÑƒÐº</string>
     <string name="transition_no_next">ÐœÐ°Ð»Ð°Ð»Ð»Ð¸ ÑÑ‹Ð¿Ó‘Ðº Ò«ÑƒÐº</string>
     <string name="transition_previous">Ð£Ð¼Ó—Ð½Ñ…Ð¸:</string>
@@ -334,7 +334,7 @@
     <string name="local_source_help_guide">Ð’Ñ‹Ñ€Ó‘Ð½Ñ‚Ð¸ Ò«Ó‘Ð» ÐºÑƒÒ« ÐµÑ€Ñ‚Ó³Ð»Ó—Ñ…Ó—</string>
     <string name="browse">Ð¨Ñ‹Ñ€Ð°Ð²</string>
     <string name="latest">Ð®Ð»Ð°ÑˆÐºÐ¸</string>
-    <string name="action_global_search_hint">ÐŸÑƒÑ€ Ò«Ó—Ñ€Ñ‚Ðµ ÑˆÑ‹Ñ€Ð°â€¦</string>
+    <string name="action_global_search_hint">ÐŸÑƒÑ€ Ò«Ó—Ñ€Ñ‚Ðµ ÑˆÑ‹Ñ€Ð°...</string>
     <string name="pinned_sources">ÒªÐ°ÐºÐ½Ó‘</string>
     <string name="last_used_source">Ð®Ð»Ð°ÑˆÐºÐ¸ ÑƒÑÓ‘ ÐºÑƒÑ€Ð½Ð¸</string>
     <string name="other_source">Ð«Ñ‚Ñ‚Ð¸ÑÐµÐ¼</string>
@@ -480,7 +480,7 @@
     <string name="confirm_lock_change">Ð£Ð»ÑˆÓ‘Ð½Ó‘Ð²Ð° Ò«Ð¸Ñ€Ó—Ð¿Ð»ÐµÑ‚Ð¼Ðµ ÐµÑÓ—Ð»Ó—Ñ…Ðµ Ò«Ð¸Ñ€Ó—Ð¿Ð»ÐµÑ‚</string>
     <string name="action_show_manga">Ð¥Ð°Ð¹Ð»Ð°Ð²Ð° ÐºÓ‘Ñ‚Ð°Ñ€Ñ‚</string>
     <string name="action_display_language_badge">Ð§Ó—Ð»Ñ…Ðµ</string>
-    <string name="action_search_hint">Ð¨Ñ‹Ñ€Ð°â€¦</string>
+    <string name="action_search_hint">Ð¨Ñ‹Ñ€Ð°...</string>
     <string name="action_close">Ð¥ÑƒÐ¿</string>
     <string name="action_start_downloading_now">Ð¢Ð¸Ð¹ÐµÐ²Ðµ Ñ…Ð°Ð»ÐµÑ… Ð¿ÑƒÒ«Ð»Ð°</string>
     <string name="internal_error">InternalError: Ð¥ÑƒÑˆÐ¼Ð° Ñ…Ñ‹Ð¿Ð°Ñ€-Ð¿Ó—Ð»Ó³ Ð¿Ó‘Ñ…Ð¼Ð° Ñ‚Ó‘Ð²Ó‘Ð¼-Ð¿ÑƒÐ»Ó‘Ð¼ ÐºÓ—Ð½ÐµÐºÐ¸Ð½Ðµ Ð¿Ó‘Ñ…</string>
@@ -549,7 +549,7 @@
     <string name="ext_installer_shizuku_stopped">Shizuku Ó—Ò«Ð»ÐµÐ¼ÐµÑÑ‚</string>
     <string name="ext_info_age_rating">ÒªÑƒÐ»-Ó³ÑÓ—Ð¼ Ñ‡Ð°Ñ€Ð°Ð²Ó—</string>
     <string name="action_sort_next_updated">Ð¢ÐµÐ¿Ó—Ñ€ ÐºÓ—Ñ‚Ó—Ð½ÐµÐºÐµÐ½ Ò«Ó—Ð½ÐµÑ‚Ó³Ð¿Ðµ</string>
-    <string name="ext_install_service_notif">Ð¥ÑƒÑˆÐ¼Ð° Ð»Ð°Ñ€Ñ‚Ð½Ð¸â€¦</string>
+    <string name="ext_install_service_notif">Ð¥ÑƒÑˆÐ¼Ð° Ð»Ð°Ñ€Ñ‚Ð½Ð¸...</string>
     <string name="action_set_interval">Ð¢Ó‘Ñ‚Ó‘ÑˆÐ»Ó‘Ñ… Ð¿Ð°Ð»Ó‘Ñ€Ñ‚</string>
     <string name="action_filter_interval_custom">Ó–Ð½ÐµÑ€Ó³Ð»Ð»Ó— Ð¸Ð»Ó³ Ñ‚Ó‘Ñ‚Ó‘ÑˆÐ»Ó‘Ñ…Ó—</string>
     <string name="ext_installer_legacy">ÐœÐ°Ð»Ñ‚Ð°Ð½Ñ…Ð¸Ð»Ð»Ðµ</string>

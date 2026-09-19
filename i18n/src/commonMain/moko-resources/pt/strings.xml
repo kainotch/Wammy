@@ -36,7 +36,7 @@
     <string name="action_cancel">Cancelar</string>
     <string name="action_sort">Ordenar</string>
     <string name="action_install">Instalar</string>
-    <string name="loading">A carregarâ€¦</string>
+    <string name="loading">A carregar...</string>
     <string name="pref_category_general">Geral</string>
     <string name="pref_category_reader">Leitor</string>
     <string name="pref_category_downloads">TransferÃªncias</string>
@@ -150,7 +150,7 @@
     <string name="file_select_backup">Selecionar ficheiro de cÃ³pia de seguranÃ§a</string>
     <string name="update_check_confirm">Transferir</string>
     <string name="update_check_no_new_updates">Sem atualizaÃ§Ãµes disponÃ­veis</string>
-    <string name="update_check_notification_download_in_progress">A transferirâ€¦</string>
+    <string name="update_check_notification_download_in_progress">A transferir...</string>
     <string name="update_check_notification_update_available">Nova versÃ£o disponÃ­vel!</string>
     <string name="information_no_downloads">Sem transferÃªncias</string>
     <string name="information_no_recent">Sem atualizaÃ§Ãµes recentes</string>
@@ -229,7 +229,7 @@
     <string name="no_more_results">Sem mais resultados</string>
     <string name="local_source">Fonte local</string>
     <string name="other_source">Outras</string>
-    <string name="action_global_search_hint">Pesquisa globalâ€¦</string>
+    <string name="action_global_search_hint">Pesquisa global...</string>
     <string name="latest">Mais recente</string>
     <string name="browse">Navegar</string>
     <string name="manga_added_library">Adicionado Ã  biblioteca</string>
@@ -257,7 +257,7 @@
     <string name="transition_previous">Anterior:</string>
     <string name="transition_no_next">NÃ£o hÃ¡ prÃ³ximo capÃ­tulo</string>
     <string name="transition_no_previous">NÃ£o hÃ¡ capÃ­tulo anterior</string>
-    <string name="transition_pages_loading">A carregar pÃ¡ginasâ€¦</string>
+    <string name="transition_pages_loading">A carregar pÃ¡ginas...</string>
     <string name="transition_pages_error">Falha ao carregar pÃ¡ginas: %1$s</string>
     <string name="migration_dialog_what_to_include">Selecione dados para incluir</string>
     <string name="migrate">Migrar</string>
@@ -542,7 +542,7 @@
     <string name="pref_verbose_logging">Registo de eventos detalhado</string>
     <string name="privacy_policy">PolÃ­tica de privacidade</string>
     <string name="extension_api_error">Falha ao obter a lista de extensÃµes</string>
-    <string name="ext_install_service_notif">Instalando a extensÃ£oâ€¦</string>
+    <string name="ext_install_service_notif">Instalando a extensÃ£o...</string>
     <string name="ext_installer_pref">Instalador</string>
     <string name="ext_installer_legacy">Legado</string>
     <string name="ext_installer_shizuku_stopped">O Shizuku nÃ£o estÃ¡ em execuÃ§Ã£o</string>
@@ -616,7 +616,7 @@
     <string name="theme_lavender">Lavanda</string>
     <string name="popular">Famoso</string>
     <string name="skipped_reason_not_always_update">Ignorado porque a sÃ©rie nÃ£o requer atualizaÃ§Ãµes</string>
-    <string name="action_search_hint">Pesquisarâ€¦</string>
+    <string name="action_search_hint">Pesquisar...</string>
     <string name="missing_storage_permission">PermissÃµes de armazenamento nÃ£o concedidas</string>
     <string name="action_display_show_continue_reading_button">BotÃ£o de continuar a ler</string>
     <string name="pref_appearance_summary">Tema, data e formato de hora</string>
@@ -719,7 +719,7 @@
     <string name="action_create">Criar</string>
     <string name="app_settings">ConfiguraÃ§Ãµes da app</string>
     <string name="syncing_library">A sincronizar a biblioteca</string>
-    <string name="notification_updating_progress">A atualizar a bibliotecaâ€¦ (%s)</string>
+    <string name="notification_updating_progress">A atualizar a biblioteca... (%s)</string>
     <string name="exception_http">HTTP %d, verifique o site na WebView</string>
     <string name="action_sort_tracker_score">PontuaÃ§Ã£o do monitorizador</string>
     <string name="action_apply">Aplicar</string>
@@ -843,7 +843,7 @@
     <string name="pref_update_library_manga_titles">Atualizar os tÃ­tulos dos mangÃ¡s da biblioteca para corresponder Ã  fonte</string>
     <string name="pref_update_library_manga_titles_summary">Aviso: se um mangÃ¡ for renomeado, ele serÃ¡ removido da fila de descargas (se estiver presente).</string>
     <string name="pref_incognito_mode_extension_summary">Pausar histÃ³rico de leitura para extensÃ£o</string>
-    <string name="logging_in">A fazer loginâ€¦</string>
+    <string name="logging_in">A fazer login...</string>
     <string name="possible_duplicates_title">PossÃ­veis duplicatas</string>
     <string name="possible_duplicates_summary">Tem entradas na sua biblioteca com nomes semelhantes.\n\nSelecione uma entrada para migrar ou adicionar mesmo assim.</string>
     <string name="download_bookmarked">Favoritos</string>
@@ -851,7 +851,7 @@
     <string name="action_toggle_private_on">Rastrear privadamente</string>
     <string name="action_toggle_private_off">Rastrear publicamente</string>
     <string name="action_filter_excluded_scanlators">Filtrar scanlators excluÃ­dos</string>
-    <string name="notes_placeholder">Gostou da parte ondeâ€¦</string>
+    <string name="notes_placeholder">Gostou da parte onde...</string>
     <string name="migrationConfigScreen.selectedHeader">Selecionado</string>
     <string name="migrationConfigScreen.availableHeader">DisponÃ­vel</string>
     <string name="migrationConfigScreen.selectAllLabel">Selecionar todos</string>
