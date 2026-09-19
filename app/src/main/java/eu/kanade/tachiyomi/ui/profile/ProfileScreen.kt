@@ -36,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -198,6 +199,17 @@ class ProfileScreen : Screen {
                                         Column {
                                             Text("Profile Picture", style = MaterialTheme.typography.labelMedium)
                                             Spacer(modifier = Modifier.height(8.dp))
+                                            if (newPhotoUrl.isNotEmpty()) {
+                                                Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                                                    AsyncImage(
+                                                        model = newPhotoUrl,
+                                                        contentDescription = "Preview",
+                                                        modifier = Modifier.size(80.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant),
+                                                        contentScale = ContentScale.Crop
+                                                    )
+                                                }
+                                                Spacer(modifier = Modifier.height(16.dp))
+                                            }
                                             OutlinedButton(
                                                 onClick = {
                                                     photoPickerLauncher.launch(
@@ -279,7 +291,13 @@ class ProfileScreen : Screen {
                                         },
                                         enabled = !isUpdating
                                     ) {
-                                        Text("Save")
+                                        if (isUpdating) {
+                                            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                                            Spacer(modifier = Modifier.width(8.dp))
+                                            Text("Saving...")
+                                        } else {
+                                            Text("Save")
+                                        }
                                     }
                                 },
                                 dismissButton = {
