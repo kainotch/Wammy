@@ -114,7 +114,7 @@ fun SwipeUpFab(
                         .padding(bottom = 80.dp) // Approximate padding above bottom nav
                 ) {
                     val customImageRes = eu.kanade.tachiyomi.R.drawable.devil_fruit
-                    
+
                     // --- VISUAL OPTIONS FOR FAB ---
                     // Option A (Standard FAB with inside image):
                     /*
@@ -166,24 +166,24 @@ fun SwipeUpFab(
             .pointerInput(hasShownTutorial) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
-                    
+
                     if (!hasShownTutorial) {
                         do {
                             val event = awaitPointerEvent()
                         } while (event.changes.any { it.pressed })
-                        
+
                         showTutorialOverlay = true
                         return@awaitEachGesture
                     }
-                    
+
                     val longPress = awaitLongPressOrCancellation(down.id)
-                    
+
                     if (longPress != null) {
                         // Gesture activated! Fire the initial tick.
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        
+
                         var triggered = false
-                        
+
                         do {
                             val event = awaitPointerEvent()
                             val change = event.changes.firstOrNull()
@@ -192,7 +192,7 @@ fun SwipeUpFab(
                                 if (dy < 0) {
                                     // Clamp the drag offset so it doesn't fly off screen
                                     dragOffset = dy.coerceAtLeast(clampPx)
-                                    
+
                                     if (dragOffset <= maxDragPx && !triggered) {
                                         triggered = true
                                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -201,7 +201,7 @@ fun SwipeUpFab(
                                 }
                             }
                         } while (event.changes.any { it.pressed })
-                        
+
                         // Force reset on release unconditionally
                         dragOffset = 0f
                     }
@@ -209,7 +209,7 @@ fun SwipeUpFab(
             }
     ) {
         val customImageRes = eu.kanade.tachiyomi.R.drawable.devil_fruit
-        
+
         // --- VISUAL OPTIONS FOR FAB ---
         // Option A (Standard FAB with inside image):
         /*

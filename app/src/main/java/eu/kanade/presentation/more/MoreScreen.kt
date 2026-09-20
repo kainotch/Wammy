@@ -1,6 +1,14 @@
 package eu.kanade.presentation.more
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.automirrored.outlined.Label
@@ -12,13 +20,18 @@ import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.Storage
 import androidx.compose.material.icons.outlined.Update
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import eu.kanade.presentation.more.settings.widget.SwitchPreferenceWidget
-import eu.kanade.presentation.more.settings.widget.TextPreferenceWidget
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.more.DownloadQueueState
 import tachiyomi.core.common.Constants
@@ -53,32 +66,37 @@ fun MoreScreen(
                     iconPadding = PaddingValues(vertical = 32.dp),
                 )
             }
+
+            // Mode Group
             item {
-                SwitchPreferenceWidget(
-                    title = stringResource(MR.strings.label_downloaded_only),
-                    subtitle = stringResource(MR.strings.downloaded_only_summary),
-                    icon = Icons.Outlined.CloudOff,
-                    checked = downloadedOnly,
-                    onCheckedChanged = onDownloadedOnlyChange,
-                )
-            }
-            item {
-                SwitchPreferenceWidget(
-                    title = stringResource(MR.strings.pref_incognito_mode),
-                    subtitle = stringResource(MR.strings.pref_incognito_mode_summary),
-                    icon = ImageVector.vectorResource(R.drawable.ic_glasses_24dp),
-                    checked = incognitoMode,
-                    onCheckedChanged = onIncognitoModeChange,
-                )
+                SettingsGroup(title = "Mode") {
+                    SettingItem(
+                        title = stringResource(MR.strings.label_downloaded_only),
+                        subtitle = stringResource(MR.strings.downloaded_only_summary),
+                        icon = Icons.Outlined.CloudOff,
+                        onClick = { onDownloadedOnlyChange(!downloadedOnly) },
+                        trailing = {
+                            Switch(checked = downloadedOnly, onCheckedChange = onDownloadedOnlyChange)
+                        }
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                    SettingItem(
+                        title = stringResource(MR.strings.pref_incognito_mode),
+                        subtitle = stringResource(MR.strings.pref_incognito_mode_summary),
+                        icon = ImageVector.vectorResource(R.drawable.ic_glasses_24dp),
+                        onClick = { onIncognitoModeChange(!incognitoMode) },
+                        trailing = {
+                            Switch(checked = incognitoMode, onCheckedChange = onIncognitoModeChange)
+                        }
+                    )
+                }
             }
 
-            item { HorizontalDivider() }
-
+            // Content Group
             item {
-                val downloadQueueState = downloadQueueStateProvider()
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_download_queue),
-                    subtitle = when (downloadQueueState) {
+                SettingsGroup(title = "Content") {
+                    val downloadQueueState = downloadQueueStateProvider()
+                    val downloadSubtitle = when (downloadQueueState) {
                         DownloadQueueState.Stopped -> null
                         is DownloadQueueState.Paused -> {
                             val pending = downloadQueueState.pending
@@ -98,70 +116,127 @@ fun MoreScreen(
                             val pending = downloadQueueState.pending
                             pluralStringResource(MR.plurals.download_queue_summary, count = pending, pending)
                         }
-                    },
-                    icon = Icons.Outlined.GetApp,
-                    onPreferenceClick = onClickDownloadQueue,
-                )
-            }
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_recent_updates),
-                    icon = androidx.compose.material.icons.Icons.Outlined.Update,
-                    onPreferenceClick = onClickUpdates,
-                )
-            }
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.categories),
-                    icon = Icons.AutoMirrored.Outlined.Label,
-                    onPreferenceClick = onClickCategories,
-                )
-            }
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_stats),
-                    icon = Icons.Outlined.QueryStats,
-                    onPreferenceClick = onClickStats,
-                )
-            }
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_data_storage),
-                    icon = Icons.Outlined.Storage,
-                    onPreferenceClick = onClickDataAndStorage,
-                )
+                    }
+                    SettingItem(
+                        title = stringResource(MR.strings.label_download_queue),
+                        subtitle = downloadSubtitle,
+                        icon = Icons.Outlined.GetApp,
+                        onClick = onClickDownloadQueue,
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                    SettingItem(
+                        title = stringResource(MR.strings.label_recent_updates),
+                        icon = androidx.compose.material.icons.Icons.Outlined.Update,
+                        onClick = onClickUpdates,
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                    SettingItem(
+                        title = stringResource(MR.strings.categories),
+                        icon = Icons.AutoMirrored.Outlined.Label,
+                        onClick = onClickCategories,
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                    SettingItem(
+                        title = stringResource(MR.strings.label_stats),
+                        icon = Icons.Outlined.QueryStats,
+                        onClick = onClickStats,
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                    SettingItem(
+                        title = stringResource(MR.strings.label_data_storage),
+                        icon = Icons.Outlined.Storage,
+                        onClick = onClickDataAndStorage,
+                    )
+                }
             }
 
-            item { HorizontalDivider() }
+            // App Group
+            item {
+                SettingsGroup(title = "App") {
+                    SettingItem(
+                        title = stringResource(MR.strings.label_settings),
+                        icon = Icons.Outlined.Settings,
+                        onClick = onClickSettings,
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                    SettingItem(
+                        title = stringResource(MR.strings.pref_category_about),
+                        icon = Icons.Outlined.Info,
+                        onClick = onClickAbout,
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
+                    SettingItem(
+                        title = stringResource(MR.strings.label_help),
+                        icon = Icons.AutoMirrored.Outlined.HelpOutline,
+                        onClick = { uriHandler.openUri(Constants.URL_HELP) },
+                    )
+                }
+            }
+        }
+    }
+}
 
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_settings),
-                    icon = Icons.Outlined.Settings,
-                    onPreferenceClick = onClickSettings,
+@Composable
+fun SettingsGroup(
+    title: String,
+    content: @Composable () -> Unit
+) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+        )
+        Surface(
+            shape = RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
+            Column {
+                content()
+            }
+        }
+    }
+}
+
+@Composable
+fun SettingItem(
+    title: String,
+    subtitle: String? = null,
+    icon: ImageVector,
+    onClick: (() -> Unit)? = null,
+    trailing: @Composable (() -> Unit)? = null
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable(onClick = onClick) else Modifier)
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            if (subtitle != null) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            // item {
-            //     TextPreferenceWidget(
-            //         title = stringResource(MR.strings.label_support_us),
-            //         icon = Icons.Default.VolunteerActivism,
-            //         onPreferenceClick = onClickSupport,
-            //     )
-            // }
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.pref_category_about),
-                    icon = Icons.Outlined.Info,
-                    onPreferenceClick = onClickAbout,
-                )
-            }
-            item {
-                TextPreferenceWidget(
-                    title = stringResource(MR.strings.label_help),
-                    icon = Icons.AutoMirrored.Outlined.HelpOutline,
-                    onPreferenceClick = { uriHandler.openUri(Constants.URL_HELP) },
-                )
-            }
+        }
+        if (trailing != null) {
+            Spacer(modifier = Modifier.width(16.dp))
+            trailing()
         }
     }
 }
