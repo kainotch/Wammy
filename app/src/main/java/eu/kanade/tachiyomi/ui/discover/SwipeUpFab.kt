@@ -43,6 +43,7 @@ fun SwipeUpFab(
     var showTutorialOverlay by remember { mutableStateOf(false) }
     var dragOffset by remember { mutableStateOf(0f) }
     val maxDragPx = with(LocalDensity.current) { -72.dp.toPx() }
+    val clampPx = with(LocalDensity.current) { -80.dp.toPx() }
     val haptic = LocalHapticFeedback.current
     val animatedOffset by animateFloatAsState(targetValue = dragOffset)
 
@@ -182,10 +183,11 @@ fun SwipeUpFab(
                         if (change != null && change.pressed) {
                             val dy = change.position.y - down.position.y
                             if (dy < 0) {
-                                dragOffset = dy
+                                // Clamp the drag offset so it doesn't fly off screen
+                                dragOffset = dy.coerceAtLeast(clampPx)
+                                
                                 if (dragOffset <= maxDragPx && !triggered) {
                                     triggered = true
-                                    dragOffset = 0f
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     onSlideUpTriggered()
                                 }
@@ -193,9 +195,8 @@ fun SwipeUpFab(
                         }
                     } while (event.changes.any { it.pressed })
                     
-                    if (!triggered) {
-                        dragOffset = 0f
-                    }
+                    // Force reset on release unconditionally
+                    dragOffset = 0f
                 }
             }
     ) {
