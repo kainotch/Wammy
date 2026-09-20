@@ -28,7 +28,8 @@ For full documentation, guides, and FAQ, please visit our [Official Website](htt
 ## Features
 
 ### Reading
-- **Manga & Novel Support:** Read both manga and light novels from a single app.
+- **Manga & Novel Support:** Read both manga and light novels from a single app. Use the **Devil Fruit** button in the bottom right corner—just press, hold, and slide up to instantly switch between Manga and Novel sections!
+  <br><br><img src="app/src/main/res/drawable/devil_fruit.png" width="80"/>
 - **Multiple Source Support:** Browse and read from a wide variety of online sources.
 - **Offline Reading:** Download chapters for reading without an internet connection.
 - **Customizable Reader:** Adjust reading modes, orientation, background colors, and scale types to your preference.
