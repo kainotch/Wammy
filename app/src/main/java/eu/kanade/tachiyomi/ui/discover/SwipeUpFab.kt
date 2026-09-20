@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.awaitLongPressOrCancellation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -175,28 +176,35 @@ fun SwipeUpFab(
                         return@awaitEachGesture
                     }
                     
-                    var triggered = false
+                    val longPress = awaitLongPressOrCancellation(down.id)
                     
-                    do {
-                        val event = awaitPointerEvent()
-                        val change = event.changes.firstOrNull()
-                        if (change != null && change.pressed) {
-                            val dy = change.position.y - down.position.y
-                            if (dy < 0) {
-                                // Clamp the drag offset so it doesn't fly off screen
-                                dragOffset = dy.coerceAtLeast(clampPx)
-                                
-                                if (dragOffset <= maxDragPx && !triggered) {
-                                    triggered = true
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    onSlideUpTriggered()
+                    if (longPress != null) {
+                        // Gesture activated! Fire the initial tick.
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        
+                        var triggered = false
+                        
+                        do {
+                            val event = awaitPointerEvent()
+                            val change = event.changes.firstOrNull()
+                            if (change != null && change.pressed) {
+                                val dy = change.position.y - down.position.y
+                                if (dy < 0) {
+                                    // Clamp the drag offset so it doesn't fly off screen
+                                    dragOffset = dy.coerceAtLeast(clampPx)
+                                    
+                                    if (dragOffset <= maxDragPx && !triggered) {
+                                        triggered = true
+                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        onSlideUpTriggered()
+                                    }
                                 }
                             }
-                        }
-                    } while (event.changes.any { it.pressed })
-                    
-                    // Force reset on release unconditionally
-                    dragOffset = 0f
+                        } while (event.changes.any { it.pressed })
+                        
+                        // Force reset on release unconditionally
+                        dragOffset = 0f
+                    }
                 }
             }
     ) {
