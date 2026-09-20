@@ -121,7 +121,7 @@ object DiscoverTab : Tab {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "Home",
+                            text = if (state.isNovel) "Novels" else "Manga",
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
@@ -145,6 +145,8 @@ object DiscoverTab : Tab {
                         }
                     }
 
+                    // Tabs removed as part of FAB transition
+                    /*
                     Spacer(modifier = Modifier.height(16.dp))
 
                     Row(modifier = Modifier.fillMaxWidth()) {
@@ -160,6 +162,7 @@ object DiscoverTab : Tab {
                             onClick = { viewModel.toggleNovel(true) }
                         )
                     }
+                    */
                 }
             },
             floatingActionButton = {
