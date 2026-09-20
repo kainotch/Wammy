@@ -26,6 +26,8 @@ class LibraryPreferences(
         LibrarySort.Serializer::deserialize,
     )
 
+    val hasShownSwipeUpFabTutorial: Preference<Boolean> = preferenceStore.getBoolean("has_shown_swipe_up_fab_tutorial", false)
+
     val randomSortSeed: Preference<Int> = preferenceStore.getInt("library_random_sort_seed", 0)
 
     val portraitColumns: Preference<Int> = preferenceStore.getInt("pref_library_columns_portrait_key", 0)
