@@ -50,6 +50,8 @@ For full documentation, guides, and FAQ, please visit our [Official Website](htt
 - **Account Sync:** Sign in with your Google account for a personalized experience.
 - **Custom Profile Pictures:** Set your own profile photo which syncs securely to the cloud.
 - **Dynamic Theming:** Full dark mode support and Material You dynamic color theming that adapts to your device.
+- **Customizable Navigation Button:** Fully resizable quick-switch button with a visual preview and custom haptic feedback tailored to your device.
+  <br><br><img src=".github/images/button_preview.png" width="250"/>
 
 ### Advanced
 - **Automatic Updates:** Stay up to date with the latest app features and extension fixes.
