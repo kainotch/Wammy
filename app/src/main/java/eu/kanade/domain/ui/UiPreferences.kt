@@ -29,6 +29,8 @@ class UiPreferences(
 
     val themeDarkAmoled: Preference<Boolean> = preferenceStore.getBoolean("pref_theme_dark_amoled_key", false)
 
+    val fabSizeDp: Preference<Int> = preferenceStore.getInt("pref_fab_size_dp", 68)
+
     val relativeTime: Preference<Boolean> = preferenceStore.getBoolean("relative_time_v2", true)
 
     val dateFormat: Preference<String> = preferenceStore.getString("app_date_format", "")

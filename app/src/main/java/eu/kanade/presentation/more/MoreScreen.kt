@@ -40,6 +40,18 @@ import tachiyomi.presentation.core.components.ScrollbarLazyColumn
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.i18n.pluralStringResource
 import tachiyomi.presentation.core.i18n.stringResource
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Slider
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import tachiyomi.presentation.core.util.collectAsState
+import eu.kanade.domain.ui.UiPreferences
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import androidx.compose.material.icons.outlined.TouchApp
 
 @Composable
 fun MoreScreen(
@@ -58,6 +70,8 @@ fun MoreScreen(
     onClickAbout: () -> Unit,
 ) {
     val uriHandler = LocalUriHandler.current
+    val uiPreferences = remember { Injekt.get<UiPreferences>() }
+    val fabSizeDp by uiPreferences.fabSizeDp.collectAsState()
 
     Scaffold { contentPadding ->
         ScrollbarLazyColumn(contentPadding = contentPadding) {
@@ -153,6 +167,27 @@ fun MoreScreen(
             // App Group
             item {
                 SettingsGroup(title = "App") {
+                    SettingItem(
+                        title = "Switch Button Size",
+                        subtitle = "${fabSizeDp}dp",
+                        icon = Icons.Outlined.TouchApp,
+                        onClick = null,
+                        trailing = {
+                            Image(
+                                painter = painterResource(id = eu.kanade.tachiyomi.R.drawable.devil_fruit),
+                                contentDescription = null,
+                                modifier = Modifier.size(40.dp),
+                                contentScale = ContentScale.Fit
+                            )
+                        }
+                    )
+                    Slider(
+                        value = fabSizeDp.toFloat(),
+                        onValueChange = { uiPreferences.fabSizeDp.set(it.toInt()) },
+                        valueRange = 48f..96f,
+                        modifier = Modifier.padding(horizontal = 32.dp, vertical = 0.dp)
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
                     SettingItem(
                         title = stringResource(MR.strings.label_settings),
                         icon = Icons.Outlined.Settings,
