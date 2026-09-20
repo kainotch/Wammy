@@ -33,6 +33,14 @@ import androidx.compose.ui.window.DialogProperties
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import tachiyomi.domain.library.service.LibraryPreferences
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import android.os.VibratorManager
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+import eu.kanade.domain.ui.UiPreferences
+import tachiyomi.presentation.core.util.collectAsState
 
 @Composable
 fun SwipeUpFab(
@@ -45,7 +53,18 @@ fun SwipeUpFab(
     var dragOffset by remember { mutableStateOf(0f) }
     val maxDragPx = with(LocalDensity.current) { -72.dp.toPx() }
     val clampPx = with(LocalDensity.current) { -80.dp.toPx() }
-    val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+    val vibrator = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            val vibratorManager = context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
+            vibratorManager.defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
+    }
+    val uiPreferences = remember { Injekt.get<UiPreferences>() }
+    val fabSizeDp by uiPreferences.fabSizeDp.collectAsState()
     val animatedOffset by animateFloatAsState(targetValue = dragOffset)
 
     if (showTutorialOverlay) {
@@ -136,7 +155,7 @@ fun SwipeUpFab(
                     // Option B (Freeform Image without background/shadow):
                     Box(
                         modifier = Modifier
-                            .size(64.dp) // slightly larger to compensate for no background padding
+                            .size(fabSizeDp.dp) // slightly larger to compensate for no background padding
                     ) {
                         Image(
                             painter = painterResource(id = customImageRes),
@@ -180,7 +199,9 @@ fun SwipeUpFab(
 
                     if (longPress != null) {
                         // Gesture activated! Fire the initial tick.
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (vibrator.hasVibrator()) {
+                            vibrator.vibrate(VibrationEffect.createOneShot(50L, VibrationEffect.DEFAULT_AMPLITUDE))
+                        }
 
                         var triggered = false
 
@@ -195,7 +216,9 @@ fun SwipeUpFab(
 
                                     if (dragOffset <= maxDragPx && !triggered) {
                                         triggered = true
-                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                        if (vibrator.hasVibrator()) {
+                                            vibrator.vibrate(VibrationEffect.createOneShot(30L, VibrationEffect.DEFAULT_AMPLITUDE))
+                                        }
                                         onSlideUpTriggered()
                                     }
                                 }
@@ -237,7 +260,7 @@ fun SwipeUpFab(
                     showTutorialOverlay = true
                 }
             },
-            modifier = Modifier.size(64.dp),
+            modifier = Modifier.size(fabSizeDp.dp),
             elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
             containerColor = Color.Transparent,
             contentColor = Color.Unspecified
