@@ -5,100 +5,100 @@
 <h1 align="center">Wammy</h1>
 
 <p align="center">
-  <b>A free, open-source manga and novel reader for Android</b>
+  <b>The ultimate, open-source manga and novel reader for Android.</b>
 </p>
 
 <p align="center">
-  <a href="https://kainotch.github.io/wammy-otaku.github.io/"><b>Official Website & Documentation</b></a>
+  <a href="https://kainotch.github.io/wammy-otaku.github.io/"><b>🌐 Official Website, Guides & Documentation</b></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/kainotch/Wammy/releases"><img src="https://img.shields.io/github/v/release/kainotch/Wammy?style=for-the-badge&logo=github&color=blue" alt="Latest Release"/></a>
-  <a href="https://github.com/kainotch/Wammy/blob/main/LICENSE"><img src="https://img.shields.io/github/license/kainotch/Wammy?style=for-the-badge" alt="License"/></a>
+  <a href="https://github.com/kainotch/Wammy/releases"><img src="https://img.shields.io/github/v/release/kainotch/Wammy?style=for-the-badge&logo=github&color=6200EE" alt="Latest Release"/></a>
+  <a href="https://github.com/kainotch/Wammy/blob/main/LICENSE"><img src="https://img.shields.io/github/license/kainotch/Wammy?style=for-the-badge&color=gray" alt="License"/></a>
 </p>
 
 ---
 
-## About
+## What is Wammy?
 
-Wammy is a powerful, feature-rich reader application for Android that brings both manga and light novels together into a single, beautifully designed interface. Whether you are catching up on the latest manga chapters or diving into a new light novel, Wammy provides a seamless and customizable reading experience.
+Wammy is a powerful, unified reader application for Android that brings both your favorite **Manga** and **Light Novels** together into a single, beautifully designed interface. Whether you are catching up on the latest manhwa chapters or diving into a dense web novel, Wammy provides a seamless, lightning-fast, and completely customizable reading experience. 
 
-For full documentation, guides, and FAQ, please visit our [Official Website](https://wammy-otaku.github.io/).
+Say goodbye to juggling multiple apps—everything is right here.
 
-## Features
+---
 
-### Reading
-- **Manga & Novel Support:** Read both manga and light novels from a single app. Use the **Devil Fruit** button in the bottom right corner—just press, hold, and slide up to instantly switch between Manga and Novel sections!
-  <br><br><img src="app/src/main/res/drawable/devil_fruit.png" width="80"/>
-- **Multiple Source Support:** Browse and read from a wide variety of online sources.
-- **Offline Reading:** Download chapters for reading without an internet connection.
-- **Customizable Reader:** Adjust reading modes, orientation, background colors, and scale types to your preference.
-- **Chapter Tracking:** Automatically track your reading progress and history.
+## 📸 Screenshots
 
-### Discovery & Extensions
-- **Global Search:** Search across all your installed sources simultaneously.
-- **Extension Support:** Install extensions to add new manga and novel repositories.
-- **JS Plugin System:** Extend app functionality with lightweight JavaScript plugins.
-- **Clean UI:** Explore catalogs with an intuitive, Material You design.
+| Splash Screen | Home & Library | Reader Settings | Dark Library |
+|:---:|:---:|:---:|:---:|
+| <img src=".github/images/splash.jpg" width="200"/> | <img src=".github/images/home.jpg" width="200"/> | <img src=".github/images/settings.jpg" width="200"/> | <img src=".github/images/library.jpg" width="200"/> |
 
-### Library & Organization
-- **Library Management:** Organize your collection with custom categories and filters.
-- **Tracker Integration:** Automatically sync your reading progress with AniList, MyAnimeList, Kitsu, and more.
-- **Migration Engine:** Easily migrate entries and progress between different sources.
-- **Duplicate Detection:** Find and manage duplicate entries in your library.
+---
 
-### Personalization
-- **Account Sync:** Sign in with your Google account for a personalized experience.
-- **Custom Profile Pictures:** Set your own profile photo which syncs securely to the cloud.
-- **Dynamic Theming:** Full dark mode support and Material You dynamic color theming that adapts to your device.
-- **Customizable Navigation Button:** Fully resizable quick-switch button with a visual preview and custom haptic feedback tailored to your device.
-  <br><br><img src=".github/images/button_preview.png" width="250"/>
+## ✨ Features
 
-### Advanced
-- **Automatic Updates:** Stay up to date with the latest app features and extension fixes.
-- **Backup & Restore:** Never lose your library, categories, or reading progress.
-- **Download Manager:** Manage offline chapters with a dedicated download queue.
+### 📚 Unified Library (Manga + Novels)
+Wammy completely merges the world of comics and text. Your library supports both manga and light novels side-by-side, complete with unread badges, custom categories, and powerful filtering.
 
-## Installation
+### 🍎 The "Devil Fruit" Switcher
+We built an exclusive, gesture-based navigation button to instantly switch between Manga and Novel modes. 
+<br/>
+<img src="https://raw.githubusercontent.com/kainotch/Wammy/master/app/src/main/res/drawable/devil_fruit.png" width="80" align="left"/> 
+**How it works:** See the Devil Fruit floating in the bottom corner of your screen? Simply press, hold, and **slide your finger up**. You'll feel a custom haptic vibration, and the app will instantly swap between your Manga catalogs and your Novel catalogs! No diving through menus required. 
+<br clear="left"/>
 
-1. Visit the [Wammy Download Page](https://wammy-otaku.github.io/download.html) or the [Releases](https://github.com/kainotch/Wammy/releases) tab.
-2. Download the latest .apk file.
-3. Enable "Install from Unknown Sources" in your Android settings if prompted.
-4. Open the downloaded APK to install.
-5. Launch Wammy and start reading.
+### 🎨 Total Personalization
+- **Customizable Buttons:** Is the Devil Fruit too big or too small? Head into **Settings > App > Switch Button Size** and use the slider to scale it perfectly to your thumb size! 
+- **True Dark Theme:** Wammy enforces a gorgeous, pure dark mode by default, saving your OLED battery and your eyes.
+- **Custom Profiles:** Upload your own profile picture directly to the app to make your home screen yours.
 
-## Building from Source
+### 🌐 Extensions & Repositories
+Wammy doesn't lock you into a single catalog. You can install extensions from various online repositories to browse, search, and read from thousands of sources across the internet. 
+
+### ⚙️ Powerful Reader Tools
+- **Offline Reading:** Queue up entire volumes to download and read on the go.
+- **Tracking:** Automatically sync your reading progress with AniList, MyAnimeList, Kitsu, and more!
+- **Text-to-Speech:** Listen to your favorite light novels with built-in TTS voice support.
+- **Advanced Viewer:** Customize background colors, page margins, text sizes, and reading directions (Left-to-Right, Right-to-Left, Webtoon Strip, etc.).
+
+---
+
+## 🚀 Installation
+
+1. Visit the [Official Download Page](https://kainotch.github.io/wammy-otaku.github.io/download.html) or the [Releases](https://github.com/kainotch/Wammy/releases) tab here on GitHub.
+2. Download the latest `.apk` file.
+3. If prompted, enable **"Install from Unknown Sources"** in your Android settings.
+4. Install and enjoy!
+
+---
+
+## 🛠️ Building from Source
+
+Want to contribute or build Wammy yourself?
 
 ### Prerequisites
-- Android Studio (latest stable release)
-- JDK 17 or higher
-- Android SDK with API level 35
+- Android Studio (Latest Stable)
+- JDK 17+
+- Android SDK API level 35
 
-### Build Steps
-
-`ash
+### Steps
+```bash
 # Clone the repository
 git clone https://github.com/kainotch/Wammy.git
 cd Wammy
 
 # Build the debug APK
 ./gradlew app:assembleDebug
+```
+The APK will be generated at `app/build/outputs/apk/debug/app-debug.apk`.
 
-# The APK will be generated at:
-# app/build/outputs/apk/debug/app-debug.apk
-`
+---
 
-## Credits
+## 🤝 Credits & Support
 
 - **Developer:** [@kainotch](https://github.com/kainotch)
 - **Partner:** [@xo._kiwikaffine](https://instagram.com/xo._kiwikaffine)
 
-## License
+If you love Wammy, be sure to check out the **[Official Website](https://kainotch.github.io/wammy-otaku.github.io/)** for full documentation, extension guides, and FAQs!
 
-This project is licensed under the Apache License 2.0. See the [LICENSE](LICENSE) file for details.
-
-## Links
-
-- [Website & Docs](https://wammy-otaku.github.io/)
-- [Report a Bug](https://github.com/kainotch/Wammy/issues)
-- [Privacy Policy](https://wammy-otaku.github.io/privacy/)
+**License:** Apache License 2.0
