@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.discover
 
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -16,6 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalDensity
@@ -108,17 +111,36 @@ fun SwipeUpFab(
                         .padding(16.dp)
                         .padding(bottom = 80.dp) // Approximate padding above bottom nav
                 ) {
+                    val customImageRes = eu.kanade.tachiyomi.R.drawable.devil_fruit
+                    
+                    // --- VISUAL OPTIONS FOR FAB ---
+                    // Option A (Standard FAB with inside image):
+                    /*
                     Box(
                         modifier = Modifier
                             .size(56.dp)
                             .clip(CircleShape)
                             .background(MaterialTheme.colorScheme.primaryContainer)
                     ) {
-                        Icon(
-                            Icons.Filled.KeyboardArrowUp,
+                        Image(
+                            painter = painterResource(id = customImageRes),
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                            modifier = Modifier.align(Alignment.Center)
+                            contentScale = ContentScale.Inside,
+                            modifier = Modifier.align(Alignment.Center).padding(8.dp)
+                        )
+                    }
+                    */
+
+                    // Option B (Freeform Image without background/shadow):
+                    Box(
+                        modifier = Modifier
+                            .size(64.dp) // slightly larger to compensate for no background padding
+                    ) {
+                        Image(
+                            painter = painterResource(id = customImageRes),
+                            contentDescription = null,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize().align(Alignment.Center)
                         )
                     }
 
@@ -177,6 +199,11 @@ fun SwipeUpFab(
                 }
             }
     ) {
+        val customImageRes = eu.kanade.tachiyomi.R.drawable.devil_fruit
+        
+        // --- VISUAL OPTIONS FOR FAB ---
+        // Option A (Standard FAB with inside image):
+        /*
         FloatingActionButton(
             onClick = {
                 if (!hasShownTutorial) {
@@ -185,7 +212,33 @@ fun SwipeUpFab(
             },
             modifier = Modifier.size(56.dp)
         ) {
-            Icon(Icons.Filled.KeyboardArrowUp, contentDescription = "Swipe up")
+            Image(
+                painter = painterResource(id = customImageRes),
+                contentDescription = "Swipe up",
+                contentScale = ContentScale.Inside,
+                modifier = Modifier.padding(8.dp)
+            )
+        }
+        */
+
+        // Option B (Freeform Image without background/shadow):
+        FloatingActionButton(
+            onClick = {
+                if (!hasShownTutorial) {
+                    showTutorialOverlay = true
+                }
+            },
+            modifier = Modifier.size(64.dp),
+            elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+            containerColor = Color.Transparent,
+            contentColor = Color.Unspecified
+        ) {
+            Image(
+                painter = painterResource(id = customImageRes),
+                contentDescription = "Swipe up",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxSize()
+            )
         }
     }
 }
