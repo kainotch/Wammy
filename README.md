@@ -27,7 +27,7 @@ Say goodbye to juggling multiple apps—everything is right here.
 
 ---
 
-## 📸 Screenshots
+## 📸 preview
 
 | Splash Screen | Home & Library | Reader Settings | Dark Library |
 |:---:|:---:|:---:|:---:|
