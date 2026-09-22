@@ -961,28 +961,8 @@ class JsSource(
         current: MangasPage,
         methodCallForPage: (Int) -> String,
     ): MangasPage {
-        if (current.hasNextPage || current.mangas.isEmpty()) {
-            return current
-        }
-
-        val probePage = currentPage + 1
-        return try {
-            val probeCall = methodCallForPage(probePage)
-            val nextResult = executePluginMethod(probeCall)
-            // Save so paging to probePage serves this result instead of refetching it.
-            // Evict oldest under lock so a concurrent probe's fresh entry isn't wiped.
-            synchronized(browseProbeCache) {
-                while (browseProbeCache.size > 4) {
-                    val oldest = browseProbeCache.minByOrNull { it.value.second }?.key ?: break
-                    browseProbeCache.remove(oldest)
-                }
-                browseProbeCache[probeCall] = nextResult to System.currentTimeMillis()
-            }
-            val nextParsed = parseMangasPage(nextResult, probePage)
-            MangasPage(current.mangas, nextParsed.mangas.isNotEmpty())
-        } catch (_: Exception) {
-            current
-        }
+        val hasNext = current.hasNextPage || current.mangas.isNotEmpty()
+        return current.copy(hasNextPage = hasNext)
     }
 
     private fun parseNovelDetails(jsonResult: String, existing: SManga): SManga {
