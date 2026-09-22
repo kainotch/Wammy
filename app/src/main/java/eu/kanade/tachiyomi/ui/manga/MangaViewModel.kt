@@ -40,6 +40,8 @@ import eu.kanade.tachiyomi.data.translation.TranslationJob
 import eu.kanade.tachiyomi.data.translation.TranslationService
 import eu.kanade.tachiyomi.network.interceptor.InteractiveRateLimitBypass
 import eu.kanade.tachiyomi.source.Source
+
+import mihon.domain.manga.model.toDomainManga
 import eu.kanade.tachiyomi.source.rateLimitHost
 import eu.kanade.tachiyomi.ui.reader.quote.QuoteManager
 import eu.kanade.tachiyomi.ui.reader.setting.ReaderPreferences
@@ -315,12 +317,65 @@ class MangaViewModel(
 
             // Initial loading finished
             updateSuccessState { it.copy(isRefreshingData = false) }
+            
+            // Fetch related mangas
+            fetchRelatedMangasFromSource()
         }
     }
 
     fun toggleSourceNameVisibility() {
         updateSuccessState {
             it.copy(showSourceName = !it.showSourceName)
+        }
+    }
+
+    fun fetchRelatedMangasFromSource() {
+        val successState = state.value as? State.Success ?: return
+        val manga = successState.manga
+        val source = successState.source
+
+        if (source is tachiyomi.domain.source.model.StubSource) return
+        if (successState.isRelatedMangasFetching || successState.relatedMangas.isNotEmpty()) return
+
+        updateSuccessState { it.copy(isRelatedMangasFetching = true) }
+
+        viewModelScope.launchIO {
+            try {
+                // Strip special characters and just do one search
+                val title = manga.title.replace(Regex("([^a-zA-Z0-9 ]|\\s-|-\\s|\\s\\.|\\.\\s)"), " ")
+                    .replace(Regex("\\s+"), " ")
+                    .trim()
+
+                if (title.isEmpty()) {
+                    updateSuccessState { it.copy(isRelatedMangasFetching = false) }
+                    return@launchIO
+                }
+
+                val results = source.getSearchManga(1, title, eu.kanade.tachiyomi.source.model.FilterList()).mangas
+                val networkToLocalManga = Injekt.get<tachiyomi.domain.manga.interactor.NetworkToLocalManga>()
+                
+                val domainMangas = results.map { 
+                    it.toDomainManga(source.id, successState.isNovel) 
+                }
+                
+                val savedMangas = if (domainMangas.isNotEmpty()) {
+                    networkToLocalManga(domainMangas)
+                } else {
+                    emptyList()
+                }
+
+                val filteredMangas = savedMangas.filter { it.id != manga.id }
+                
+                updateSuccessState { 
+                    it.copy(
+                        relatedMangas = filteredMangas,
+                        isRelatedMangasFetching = false
+                    ) 
+                }
+            } catch (e: Exception) {
+                logcat(LogPriority.ERROR, e) { "Failed to fetch related mangas from source" }
+                updateSuccessState { it.copy(isRelatedMangasFetching = false) }
+            }
         }
     }
 
@@ -1770,6 +1825,8 @@ class MangaViewModel(
             val similarNovels: List<MangaWithChapterCount> = emptyList(),
             val categories: List<Category> = emptyList(),
             val showSourceName: Boolean = true,
+            val relatedMangas: List<Manga> = emptyList(),
+            val isRelatedMangasFetching: Boolean = false,
         ) : State {
             val processedChapters by lazy {
                 chapters.applyFilters(manga).toList()

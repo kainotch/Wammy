@@ -57,6 +57,8 @@ import eu.kanade.presentation.manga.components.MangaBottomActionMenu
 import eu.kanade.presentation.manga.components.MangaChapterListItem
 import eu.kanade.presentation.manga.components.MangaInfoBox
 import eu.kanade.presentation.manga.components.MangaToolbar
+
+import eu.kanade.presentation.manga.components.RelatedMangasRow
 import eu.kanade.presentation.manga.components.MissingChapterCountListItem
 import eu.kanade.presentation.util.formatChapterNumber
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -108,6 +110,11 @@ fun MangaScreen(
     onForceRefresh: (() -> Unit)? = null,
     onContinueReading: () -> Unit,
     onSearch: (query: String, global: Boolean) -> Unit,
+    
+    // For recommendations
+    onSeeRecommendationsClick: () -> Unit,
+    onSuggestionClick: (Manga) -> Unit,
+    onSuggestionLongClick: (Manga) -> Unit,
 
     // For cover dialog
     onCoverClicked: () -> Unit,
@@ -175,6 +182,9 @@ fun MangaScreen(
             onForceRefresh = onForceRefresh,
             onContinueReading = onContinueReading,
             onSearch = onSearch,
+            onSeeRecommendationsClick = onSeeRecommendationsClick,
+            onSuggestionClick = onSuggestionClick,
+            onSuggestionLongClick = onSuggestionLongClick,
             onCoverClicked = onCoverClicked,
             onShareClicked = onShareClicked,
             onDownloadActionClicked = onDownloadActionClicked,
@@ -225,6 +235,9 @@ fun MangaScreen(
             onForceRefresh = onForceRefresh,
             onContinueReading = onContinueReading,
             onSearch = onSearch,
+            onSeeRecommendationsClick = onSeeRecommendationsClick,
+            onSuggestionClick = onSuggestionClick,
+            onSuggestionLongClick = onSuggestionLongClick,
             onCoverClicked = onCoverClicked,
             onShareClicked = onShareClicked,
             onDownloadActionClicked = onDownloadActionClicked,
@@ -281,6 +294,11 @@ private fun MangaScreenSmallImpl(
     onForceRefresh: (() -> Unit)? = null,
     onContinueReading: () -> Unit,
     onSearch: (query: String, global: Boolean) -> Unit,
+    
+    // For recommendations
+    onSeeRecommendationsClick: () -> Unit,
+    onSuggestionClick: (Manga) -> Unit,
+    onSuggestionLongClick: (Manga) -> Unit,
 
     // For cover dialog
     onCoverClicked: () -> Unit,
@@ -528,6 +546,24 @@ private fun MangaScreenSmallImpl(
                     }
 
                     item(
+                        key = MangaScreenItem.SUGGESTIONS,
+                        contentType = MangaScreenItem.SUGGESTIONS,
+                    ) {
+                        RelatedMangasRow(
+                            relatedMangas = state.relatedMangas,
+                            isLoading = state.isRelatedMangasFetching,
+                            getManga = { manga -> 
+                                androidx.compose.runtime.produceState(initialValue = manga) {
+                                    value = manga
+                                }
+                            },
+                            onMangaClick = onSuggestionClick,
+                            onMangaLongClick = onSuggestionLongClick,
+                            onSeeRecommendationsClick = onSeeRecommendationsClick,
+                        )
+                    }
+
+                    item(
                         key = MangaScreenItem.CHAPTER_HEADER,
                         contentType = MangaScreenItem.CHAPTER_HEADER,
                     ) {
@@ -584,6 +620,11 @@ fun MangaScreenLargeImpl(
     onForceRefresh: (() -> Unit)? = null,
     onContinueReading: () -> Unit,
     onSearch: (query: String, global: Boolean) -> Unit,
+    
+    // For recommendations
+    onSeeRecommendationsClick: () -> Unit,
+    onSuggestionClick: (Manga) -> Unit,
+    onSuggestionLongClick: (Manga) -> Unit,
 
     // For cover dialog
     onCoverClicked: () -> Unit,
@@ -809,6 +850,18 @@ fun MangaScreenLargeImpl(
                             onTagSearch = onTagSearch,
                             onCopyTagToClipboard = onCopyTagToClipboard,
                             onEditNotes = onEditNotesClicked,
+                        )
+                        RelatedMangasRow(
+                            relatedMangas = state.relatedMangas,
+                            isLoading = state.isRelatedMangasFetching,
+                            getManga = { manga -> 
+                                androidx.compose.runtime.produceState(initialValue = manga) {
+                                    value = manga
+                                }
+                            },
+                            onMangaClick = onSuggestionClick,
+                            onMangaLongClick = onSuggestionLongClick,
+                            onSeeRecommendationsClick = onSeeRecommendationsClick,
                         )
                     }
                 },
