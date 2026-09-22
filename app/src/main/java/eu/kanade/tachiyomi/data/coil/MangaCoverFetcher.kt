@@ -112,8 +112,8 @@ class MangaCoverFetcher(
         try {
             val opts = android.graphics.BitmapFactory.Options().apply { inSampleSize = 8 }
             val bitmap = android.graphics.BitmapFactory.decodeFile(file.path, opts) ?: return
-            val palette = androidx.palette.graphics.Palette.from(bitmap).generate()
-            val color = palette.getVibrantColor(palette.getDominantColor(android.graphics.Color.TRANSPARENT))
+            val palette = androidx.palette.graphics.Palette.from(bitmap).clearFilters().generate()
+            val color = palette.getVibrantColor(palette.getDominantColor(android.graphics.Color.WHITE))
             
             eu.kanade.tachiyomi.ui.manga.PaletteCache.vibrantCoverColorMap[mangaId] = color
         } catch (_: Exception) {}
