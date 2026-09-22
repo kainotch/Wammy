@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.browse.source
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.TravelExplore
+import androidx.compose.material.icons.outlined._18UpRating
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -43,6 +44,12 @@ fun Screen.sourcesTab(): TabContent {
                 title = stringResource(MR.strings.action_filter),
                 icon = Icons.Outlined.FilterList,
                 onClick = { navigator.push(SourcesFilterScreen(isNovel = false)) },
+            ),
+            AppBar.Action(
+                title = "18+",
+                icon = Icons.Outlined._18UpRating,
+                iconTint = if (state.nsfwOnly) androidx.compose.material3.MaterialTheme.colorScheme.error else null,
+                onClick = { viewModel.toggleNsfwOnly() },
             ),
         ),
         content = { contentPadding, snackbarHostState ->
