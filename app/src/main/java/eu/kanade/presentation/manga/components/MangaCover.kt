@@ -28,14 +28,6 @@ enum class MangaCover(val ratio: Float) {
         shape: Shape = MaterialTheme.shapes.extraSmall,
         onClick: (() -> Unit)? = null,
     ) {
-        // KMK --> Precalculate palette color when cover is visible
-        if (data is tachiyomi.domain.manga.model.MangaCover) {
-            val context = androidx.compose.ui.platform.LocalContext.current
-            androidx.compose.runtime.LaunchedEffect(data.mangaId) {
-                eu.kanade.tachiyomi.ui.manga.PaletteCache.precalculate(context, data.mangaId, data.url)
-            }
-        }
-        // KMK <--
         AsyncImage(
             model = data,
             placeholder = ColorPainter(CoverPlaceholderColor),
