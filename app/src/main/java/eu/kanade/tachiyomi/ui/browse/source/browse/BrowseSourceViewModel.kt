@@ -192,33 +192,36 @@ class BrowseSourceViewModel(
         }
 
         if (source is CatalogueSource) {
-            // Get initial filters from source
-            var initialFilters = source.getFilterList()
-
-            // Apply default preset synchronously if enabled
-            if (manageFilterPresets.getAutoApplyEnabled()) {
-                val presetState = manageFilterPresets.getDefaultPresetState(sourceId)
-                if (presetState != null) {
-                    ManageFilterPresets.applyPresetState(initialFilters, presetState)
-                    logcat(LogPriority.INFO) { "BrowseSource: Default preset applied on init" }
-                }
-            }
-
-            mutableState.update {
-                var query: String? = null
-                var listing = it.listing
-
-                if (listing is Listing.Search) {
-                    query = listing.query
-                    listing = Listing.Search(query, initialFilters)
+            // Fetch initial filters asynchronously to avoid blocking the Main Thread
+            // (JsSource.getFilterList uses runBlocking which freezes the UI)
+            viewModelScope.launch(Dispatchers.IO) {
+                val initialFilters = source.getFilterList()
+                
+                // Apply default preset synchronously if enabled
+                if (manageFilterPresets.getAutoApplyEnabled()) {
+                    val presetState = manageFilterPresets.getDefaultPresetState(sourceId)
+                    if (presetState != null) {
+                        ManageFilterPresets.applyPresetState(initialFilters, presetState)
+                        logcat(LogPriority.INFO) { "BrowseSource: Default preset applied on init" }
+                    }
                 }
 
-                it.copy(
-                    listing = listing,
-                    filters = initialFilters,
-                    pendingFilters = initialFilters, // Initialize pending with same filters
-                    toolbarQuery = query,
-                )
+                mutableState.update {
+                    var query: String? = null
+                    var listing = it.listing
+
+                    if (listing is Listing.Search) {
+                        query = listing.query
+                        listing = Listing.Search(query, initialFilters)
+                    }
+
+                    it.copy(
+                        filters = initialFilters,
+                        pendingFilters = initialFilters,
+                        listing = listing,
+                        toolbarQuery = query,
+                    )
+                }
             }
         }
 
@@ -277,6 +280,8 @@ class BrowseSourceViewModel(
     }
         .stateIn(viewModelScope, SharingStarted.Lazily, emptyFlow())
 
+    private val isNovelSource by lazy { source.isNovelSource() }
+
     fun getColumnsPreference(orientation: Int): GridCells {
         val isLandscape = orientation == Configuration.ORIENTATION_LANDSCAPE
         val columns = if (isLandscape) {
@@ -284,7 +289,16 @@ class BrowseSourceViewModel(
         } else {
             libraryPreferences.portraitColumns
         }.get()
-        return if (columns == 0) GridCells.Adaptive(128.dp) else GridCells.Fixed(columns)
+        
+        return if (columns == 0) {
+            if (isNovelSource) {
+                GridCells.Fixed(if (isLandscape) 4 else 3)
+            } else {
+                GridCells.Adaptive(128.dp)
+            }
+        } else {
+            GridCells.Fixed(columns)
+        }
     }
 
     fun resetFilters() {
