@@ -59,9 +59,10 @@ class ExtensionsViewModel(
                     .map { searchQueryPredicate(it ?: "") },
                 currentDownloads,
                 getExtensions.subscribe(),
-            ) { predicate, downloads, (_updates, _installed, _available, _untrusted) ->
+                state.map { it.nsfwOnly }.distinctUntilChanged(),
+            ) { predicate, downloads, (_updates, _installed, _available, _untrusted), nsfwOnly ->
                 val updates = _updates.filter {
-                    !it.isNovel
+                    !it.isNovel && (!nsfwOnly || it.isNsfw)
                 }.filter(predicate).map(extensionMapper(downloads))
                 buildMap {
                     if (updates.isNotEmpty()) {
@@ -69,17 +70,17 @@ class ExtensionsViewModel(
                     }
 
                     val installed = _installed.filter {
-                        !it.isNovel
+                        !it.isNovel && (!nsfwOnly || it.isNsfw)
                     }.filter(predicate).map(extensionMapper(downloads))
                     val untrusted = _untrusted.filter {
-                        !it.isNovel
+                        !it.isNovel && (!nsfwOnly || it.isNsfw)
                     }.filter(predicate).map(extensionMapper(downloads))
                     if (installed.isNotEmpty() || untrusted.isNotEmpty()) {
                         put(ExtensionUiModel.Header.Resource(MR.strings.ext_installed), installed + untrusted)
                     }
 
                     val languagesWithExtensions = _available
-                        .filter { !it.isNovel }
+                        .filter { !it.isNovel && (!nsfwOnly || it.isNsfw) }
                         .filter(predicate)
                         .groupBy { it.lang }
                         .toSortedMap(LocaleHelper.comparator)
@@ -160,6 +161,10 @@ class ExtensionsViewModel(
         }
     }
 
+    fun toggleNsfwOnly() {
+        mutableState.update { it.copy(nsfwOnly = !it.nsfwOnly) }
+    }
+
     fun installExtension(extension: Extension.Available) {
         viewModelScope.launchIO {
             extensionManager.installExtension(extension).collectToInstallUpdate(extension)
@@ -227,6 +232,7 @@ data class ExtensionScreenState(
     val updates: Int = 0,
     val installer: BasePreferences.ExtensionInstaller? = null,
     val searchQuery: String? = null,
+    val nsfwOnly: Boolean = false,
 ) {
     val isEmpty = items.isEmpty()
 }

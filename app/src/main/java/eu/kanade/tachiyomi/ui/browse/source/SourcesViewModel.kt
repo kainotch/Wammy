@@ -25,6 +25,11 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.TreeMap
 
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.distinctUntilChanged
+import eu.kanade.domain.source.model.installedExtension
+
 class SourcesViewModel(
     private val getEnabledSources: GetEnabledSources = Injekt.get(),
     private val toggleSource: ToggleSource = Injekt.get(),
@@ -40,7 +45,16 @@ class SourcesViewModel(
 
     init {
         viewModelScope.launchIO {
-            getEnabledSources.subscribe()
+            combine(
+                getEnabledSources.subscribe(),
+                state.map { it.nsfwOnly }.distinctUntilChanged(),
+            ) { sources, nsfwOnly ->
+                if (nsfwOnly) {
+                    sources.filter { it.installedExtension?.isNsfw == true }
+                } else {
+                    sources
+                }
+            }
                 .catch {
                     logcat(LogPriority.ERROR, it)
                     _events.send(Event.FailedFetchingSources)
@@ -162,8 +176,13 @@ class SourcesViewModel(
         val dialog: Dialog? = null,
         val isLoading: Boolean = true,
         val items: List<SourceUiModel> = listOf(),
+        val nsfwOnly: Boolean = false,
     ) {
         val isEmpty = items.isEmpty()
+    }
+
+    fun toggleNsfwOnly() {
+        mutableState.update { it.copy(nsfwOnly = !it.nsfwOnly) }
     }
 
     companion object {

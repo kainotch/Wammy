@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.util.system.LocaleHelper
 import tachiyomi.domain.source.model.Source
 import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.util.secondaryItemAlpha
+import eu.kanade.domain.source.model.installedExtension
 
 @Composable
 fun BaseSourceItem(
@@ -62,14 +63,28 @@ private val defaultContent: @Composable RowScope.(Source, String?) -> Unit = { s
             )
             SourceTypeBadge(source = source)
         }
-        if (sourceLangString != null) {
-            Text(
-                modifier = Modifier.secondaryItemAlpha(),
-                text = sourceLangString,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.bodySmall,
-            )
+        Row(
+            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(MaterialTheme.padding.small),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (source.installedExtension?.isNsfw == true) {
+                Text(
+                    text = tachiyomi.presentation.core.i18n.stringResource(tachiyomi.i18n.MR.strings.ext_nsfw_short).uppercase(),
+                    color = MaterialTheme.colorScheme.error,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
+            if (sourceLangString != null) {
+                Text(
+                    modifier = Modifier.secondaryItemAlpha(),
+                    text = sourceLangString,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
         }
     }
 }

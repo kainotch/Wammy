@@ -90,14 +90,19 @@ class NovelExtensionsViewModel(
             }
         }
 
+        val queryAndNsfwFlow = combine(
+            state.map { it.searchQuery }.distinctUntilChanged().debounce(SEARCH_DEBOUNCE_MILLIS),
+            state.map { it.nsfwOnly }.distinctUntilChanged()
+        ) { query, nsfw -> query to nsfw }
+
         viewModelScope.launchIO {
             combine(
-                state.map { it.searchQuery }.distinctUntilChanged().debounce(SEARCH_DEBOUNCE_MILLIS),
+                queryAndNsfwFlow,
                 currentDownloads,
                 getExtensions.subscribe(),
                 jsPluginManager.availablePlugins,
                 jsPluginManager.installedPlugins,
-            ) { query, downloads, (_updates, _installed, _available, _untrusted), jsAvailable, jsInstalled ->
+            ) { (query, nsfwOnly), downloads, (_updates, _installed, _available, _untrusted), jsAvailable, jsInstalled ->
                 val searchQuery = query ?: ""
                 // Respect language filter for JS plugins (same as KT extensions)
                 val enabledLanguages = preferences.enabledLanguages.get()
@@ -173,6 +178,7 @@ class NovelExtensionsViewModel(
                     val jsAvailableExt = allJsExtensions.filter { !it.isInstalled && it.lang in enabledLanguages }
 
                     val updates = (_updates.filter { it.isNovel } + jsUpdates)
+                        .filter { !nsfwOnly || it.isNsfw }
                         .filter(queryFilter(searchQuery)).map(extensionMapper(downloads))
                     updatesCount = updates.size
                     if (updates.isNotEmpty()) {
@@ -183,9 +189,10 @@ class NovelExtensionsViewModel(
                         _installed.filter {
                             it.isNovel
                         } + jsInstalledExt
-                        ).filter(queryFilter(searchQuery)).map(extensionMapper(downloads))
+                        ).filter { !nsfwOnly || it.isNsfw }
+                         .filter(queryFilter(searchQuery)).map(extensionMapper(downloads))
                     val untrusted = _untrusted.filter {
-                        it.isNovel
+                        it.isNovel && (!nsfwOnly || it.isNsfw)
                     }.filter(queryFilter(searchQuery)).map(extensionMapper(downloads))
                     if (installed.isNotEmpty() || untrusted.isNotEmpty()) {
                         put(ExtensionUiModel.Header.Resource(MR.strings.ext_installed), installed + untrusted)
@@ -195,6 +202,7 @@ class NovelExtensionsViewModel(
                         _available
                             .filter { it.isNovel } + jsAvailableExt
                         )
+                        .filter { !nsfwOnly || it.isNsfw }
                         .filter(queryFilter(searchQuery))
                         .groupBy { it.lang }
                         .toSortedMap(LocaleHelper.comparator)
@@ -230,6 +238,10 @@ class NovelExtensionsViewModel(
         mutableState.update {
             it.copy(searchQuery = query)
         }
+    }
+
+    fun toggleNsfwOnly() {
+        mutableState.update { it.copy(nsfwOnly = !it.nsfwOnly) }
     }
 
     fun updateAllExtensions() {

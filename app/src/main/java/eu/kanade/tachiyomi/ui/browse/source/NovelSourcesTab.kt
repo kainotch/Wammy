@@ -4,6 +4,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.TravelExplore
+import androidx.compose.material.icons.outlined._18UpRating
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -50,6 +51,12 @@ fun Screen.novelSourcesTab(): TabContent {
                 title = "Custom Sources", // TODO: Add string resource
                 icon = Icons.Outlined.Edit,
                 onClick = { navigator.push(CustomSourcesScreen()) },
+            ),
+            AppBar.Action(
+                title = "18+",
+                icon = Icons.Outlined._18UpRating,
+                iconTint = if (state.nsfwOnly) androidx.compose.material3.MaterialTheme.colorScheme.error else null,
+                onClick = { screenModel.toggleNsfwOnly() },
             ),
         ),
         content = { contentPadding, snackbarHostState ->
