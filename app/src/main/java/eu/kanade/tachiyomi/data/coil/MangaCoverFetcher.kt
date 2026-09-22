@@ -50,6 +50,7 @@ import java.io.IOException
 class MangaCoverFetcher(
     private val url: String?,
     private val isLibraryManga: Boolean,
+    private val mangaId: Long,
     private val options: Options,
     private val coverFileLazy: Lazy<File?>,
     private val customCoverFileLazy: Lazy<File>,
@@ -89,6 +90,7 @@ class MangaCoverFetcher(
         if (!file.exists()) {
             throw IOException("Cover file not found: ${file.absolutePath}")
         }
+        extractPaletteColor(file)
         return SourceFetchResult(
             source = ImageSource(
                 file = file.toOkioPath(),
@@ -98,6 +100,44 @@ class MangaCoverFetcher(
             mimeType = "image/*",
             dataSource = DataSource.DISK,
         )
+    }
+
+    /**
+     * Extract palette color from cover file and cache it for instant dynamic theming.
+     * Runs only once per manga (skips if already cached). Uses BitmapFactory with
+     * inSampleSize=8 for minimal memory/CPU overhead.
+     */
+    private fun extractPaletteColor(file: File) {
+        if (eu.kanade.tachiyomi.ui.manga.PaletteCache.vibrantCoverColorMap.containsKey(mangaId)) return
+        try {
+            val opts = android.graphics.BitmapFactory.Options().apply { inSampleSize = 8 }
+            val bitmap = android.graphics.BitmapFactory.decodeFile(file.path, opts) ?: return
+            val scaled = android.graphics.Bitmap.createScaledBitmap(bitmap, 24, 24, true)
+            var rTotal = 0L; var gTotal = 0L; var bTotal = 0L
+            val w = scaled.width; val h = scaled.height; val count = w * h
+            for (x in 0 until w) {
+                for (y in 0 until h) {
+                    val pixel = scaled.getPixel(x, y)
+                    rTotal += android.graphics.Color.red(pixel)
+                    gTotal += android.graphics.Color.green(pixel)
+                    bTotal += android.graphics.Color.blue(pixel)
+                }
+            }
+            val avgColor = android.graphics.Color.rgb(
+                (rTotal / count).toInt(),
+                (gTotal / count).toInt(),
+                (bTotal / count).toInt(),
+            )
+            eu.kanade.tachiyomi.ui.manga.PaletteCache.vibrantCoverColorMap[mangaId] = avgColor
+        } catch (_: Exception) {}
+    }
+
+    private fun extractPaletteColorFromSnapshot(snapshot: DiskCache.Snapshot) {
+        if (eu.kanade.tachiyomi.ui.manga.PaletteCache.vibrantCoverColorMap.containsKey(mangaId)) return
+        try {
+            val file = snapshot.data.toFile()
+            extractPaletteColor(file)
+        } catch (_: Exception) {}
     }
 
     private fun fileUriLoader(uri: String): FetchResult {
@@ -134,6 +174,7 @@ class MangaCoverFetcher(
                 }
 
                 // Read from snapshot
+                extractPaletteColorFromSnapshot(snapshot)
                 return SourceFetchResult(
                     source = snapshot.toImageSource(),
                     mimeType = "image/*",
@@ -154,6 +195,7 @@ class MangaCoverFetcher(
                 // Read from disk cache
                 snapshot = writeToDiskCache(response)
                 if (snapshot != null) {
+                    extractPaletteColorFromSnapshot(snapshot)
                     return SourceFetchResult(
                         source = snapshot.toImageSource(),
                         mimeType = "image/*",
@@ -322,6 +364,7 @@ class MangaCoverFetcher(
             return MangaCoverFetcher(
                 url = data.thumbnailUrl,
                 isLibraryManga = data.favorite,
+                mangaId = data.id,
                 options = options,
                 coverFileLazy = lazy { coverCache.getCoverFile(data.thumbnailUrl) },
                 customCoverFileLazy = lazy { coverCache.getCustomCoverFile(data.id) },
@@ -344,6 +387,7 @@ class MangaCoverFetcher(
             return MangaCoverFetcher(
                 url = data.url,
                 isLibraryManga = data.isMangaFavorite,
+                mangaId = data.mangaId,
                 options = options,
                 coverFileLazy = lazy { coverCache.getCoverFile(data.url) },
                 customCoverFileLazy = lazy { coverCache.getCustomCoverFile(data.mangaId) },
