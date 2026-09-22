@@ -1770,8 +1770,6 @@ class MangaViewModel(
             val similarNovels: List<MangaWithChapterCount> = emptyList(),
             val categories: List<Category> = emptyList(),
             val showSourceName: Boolean = true,
-
-            val seedColor: Int? = PaletteCache.vibrantCoverColorMap[manga.id],
         ) : State {
             val processedChapters by lazy {
                 chapters.applyFilters(manga).toList()
