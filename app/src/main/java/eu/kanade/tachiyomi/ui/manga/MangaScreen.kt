@@ -127,6 +127,15 @@ class MangaScreen(
             }
         }
 
+        // KMK --> Extract palette color from cover
+        LaunchedEffect(successState.manga.thumbnailUrl) {
+            if (successState.seedColor == null) {
+                viewModel.setPaletteColor(successState.manga.thumbnailUrl)
+            }
+        }
+        // KMK <--
+
+        eu.kanade.presentation.theme.TachiyomiTheme(seedColor = successState.seedColor) {
         MangaScreen(
             state = successState,
             snackbarHostState = viewModel.snackbarHostState,
@@ -227,6 +236,7 @@ class MangaScreen(
             onAllChapterSelected = viewModel::toggleAllSelection,
             onInvertSelection = viewModel::invertSelection,
         )
+        } // TachiyomiTheme
 
         var showScanlatorsDialog by remember { mutableStateOf(false) }
 
