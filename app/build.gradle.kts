@@ -219,6 +219,7 @@ baselineProfile {
 }
 
 dependencies {
+    implementation("androidx.palette:palette-ktx:1.0.0")
     baselineProfile(projects.baselineProfile)
 
     implementation(projects.i18n)
