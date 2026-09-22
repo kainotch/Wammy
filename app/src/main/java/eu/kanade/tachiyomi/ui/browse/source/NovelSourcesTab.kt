@@ -19,7 +19,9 @@ import eu.kanade.presentation.browse.SourcesScreen
 import eu.kanade.presentation.components.AppBar
 import eu.kanade.presentation.components.TabContent
 import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen
+import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceViewModel
 import eu.kanade.tachiyomi.ui.browse.source.custom.CustomSourcesScreen
+import eu.kanade.tachiyomi.ui.browse.source.feed.SourceFeedScreen
 import eu.kanade.tachiyomi.ui.browse.source.globalsearch.NovelGlobalSearchScreen
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -73,7 +75,11 @@ fun Screen.novelSourcesTab(): TabContent {
                 ),
                 contentPadding = contentPadding,
                 onClickItem = { source, listing ->
-                    navigator.push(BrowseSourceScreen(source.id, listing.query))
+                    if (listing == BrowseSourceViewModel.Listing.Popular) {
+                        navigator.push(SourceFeedScreen(source.id))
+                    } else {
+                        navigator.push(BrowseSourceScreen(source.id, listing.query))
+                    }
                 },
                 onLongClickItem = { source ->
                     screenModel.showSourceDialog(source)

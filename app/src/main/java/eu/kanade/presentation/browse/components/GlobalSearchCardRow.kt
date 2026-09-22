@@ -29,6 +29,7 @@ fun GlobalSearchCardRow(
     getManga: @Composable (Manga) -> State<Manga>,
     onClick: (Manga) -> Unit,
     onLongClick: (Manga) -> Unit,
+    selection: Set<Manga> = emptySet(),
 ) {
     if (titles.isEmpty()) {
         EmptyResultItem()
@@ -45,6 +46,7 @@ fun GlobalSearchCardRow(
                 title = title.title,
                 cover = title.asMangaCover(),
                 isFavorite = title.favorite,
+                isSelected = selection.any { selectedManga -> selectedManga.id == title.id },
                 onClick = { onClick(title) },
                 onLongClick = { onLongClick(title) },
             )
@@ -57,6 +59,7 @@ private fun MangaItem(
     title: String,
     cover: MangaCover,
     isFavorite: Boolean,
+    isSelected: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit,
 ) {
@@ -69,6 +72,7 @@ private fun MangaItem(
                 InLibraryBadge(enabled = isFavorite)
             },
             coverAlpha = if (isFavorite) CommonMangaItemDefaults.BrowseFavoriteCoverAlpha else 1f,
+            isSelected = isSelected,
             onClick = onClick,
             onLongClick = onLongClick,
         )
