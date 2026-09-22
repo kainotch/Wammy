@@ -112,23 +112,10 @@ class MangaCoverFetcher(
         try {
             val opts = android.graphics.BitmapFactory.Options().apply { inSampleSize = 8 }
             val bitmap = android.graphics.BitmapFactory.decodeFile(file.path, opts) ?: return
-            val scaled = android.graphics.Bitmap.createScaledBitmap(bitmap, 24, 24, true)
-            var rTotal = 0L; var gTotal = 0L; var bTotal = 0L
-            val w = scaled.width; val h = scaled.height; val count = w * h
-            for (x in 0 until w) {
-                for (y in 0 until h) {
-                    val pixel = scaled.getPixel(x, y)
-                    rTotal += android.graphics.Color.red(pixel)
-                    gTotal += android.graphics.Color.green(pixel)
-                    bTotal += android.graphics.Color.blue(pixel)
-                }
-            }
-            val avgColor = android.graphics.Color.rgb(
-                (rTotal / count).toInt(),
-                (gTotal / count).toInt(),
-                (bTotal / count).toInt(),
-            )
-            eu.kanade.tachiyomi.ui.manga.PaletteCache.vibrantCoverColorMap[mangaId] = avgColor
+            val palette = androidx.palette.graphics.Palette.from(bitmap).generate()
+            val color = palette.getVibrantColor(palette.getDominantColor(android.graphics.Color.TRANSPARENT))
+            
+            eu.kanade.tachiyomi.ui.manga.PaletteCache.vibrantCoverColorMap[mangaId] = color
         } catch (_: Exception) {}
     }
 
