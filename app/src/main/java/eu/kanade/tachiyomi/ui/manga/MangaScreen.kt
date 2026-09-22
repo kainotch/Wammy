@@ -73,6 +73,11 @@ import tachiyomi.domain.chapter.model.Chapter
 import tachiyomi.domain.manga.model.CustomMangaInfo
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
+import eu.kanade.tachiyomi.ui.manga.recommendations.RecommendationsScreen
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import eu.kanade.domain.manga.interactor.UpdateManga
+import tachiyomi.domain.manga.model.MangaUpdate
 import tachiyomi.i18n.novel.TDMR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
@@ -177,6 +182,27 @@ class MangaScreen(
                         navigator.push(BrowseSourceScreen(source.id, null))
                     } else {
                         performSearch(navigator, query, global, successState.isNovel)
+                    }
+                }
+            },
+            onSeeRecommendationsClick = {
+                navigator.push(RecommendationsScreen(successState.manga.id, successState.source.id))
+            },
+            onSuggestionClick = { manga ->
+                navigator.push(MangaScreen(manga.id, true))
+            },
+            onSuggestionLongClick = { manga ->
+                scope.launch {
+                    val networkToLocalManga = uy.kohesive.injekt.Injekt.get<tachiyomi.domain.manga.interactor.NetworkToLocalManga>()
+                    val savedManga = networkToLocalManga(listOf(manga)).first()
+                    
+                    val updateManga = uy.kohesive.injekt.Injekt.get<eu.kanade.domain.manga.interactor.UpdateManga>()
+                    updateManga.awaitUpdateFavorite(savedManga.id, !savedManga.favorite)
+                    
+                    if (!savedManga.favorite) {
+                        context.toast("Added to library")
+                    } else {
+                        context.toast("Removed from library")
                     }
                 }
             },
