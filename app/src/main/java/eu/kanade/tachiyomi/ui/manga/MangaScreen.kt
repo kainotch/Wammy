@@ -127,7 +127,8 @@ class MangaScreen(
             }
         }
 
-        eu.kanade.presentation.theme.TachiyomiTheme(seedColor = successState.seedColor) {
+        val seedColor = PaletteCache.vibrantCoverColorMap[successState.manga.id]
+        eu.kanade.presentation.theme.TachiyomiTheme(seedColor = seedColor) {
         MangaScreen(
             state = successState,
             snackbarHostState = viewModel.snackbarHostState,

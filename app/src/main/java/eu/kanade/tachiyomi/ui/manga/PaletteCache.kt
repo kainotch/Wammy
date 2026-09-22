@@ -1,10 +1,12 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import androidx.compose.runtime.mutableStateMapOf
+
 /**
  * In-memory cache for manga cover palette colors.
- * Colors are extracted inside MangaCoverFetcher when covers are loaded,
- * so by the time the user taps a manga, the color is already available.
+ * Uses Compose's mutableStateMapOf so the UI automatically recomposes
+ * when a new color is added by MangaCoverFetcher.
  */
 object PaletteCache {
-    val vibrantCoverColorMap = java.util.concurrent.ConcurrentHashMap<Long, Int>()
+    val vibrantCoverColorMap = mutableStateMapOf<Long, Int>()
 }
