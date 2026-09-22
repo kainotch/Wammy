@@ -194,7 +194,7 @@ class BrowseSourceViewModel(
         if (source is CatalogueSource) {
             // Fetch initial filters asynchronously to avoid blocking the Main Thread
             // (JsSource.getFilterList uses runBlocking which freezes the UI)
-            viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launchIO {
                 val initialFilters = source.getFilterList()
                 
                 // Apply default preset synchronously if enabled
