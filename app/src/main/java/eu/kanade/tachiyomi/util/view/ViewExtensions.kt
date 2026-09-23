@@ -28,7 +28,7 @@ inline fun ComponentActivity.setComposeContent(
     crossinline content: @Composable () -> Unit,
 ) {
     setContent(parent) {
-        TachiyomiTheme {
+        TachiyomiTheme(seedColor = null) {
             CompositionLocalProvider(
                 LocalTextStyle provides MaterialTheme.typography.bodySmall,
                 LocalContentColor provides MaterialTheme.colorScheme.onBackground,
@@ -44,7 +44,7 @@ fun ComposeView.setComposeContent(
 ) {
     setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
     setContent {
-        TachiyomiTheme {
+        TachiyomiTheme(seedColor = null) {
             CompositionLocalProvider(
                 LocalTextStyle provides MaterialTheme.typography.bodySmall,
                 LocalContentColor provides MaterialTheme.colorScheme.onBackground,

@@ -9,7 +9,29 @@ data class MangaCover(
     val isMangaFavorite: Boolean,
     val url: String?,
     val lastModified: Long,
-)
+) {
+    // KMK -->
+    /**
+     * [vibrantCoverColor] is used to set the color theme in manga detail page.
+     * It contains color for all mangas, both in library or browsing.
+     *
+     * It reads/saves to a hashmap in [MangaCover.vibrantCoverColorMap] for multiple mangas.
+     */
+    var vibrantCoverColor: Int?
+        get() = vibrantCoverColorMap[mangaId]
+        set(value) {
+            vibrantCoverColorMap[mangaId] = value
+        }
+
+    companion object {
+        /**
+         * [vibrantCoverColorMap] store color generated while browsing library.
+         * It always empty at beginning each time app starts, then add more color while browsing.
+         */
+        val vibrantCoverColorMap: HashMap<Long, Int?> = hashMapOf()
+    }
+    // KMK <--
+}
 
 fun Manga.asMangaCover(): MangaCover {
     return MangaCover(

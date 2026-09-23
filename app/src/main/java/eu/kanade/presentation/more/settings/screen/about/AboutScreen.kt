@@ -193,6 +193,19 @@ object AboutScreen : Screen() {
                         onClick = { uriHandler.openUri("https://instagram.com/xo._kiwikaffine") }
                     )
                 }
+
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        LinkIcon(
+                            label = "Discord",
+                            icon = CustomIcons.Discord,
+                            url = "https://discord.gg/qybFSATs7Q"
+                        )
+                    }
+                }
             }
         }
     }

@@ -52,7 +52,7 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
     @Composable
     override fun Content() {
         data?.let {
-            TachiyomiTheme {
+            TachiyomiTheme(seedColor = null) {
                 CompositionLocalProvider(
                     LocalTextStyle provides MaterialTheme.typography.bodySmall,
                     LocalContentColor provides MaterialTheme.colorScheme.onBackground,

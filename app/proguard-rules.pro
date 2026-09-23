@@ -106,3 +106,8 @@
     public <init>();
     public void destroy();
 }
+
+# Keep Compose Theme from being stripped/mangled by R8
+-keep class eu.kanade.presentation.theme.TachiyomiThemeKt { *; }
+-keep class eu.kanade.presentation.theme.** { *; }
+
