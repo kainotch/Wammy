@@ -208,7 +208,7 @@ object AboutScreen : Screen() {
                         LinkIcon(
                             label = "Website",
                             icon = Icons.Outlined.Public,
-                            url = "https://wammy-otaku.github.io"
+                            url = "https://kainotch.github.io/wammy-otaku.github.io/"
                         )
                     }
                 }
