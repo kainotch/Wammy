@@ -1,4 +1,4 @@
-﻿package eu.kanade.presentation.more.settings.screen.about
+package eu.kanade.presentation.more.settings.screen.about
 
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
@@ -203,6 +203,12 @@ object AboutScreen : Screen() {
                             label = "Discord",
                             icon = CustomIcons.Discord,
                             url = "https://discord.gg/qybFSATs7Q"
+                        )
+                        androidx.compose.foundation.layout.Spacer(modifier = Modifier.size(16.dp))
+                        LinkIcon(
+                            label = "Website",
+                            icon = Icons.Outlined.Public,
+                            url = "https://wammy-otaku.github.io"
                         )
                     }
                 }
