@@ -139,12 +139,6 @@ fun MoreScreen(
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
                     SettingItem(
-                        title = stringResource(MR.strings.label_recent_updates),
-                        icon = androidx.compose.material.icons.Icons.Outlined.Update,
-                        onClick = onClickUpdates,
-                    )
-                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), color = MaterialTheme.colorScheme.outlineVariant)
-                    SettingItem(
                         title = stringResource(MR.strings.categories),
                         icon = Icons.AutoMirrored.Outlined.Label,
                         onClick = onClickCategories,

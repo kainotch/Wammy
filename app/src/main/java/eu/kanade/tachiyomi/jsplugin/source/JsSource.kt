@@ -692,6 +692,15 @@ class JsSource(
     }
 
     override fun getFilterList(): FilterList {
+        // If called from the main thread, return an empty list immediately to prevent UI freezes.
+        // We rely on BrowseSourceViewModel's launchIO block to call this from a background thread.
+        if (android.os.Looper.myLooper() == android.os.Looper.getMainLooper()) {
+            logcat(LogPriority.WARN) {
+                "JsSource[$pluginId]: getFilterList called on MAIN THREAD! Returning empty list to prevent freeze."
+            }
+            return FilterList()
+        }
+
         return try {
             // Synchronous interface, so the first call must runBlocking into JS. Cache the raw
             // JSON but re-parse per call; Filter instances are stateful.
@@ -700,7 +709,7 @@ class JsSource(
                     .also { filtersJsonCache = it }
             parseFiltersFromJson(result)
         } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e) { "Error getting filters for ${plugin.name}" }
+            logcat(LogPriority.ERROR, e) { "JsSource[$pluginId]: Failed to parse filters" }
             FilterList()
         }
     }

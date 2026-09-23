@@ -81,6 +81,15 @@ import tachiyomi.domain.manga.model.MangaUpdate
 import tachiyomi.i18n.novel.TDMR
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.LoadingScreen
+import eu.kanade.tachiyomi.data.cache.CoverCache
+import eu.kanade.tachiyomi.data.coil.getBestColor
+import eu.kanade.tachiyomi.util.system.getBitmapOrNull
+import tachiyomi.domain.manga.model.asMangaCover
+import coil3.asDrawable
+import coil3.imageLoader
+import coil3.request.allowHardware
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class MangaScreen(
     private val mangaId: Long,
@@ -132,7 +141,43 @@ class MangaScreen(
             }
         }
 
-        val seedColor = PaletteCache.vibrantCoverColorMap[successState.manga.id]
+        // Eagerly extract palette color from cached cover so the theme loads instantly.
+        // The color is typically already pre-computed by MangaCoverFetcher when the cover
+        // was displayed on any previous screen (library, browse, etc.).
+        // This LaunchedEffect only runs as a fallback for the rare case where the color
+        // wasn't extracted yet (e.g., deep link directly to manga details).
+        var seedColor by remember { mutableStateOf(tachiyomi.domain.manga.model.MangaCover.vibrantCoverColorMap[successState.manga.id]) }
+        LaunchedEffect(successState.manga.id) {
+            val id = successState.manga.id
+            if (seedColor == null) {
+                withContext(Dispatchers.IO) {
+                    try {
+                        val request = coil3.request.ImageRequest.Builder(context)
+                            .data(successState.manga.asMangaCover())
+                            .allowHardware(false)
+                            .build()
+                        
+                        val result = context.imageLoader.execute(request)
+                        if (result is coil3.request.SuccessResult) {
+                            val bitmap = result.image.asDrawable(context.resources).getBitmapOrNull()
+                            if (bitmap != null) {
+                                val palette = androidx.palette.graphics.Palette.from(bitmap)
+                                    .maximumColorCount(24)
+                                    .generate()
+                                val color = palette.getBestColor()
+                                if (color != null) {
+                                    tachiyomi.domain.manga.model.MangaCover.vibrantCoverColorMap[id] = color
+                                    seedColor = color
+                                }
+                            }
+                        }
+                    } catch (e: Exception) {
+                        logcat(LogPriority.ERROR, e) { "Failed to extract palette color in MangaScreen" }
+                    }
+                }
+            }
+        }
+
         eu.kanade.presentation.theme.TachiyomiTheme(seedColor = seedColor) {
         MangaScreen(
             state = successState,

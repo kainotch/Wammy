@@ -105,22 +105,24 @@ class MangaCoverFetcher(
     /**
      * Extract palette color from cover file and cache it for instant dynamic theming.
      * Runs only once per manga (skips if already cached). Uses BitmapFactory with
-     * inSampleSize=8 for minimal memory/CPU overhead.
+     * inSampleSize=4 for minimal memory/CPU overhead.
      */
     private fun extractPaletteColor(file: File) {
-        if (eu.kanade.tachiyomi.ui.manga.PaletteCache.vibrantCoverColorMap.containsKey(mangaId)) return
+        if (MangaCover.vibrantCoverColorMap.containsKey(mangaId)) return
         try {
-            val opts = android.graphics.BitmapFactory.Options().apply { inSampleSize = 8 }
+            val opts = android.graphics.BitmapFactory.Options().apply { inSampleSize = 4 }
             val bitmap = android.graphics.BitmapFactory.decodeFile(file.path, opts) ?: return
-            val palette = androidx.palette.graphics.Palette.from(bitmap).clearFilters().generate()
-            val color = palette.getVibrantColor(palette.getDominantColor(android.graphics.Color.WHITE))
-            
-            eu.kanade.tachiyomi.ui.manga.PaletteCache.vibrantCoverColorMap[mangaId] = color
+            val palette = androidx.palette.graphics.Palette.from(bitmap)
+                .maximumColorCount(24)
+                .generate()
+
+            val color = palette.getBestColor() ?: return
+            MangaCover.vibrantCoverColorMap[mangaId] = color
         } catch (_: Exception) {}
     }
 
     private fun extractPaletteColorFromSnapshot(snapshot: DiskCache.Snapshot) {
-        if (eu.kanade.tachiyomi.ui.manga.PaletteCache.vibrantCoverColorMap.containsKey(mangaId)) return
+        if (MangaCover.vibrantCoverColorMap.containsKey(mangaId)) return
         try {
             val file = snapshot.data.toFile()
             extractPaletteColor(file)

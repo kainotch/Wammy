@@ -28,7 +28,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import eu.kanade.tachiyomi.data.auth.AuthManager
 import uy.kohesive.injekt.Injekt
+import androidx.compose.material.icons.outlined.Update
+import tachiyomi.i18n.MR
+import tachiyomi.presentation.core.i18n.stringResource
 import uy.kohesive.injekt.api.get
+import tachiyomi.domain.library.service.LibraryPreferences
+import tachiyomi.presentation.core.util.collectAsState
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.AccountCircle
@@ -75,7 +82,6 @@ import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaCover
 import tachiyomi.domain.manga.model.asMangaCover
 import tachiyomi.presentation.core.i18n.stringResource
-import tachiyomi.i18n.MR
 import eu.kanade.tachiyomi.ui.webview.TrackerWebViewLoginActivity
 
 object DiscoverTab : Tab {
@@ -105,6 +111,9 @@ object DiscoverTab : Tab {
         val authManager: AuthManager = Injekt.get()
         val user by authManager.currentUser.collectAsState()
 
+        val libraryPreferences = remember { Injekt.get<LibraryPreferences>() }
+        val updatesCount by libraryPreferences.newUpdatesCount.collectAsState()
+
         Scaffold(
             topBar = {
                 Column(
@@ -126,7 +135,23 @@ object DiscoverTab : Tab {
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
                         )
-                        IconButton(onClick = { navigator.push(eu.kanade.tachiyomi.ui.profile.ProfileScreen()) }) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            IconButton(onClick = { navigator.push(eu.kanade.tachiyomi.ui.updates.UpdatesTab) }) {
+                                BadgedBox(
+                                    badge = {
+                                        if (updatesCount > 0) {
+                                            Badge(containerColor = MaterialTheme.colorScheme.primary)
+                                        }
+                                    }
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Update,
+                                        contentDescription = stringResource(MR.strings.label_recent_updates),
+                                        tint = MaterialTheme.colorScheme.onBackground
+                                    )
+                                }
+                            }
+                            IconButton(onClick = { navigator.push(eu.kanade.tachiyomi.ui.profile.ProfileScreen()) }) {
                             if (user?.photoUrl != null) {
                                 coil3.compose.AsyncImage(
                                     model = user?.photoUrl,
@@ -142,6 +167,7 @@ object DiscoverTab : Tab {
                                     tint = MaterialTheme.colorScheme.onBackground
                                 )
                             }
+                        }
                         }
                     }
 

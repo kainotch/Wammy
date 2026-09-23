@@ -30,6 +30,7 @@ import eu.kanade.presentation.theme.colorscheme.MonetCompatColorScheme
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
+@androidx.annotation.Keep
 @Composable
 fun TachiyomiTheme(
     appTheme: AppTheme? = null,

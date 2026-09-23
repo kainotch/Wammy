@@ -98,7 +98,7 @@ class TrackerWebViewLoginActivity : BaseActivity() {
         val configuredUserAgent = networkPreferences.defaultUserAgent.get().trim().ifBlank { null }
 
         setContent {
-            TachiyomiTheme {
+            TachiyomiTheme(seedColor = null) {
                 TrackerWebViewLoginScreen(
                     trackerId = trackerId,
                     trackerName = trackerName,
@@ -285,10 +285,10 @@ private fun TrackerWebViewLoginScreen(
                 val instructions =
                     @Suppress("ktlint:standard:max-line-length")
                     when (trackerId) {
-                        TrackerManager.NOVELUPDATES -> "Login to NovelUpdates, then tap the ✓ button to complete login."
-                        TrackerManager.NOVELLIST -> "Login to NovelList, then tap the ✓ button to complete login. Use the edit icon to paste token/cookie manually."
-                        TrackerManager.RANOBEDB -> "Login to RanobeDB, then tap the ✓ button to complete login. Use the edit icon to paste the auth_session cookie manually."
-                        else -> "Login, then tap the ✓ button to complete."
+                        TrackerManager.NOVELUPDATES -> "Login to NovelUpdates, then tap the âœ“ button to complete login."
+                        TrackerManager.NOVELLIST -> "Login to NovelList, then tap the âœ“ button to complete login. Use the edit icon to paste token/cookie manually."
+                        TrackerManager.RANOBEDB -> "Login to RanobeDB, then tap the âœ“ button to complete login. Use the edit icon to paste the auth_session cookie manually."
+                        else -> "Login, then tap the âœ“ button to complete."
                     }
                 Text(
                     text = instructions,

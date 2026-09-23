@@ -37,6 +37,28 @@ import tachiyomi.presentation.core.screens.EmptyScreenAction
 import tachiyomi.presentation.core.screens.LoadingScreen
 import tachiyomi.source.local.LocalNovelSource
 import tachiyomi.source.local.LocalSource
+import androidx.compose.ui.unit.dp
+import tachiyomi.presentation.core.util.plus
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.clip
+import eu.kanade.presentation.library.components.CommonMangaItemDefaults
+import eu.kanade.presentation.manga.components.MangaCover
 
 @Composable
 fun BrowseSourceContent(
@@ -83,7 +105,11 @@ fun BrowseSourceContent(
     }
 
     if (mangaList.itemCount == 0 && mangaList.loadState.refresh is LoadState.Loading) {
-        LoadingScreen(Modifier.padding(contentPadding))
+        if (displayMode == LibraryDisplayMode.List) {
+            LoadingScreen(Modifier.padding(contentPadding))
+        } else {
+            BrowseSourceSkeletonGrid(columns = columns, contentPadding = contentPadding)
+        }
         return
     }
 
@@ -214,5 +240,49 @@ internal fun MissingSourceScreen(
             message = stringResource(MR.strings.source_not_installed, source.toString()),
             modifier = Modifier.padding(paddingValues),
         )
+    }
+}
+
+
+@Composable
+private fun BrowseSourceSkeletonGrid(
+    columns: GridCells,
+    contentPadding: PaddingValues,
+) {
+    LazyVerticalGrid(
+        columns = columns,
+        contentPadding = contentPadding + PaddingValues(8.dp),
+        verticalArrangement = Arrangement.spacedBy(CommonMangaItemDefaults.GridVerticalSpacer),
+        horizontalArrangement = Arrangement.spacedBy(CommonMangaItemDefaults.GridHorizontalSpacer),
+    ) {
+        items(15) { 
+            val transition = rememberInfiniteTransition(label = "skeleton")
+            val alpha by transition.animateFloat(
+                initialValue = 0.2f,
+                targetValue = 0.6f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1000),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "alpha"
+            )
+            Column {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(MangaCover.Book.ratio)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha))
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(top = 8.dp, bottom = 4.dp, start = 4.dp, end = 24.dp)
+                        .fillMaxWidth(0.7f)
+                        .height(14.dp)
+                        .clip(RoundedCornerShape(2.dp))
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha))
+                )
+            }
+        }
     }
 }
