@@ -45,6 +45,7 @@ data object HistoryTab : Tab {
     private val snackbarHostState = SnackbarHostState()
 
     private val resumeLastChapterReadEvent = Channel<Unit>()
+    val filterEvent = Channel<HistoryFilter>(Channel.CONFLATED)
 
     override val options: TabOptions
         @Composable
@@ -163,6 +164,12 @@ data object HistoryTab : Tab {
         }
 
         LaunchedEffect(Unit) {
+            filterEvent.receiveAsFlow().collectLatest { filter ->
+                viewModel.setFilter(filter)
+            }
+        }
+
+        LaunchedEffect(Unit) {
             resumeLastChapterReadEvent.receiveAsFlow().collectLatest {
                 openChapter(context, viewModel.getNextChapter())
             }
@@ -178,3 +185,5 @@ data object HistoryTab : Tab {
         }
     }
 }
+
+
