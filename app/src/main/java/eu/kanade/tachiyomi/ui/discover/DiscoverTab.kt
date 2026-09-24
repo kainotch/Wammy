@@ -484,15 +484,12 @@ fun SectionHeader(title: String, subtitle: String? = null, onSeeAll: () -> Unit)
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                style = MaterialTheme.typography.titleMedium
             )
             if (!subtitle.isNullOrEmpty()) {
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                    style = MaterialTheme.typography.bodyMedium
                 )
             }
         }
@@ -762,6 +759,7 @@ fun EmptyDiscoverScreen(isNovel: Boolean, onBrowseExtensions: () -> Unit) {
         }
     }
 }
+
 
 
 
