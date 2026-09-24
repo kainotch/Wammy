@@ -86,7 +86,7 @@ import tachiyomi.presentation.core.i18n.stringResource
 import eu.kanade.tachiyomi.ui.webview.TrackerWebViewLoginActivity
 import eu.kanade.tachiyomi.ui.history.HistoryTab
 import eu.kanade.tachiyomi.ui.history.HistoryFilter
-import eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen
+import eu.kanade.tachiyomi.ui.browse.source.feed.SourceFeedScreen
 import tachiyomi.domain.source.interactor.GetRemoteManga
 
 object DiscoverTab : Tab {
@@ -310,7 +310,7 @@ object DiscoverTab : Tab {
                                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                         val titleText = firstSource.name
                                         val subtitleText = if (firstSource.lang == "all" || firstSource.lang.isEmpty()) null else eu.kanade.tachiyomi.util.system.LocaleHelper.getLocalizedDisplayName(firstSource.lang)
-                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(BrowseSourceScreen(firstSource.id, GetRemoteManga.QUERY_POPULAR)) })
+                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(SourceFeedScreen(firstSource.id)) })
                                         SkeletonCarousel()
                                     }
                                     LaunchedEffect(firstSource.id) {
@@ -321,7 +321,7 @@ object DiscoverTab : Tab {
                                     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
                                         val titleText = firstSource.name
                                         val subtitleText = if (firstSource.lang == "all" || firstSource.lang.isEmpty()) null else eu.kanade.tachiyomi.util.system.LocaleHelper.getLocalizedDisplayName(firstSource.lang)
-                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(BrowseSourceScreen(firstSource.id, GetRemoteManga.QUERY_POPULAR)) })
+                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(SourceFeedScreen(firstSource.id)) })
                                         LazyRow(
                                             contentPadding = PaddingValues(horizontal = 16.dp),
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -351,7 +351,7 @@ object DiscoverTab : Tab {
                             }
 
                             item {
-                                SectionHeader(title = "Recently Updated", onSeeAll = { navigator.push(BrowseSourceScreen(firstSource.id, GetRemoteManga.QUERY_LATEST)) })
+                                SectionHeader(title = "Recently Updated", onSeeAll = { navigator.push(SourceFeedScreen(firstSource.id)) })
 
                                 val latest = viewModel.latestCache[firstSource.id]
 
@@ -405,7 +405,7 @@ object DiscoverTab : Tab {
                                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                         val titleText = source.name
                                         val subtitleText = if (source.lang == "all" || source.lang.isEmpty()) null else eu.kanade.tachiyomi.util.system.LocaleHelper.getLocalizedDisplayName(source.lang)
-                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(BrowseSourceScreen(source.id, GetRemoteManga.QUERY_POPULAR)) })
+                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(SourceFeedScreen(source.id)) })
                                         SkeletonCarousel()
                                     }
                                     LaunchedEffect(source.id) {
@@ -416,7 +416,7 @@ object DiscoverTab : Tab {
                                     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
                                         val titleText = source.name
                                         val subtitleText = if (source.lang == "all" || source.lang.isEmpty()) null else eu.kanade.tachiyomi.util.system.LocaleHelper.getLocalizedDisplayName(source.lang)
-                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(BrowseSourceScreen(source.id, GetRemoteManga.QUERY_POPULAR)) })
+                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(SourceFeedScreen(source.id)) })
                                         LazyRow(
                                             contentPadding = PaddingValues(horizontal = 16.dp),
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -776,6 +776,7 @@ fun EmptyDiscoverScreen(isNovel: Boolean, onBrowseExtensions: () -> Unit) {
         }
     }
 }
+
 
 
 
