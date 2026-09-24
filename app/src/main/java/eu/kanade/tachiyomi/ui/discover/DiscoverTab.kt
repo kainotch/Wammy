@@ -108,7 +108,7 @@ object DiscoverTab : Tab {
         val state by viewModel.state.collectAsState()
         val scope = rememberCoroutineScope()
         val tabNavigator = LocalTabNavigator.current
-        
+
         val authManager: AuthManager = Injekt.get()
         val user by authManager.currentUser.collectAsState()
 
@@ -271,7 +271,7 @@ object DiscoverTab : Tab {
                                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
                                         items(recentlyRead) { history ->
-                                            Box(modifier = Modifier.width(96.dp)) {
+                                            Box(modifier = Modifier.width(84.dp)) {
                                                 MangaCompactGridItem(
                                                     isSelected = false,
                                                     title = history.title,
@@ -295,7 +295,7 @@ object DiscoverTab : Tab {
 
                         if (animatedState.sources.isNotEmpty()) {
                             val firstSource = animatedState.sources.first()
-                            
+
                             item {
                                 val cached = viewModel.popularCache[firstSource.id]
                                 if (cached == null) {
@@ -319,7 +319,7 @@ object DiscoverTab : Tab {
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
                                             items(cached) { manga ->
-                                                Box(modifier = Modifier.width(96.dp)) {
+                                                Box(modifier = Modifier.width(84.dp)) {
                                                     MangaCompactGridItem(
                                                         isSelected = false,
                                                         title = manga.title,
@@ -344,7 +344,7 @@ object DiscoverTab : Tab {
 
                             item {
                                 SectionHeader(title = "Recently Updated", onSeeAll = {})
-                                
+
                                 val latest = viewModel.latestCache[firstSource.id]
 
                                 if (latest == null) {
@@ -414,7 +414,7 @@ object DiscoverTab : Tab {
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
                                             items(cached) { manga ->
-                                                Box(modifier = Modifier.width(96.dp)) {
+                                                Box(modifier = Modifier.width(84.dp)) {
                                                     MangaCompactGridItem(
                                                         isSelected = false,
                                                         title = manga.title,
@@ -584,7 +584,7 @@ fun HeroCarousel(
     }
 
     val pagerState = androidx.compose.foundation.pager.rememberPagerState(pageCount = { featuredManga.size })
-    
+
     // Auto-scroll logic
     LaunchedEffect(pagerState) {
         while (true) {
@@ -613,7 +613,7 @@ fun HeroCarousel(
             val pageOffset = (
                 (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
             ).absoluteValue
-            
+
             val manga = featuredManga[page]
             Box(
                 modifier = Modifier
@@ -667,7 +667,7 @@ fun HeroCarousel(
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
-                    
+
                     val subtitle = manga.author ?: "Trending Now"
                     Text(
                         text = subtitle,
@@ -700,7 +700,7 @@ fun HeroCarousel(
                 }
             }
         }
-        
+
         // Pager Indicators
         Row(
             modifier = Modifier
@@ -739,8 +739,8 @@ fun SkeletonCarousel() {
         items(5) {
             Box(
                 modifier = Modifier
-                    .width(96.dp)
-                    .height(160.dp)
+                    .width(84.dp)
+                    .height(140.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha))
             )
@@ -762,6 +762,8 @@ fun EmptyDiscoverScreen(isNovel: Boolean, onBrowseExtensions: () -> Unit) {
         }
     }
 }
+
+
 
 
 
