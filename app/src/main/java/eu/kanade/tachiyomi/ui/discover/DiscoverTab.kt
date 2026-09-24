@@ -573,8 +573,7 @@ fun HeroCarousel(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(240.dp)
-                .padding(horizontal = 16.dp)
-                .clip(RoundedCornerShape(16.dp))
+                
                 .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha))
         )
         return
@@ -600,8 +599,7 @@ fun HeroCarousel(
         modifier = Modifier
             .fillMaxWidth()
             .height(240.dp)
-            .padding(horizontal = 16.dp)
-            .clip(RoundedCornerShape(16.dp))
+            
     ) {
         androidx.compose.foundation.pager.HorizontalPager(
             state = pagerState,
@@ -678,7 +676,7 @@ fun HeroCarousel(
                     Button(
                         onClick = { onClick(manga) },
                         colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
-                        shape = RoundedCornerShape(50),
+                        shape = RoundedCornerShape(8.dp),
                         modifier = Modifier.height(40.dp)
                     ) {
                         Icon(
@@ -759,6 +757,7 @@ fun EmptyDiscoverScreen(isNovel: Boolean, onBrowseExtensions: () -> Unit) {
         }
     }
 }
+
 
 
 
