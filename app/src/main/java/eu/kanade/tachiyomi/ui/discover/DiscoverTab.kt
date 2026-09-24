@@ -299,8 +299,9 @@ object DiscoverTab : Tab {
                                 val cached = viewModel.popularCache[firstSource.id]
                                 if (cached == null) {
                                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                        val titleText = if (firstSource.lang == "all" || firstSource.lang.isEmpty()) firstSource.name else "${firstSource.name} (${firstSource.lang.uppercase()})"
-                                        SectionHeader(title = titleText, onSeeAll = {})
+                                        val titleText = firstSource.name
+                                        val subtitleText = if (firstSource.lang == "all" || firstSource.lang.isEmpty()) null else eu.kanade.tachiyomi.util.system.LocaleHelper.getLocalizedDisplayName(firstSource.lang)
+                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = {})
                                         SkeletonCarousel()
                                     }
                                     LaunchedEffect(firstSource.id) {
@@ -309,8 +310,9 @@ object DiscoverTab : Tab {
                                     }
                                 } else if (cached.isNotEmpty()) {
                                     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                                        val titleText = if (firstSource.lang == "all" || firstSource.lang.isEmpty()) firstSource.name else "${firstSource.name} (${firstSource.lang.uppercase()})"
-                                        SectionHeader(title = titleText, onSeeAll = {})
+                                        val titleText = firstSource.name
+                                        val subtitleText = if (firstSource.lang == "all" || firstSource.lang.isEmpty()) null else eu.kanade.tachiyomi.util.system.LocaleHelper.getLocalizedDisplayName(firstSource.lang)
+                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = {})
                                         LazyRow(
                                             contentPadding = PaddingValues(horizontal = 16.dp),
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -392,8 +394,9 @@ object DiscoverTab : Tab {
                                 val cached = viewModel.popularCache[source.id]
                                 if (cached == null) {
                                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-                                        val titleText = if (source.lang == "all" || source.lang.isEmpty()) source.name else "${source.name} (${source.lang.uppercase()})"
-                                        SectionHeader(title = titleText, onSeeAll = {})
+                                        val titleText = source.name
+                                        val subtitleText = if (source.lang == "all" || source.lang.isEmpty()) null else eu.kanade.tachiyomi.util.system.LocaleHelper.getLocalizedDisplayName(source.lang)
+                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = {})
                                         SkeletonCarousel()
                                     }
                                     LaunchedEffect(source.id) {
@@ -402,8 +405,9 @@ object DiscoverTab : Tab {
                                     }
                                 } else if (cached.isNotEmpty()) {
                                     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
-                                        val titleText = if (source.lang == "all" || source.lang.isEmpty()) source.name else "${source.name} (${source.lang.uppercase()})"
-                                        SectionHeader(title = titleText, onSeeAll = {})
+                                        val titleText = source.name
+                                        val subtitleText = if (source.lang == "all" || source.lang.isEmpty()) null else eu.kanade.tachiyomi.util.system.LocaleHelper.getLocalizedDisplayName(source.lang)
+                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = {})
                                         LazyRow(
                                             contentPadding = PaddingValues(horizontal = 16.dp),
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -467,19 +471,34 @@ fun CustomTab(text: String, isSelected: Boolean, onClick: () -> Unit) {
 }
 
 @Composable
-fun SectionHeader(title: String, onSeeAll: () -> Unit) {
+fun SectionHeader(title: String, subtitle: String? = null, onSeeAll: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .clickable(onClick = onSeeAll)
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.titleLarge,
-            fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onBackground
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onBackground
+            )
+            if (!subtitle.isNullOrEmpty()) {
+                Text(
+                    text = subtitle,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
+                )
+            }
+        }
+        Icon(
+            imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Outlined.ArrowForward,
+            contentDescription = "See All",
+            tint = MaterialTheme.colorScheme.onBackground
         )
     }
 }
@@ -742,4 +761,7 @@ fun EmptyDiscoverScreen(isNovel: Boolean, onBrowseExtensions: () -> Unit) {
         }
     }
 }
+
+
+
 
