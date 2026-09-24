@@ -628,6 +628,17 @@ fun HeroCarousel(
                 // Gradients
                 Box(
                     modifier = Modifier
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .align(Alignment.TopCenter)
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(MaterialTheme.colorScheme.background, Color.Transparent)
+                            )
+                        )
+                )
+                Box(
+                    modifier = Modifier
                         .fillMaxSize()
                         .background(
                             Brush.verticalGradient(
@@ -757,6 +768,7 @@ fun EmptyDiscoverScreen(isNovel: Boolean, onBrowseExtensions: () -> Unit) {
         }
     }
 }
+
 
 
 
