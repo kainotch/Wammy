@@ -271,7 +271,7 @@ object DiscoverTab : Tab {
                                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                                     ) {
                                         items(recentlyRead) { history ->
-                                            Box(modifier = Modifier.width(110.dp)) {
+                                            Box(modifier = Modifier.width(96.dp)) {
                                                 MangaCompactGridItem(
                                                     isSelected = false,
                                                     title = history.title,
@@ -319,7 +319,7 @@ object DiscoverTab : Tab {
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
                                             items(cached) { manga ->
-                                                Box(modifier = Modifier.width(110.dp)) {
+                                                Box(modifier = Modifier.width(96.dp)) {
                                                     MangaCompactGridItem(
                                                         isSelected = false,
                                                         title = manga.title,
@@ -414,7 +414,7 @@ object DiscoverTab : Tab {
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                                         ) {
                                             items(cached) { manga ->
-                                                Box(modifier = Modifier.width(110.dp)) {
+                                                Box(modifier = Modifier.width(96.dp)) {
                                                     MangaCompactGridItem(
                                                         isSelected = false,
                                                         title = manga.title,
@@ -739,8 +739,7 @@ fun SkeletonCarousel() {
         items(5) {
             Box(
                 modifier = Modifier
-                    .width(110.dp)
-                    .height(160.dp)
+                    .width(96.dp)`n                    .height(160.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha))
             )
@@ -762,6 +761,8 @@ fun EmptyDiscoverScreen(isNovel: Boolean, onBrowseExtensions: () -> Unit) {
         }
     }
 }
+
+
 
 
 
