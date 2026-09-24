@@ -234,7 +234,7 @@ fun SettingItem(
     subtitle: String? = null,
     icon: ImageVector,
     onClick: (() -> Unit)? = null,
-    trailing: (@Composable () -> Unit)? = null
+    trailing: @Composable (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
