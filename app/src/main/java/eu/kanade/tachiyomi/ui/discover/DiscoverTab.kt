@@ -37,6 +37,7 @@ import tachiyomi.presentation.core.util.collectAsState
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Explore
@@ -496,7 +497,7 @@ fun SectionHeader(title: String, subtitle: String? = null, onSeeAll: () -> Unit)
             }
         }
         Icon(
-            imageVector = androidx.compose.material.icons.Icons.AutoMirrored.Outlined.ArrowForward,
+            imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
             contentDescription = "See All",
             tint = MaterialTheme.colorScheme.onBackground
         )
@@ -761,6 +762,7 @@ fun EmptyDiscoverScreen(isNovel: Boolean, onBrowseExtensions: () -> Unit) {
         }
     }
 }
+
 
 
 
