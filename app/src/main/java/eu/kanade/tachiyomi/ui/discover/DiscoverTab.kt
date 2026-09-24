@@ -739,7 +739,8 @@ fun SkeletonCarousel() {
         items(5) {
             Box(
                 modifier = Modifier
-                    .width(96.dp)`n                    .height(160.dp)
+                    .width(96.dp)
+                    .height(160.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha))
             )
@@ -761,6 +762,7 @@ fun EmptyDiscoverScreen(isNovel: Boolean, onBrowseExtensions: () -> Unit) {
         }
     }
 }
+
 
 
 
