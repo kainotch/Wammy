@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.ui.main
+package eu.kanade.tachiyomi.ui.main
 
 import android.animation.ValueAnimator
 import android.app.SearchManager
@@ -322,32 +322,11 @@ class MainActivity : BaseActivity() {
     @Composable
     private fun ShowOnboarding() {
         val navigator = LocalNavigator.currentOrThrow
-        var showBottomSheet by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(!preferences.shownOnboardingFlow.get()) }
 
-        if (showBottomSheet && navigator.lastItem !is OnboardingScreen) {
-            val sheetState = androidx.compose.material3.rememberModalBottomSheetState(skipPartiallyExpanded = true)
-            androidx.compose.material3.ModalBottomSheet(
-                onDismissRequest = { 
-                    preferences.shownOnboardingFlow.set(true)
-                    showBottomSheet = false
-                },
-                sheetState = sheetState
-            ) {
-                eu.kanade.presentation.more.onboarding.OnboardingScreen(
-                    onComplete = {
-                        preferences.shownOnboardingFlow.set(true)
-                        showBottomSheet = false
-                    },
-                    onRestoreBackup = {
-                        preferences.shownOnboardingFlow.set(true)
-                        showBottomSheet = false
-                        eu.kanade.presentation.more.settings.screen.SearchableSettings.highlightKey = "restore"
-                        navigator.push(SettingsScreen(SettingsScreen.Destination.DataAndStorage))
-                    }
-                )
+        LaunchedEffect(Unit) {
+            if (!preferences.shownOnboardingFlow.get() && navigator.lastItem !is OnboardingScreen) {
+                navigator.push(OnboardingScreen())
             }
-        }
-    }
         }
     }
 
@@ -641,7 +620,7 @@ class MainActivity : BaseActivity() {
      *
      * Handles three shapes:
      *  - `ACTION_VIEW` with a single URI in [Intent.getData]. Triggered by the
-     *    file-manager "open withâ€¦" flow.
+     *    file-manager "open with…" flow.
      *  - `ACTION_SEND` with one URI under [Intent.EXTRA_STREAM]. Triggered by
      *    apps that share a single EPUB via the Android share sheet.
      *  - `ACTION_SEND_MULTIPLE` with a list of URIs under
@@ -659,7 +638,7 @@ class MainActivity : BaseActivity() {
             val path = (uri.lastPathSegment ?: uri.path ?: uri.toString()).lowercase()
             if (path.endsWith(".epub")) return true
             // Fallback for content URIs where the path has no extension (e.g. Downloads provider
-            // uses numeric IDs like content://â€¦/document/12345). Query the display name instead.
+            // uses numeric IDs like content://…/document/12345). Query the display name instead.
             if (uri.scheme == "content") {
                 val displayName = runCatching {
                     contentResolver.query(
@@ -738,4 +717,3 @@ class MainActivity : BaseActivity() {
 private const val SPLASH_MIN_DURATION = 0 // ms
 private const val SPLASH_MAX_DURATION = 5000 // ms
 private const val SPLASH_EXIT_ANIM_DURATION = 400L // ms
-
