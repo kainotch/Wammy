@@ -62,6 +62,9 @@ import eu.kanade.presentation.manga.components.MangaCover
 
 @Composable
 fun BrowseSourceContent(
+    latestItems: List<Manga>?,
+    browseItems: List<Manga>?,
+    getMangaState: @Composable (Manga) -> androidx.compose.runtime.State<Manga>,
     source: Source?,
     mangaList: LazyPagingItems<StateFlow<Manga>>,
     columns: GridCells,
@@ -174,6 +177,9 @@ fun BrowseSourceContent(
     when (displayMode) {
         LibraryDisplayMode.ComfortableGrid -> {
             BrowseSourceComfortableGrid(
+                latestItems = latestItems,
+                browseItems = browseItems,
+                getMangaState = getMangaState,
                 mangaList = mangaList,
                 columns = columns,
                 contentPadding = contentPadding,
@@ -190,6 +196,9 @@ fun BrowseSourceContent(
         }
         LibraryDisplayMode.List -> {
             BrowseSourceList(
+                latestItems = latestItems,
+                browseItems = browseItems,
+                getMangaState = getMangaState,
                 mangaList = mangaList,
                 contentPadding = contentPadding,
                 onMangaClick = onMangaClick,
@@ -205,6 +214,9 @@ fun BrowseSourceContent(
         }
         LibraryDisplayMode.CompactGrid, LibraryDisplayMode.CoverOnlyGrid -> {
             BrowseSourceCompactGrid(
+                latestItems = latestItems,
+                browseItems = browseItems,
+                getMangaState = getMangaState,
                 mangaList = mangaList,
                 columns = columns,
                 contentPadding = contentPadding,
@@ -286,3 +298,4 @@ private fun BrowseSourceSkeletonGrid(
         }
     }
 }
+

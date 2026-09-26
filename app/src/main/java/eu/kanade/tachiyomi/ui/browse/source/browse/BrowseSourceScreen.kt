@@ -482,7 +482,12 @@ data class BrowseSourceScreen(
             },
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         ) { paddingValues ->
+            val isSearching = state.isUserQuery
+            val showFeeds = !isSearching && state.listing == BrowseSourceViewModel.Listing.Popular
             BrowseSourceContent(
+                latestItems = if (showFeeds) state.latestItems else null,
+                browseItems = if (showFeeds) state.browseItems else null,
+                getMangaState = { viewModel.getMangaState(it) },
                 source = viewModel.source,
                 mangaList = mangaList,
                 columns = viewModel.getColumnsPreference(LocalConfiguration.current.orientation),

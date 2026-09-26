@@ -1,11 +1,13 @@
 package eu.kanade.presentation.browse.components
 
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Modifier
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import eu.kanade.presentation.library.components.CommonMangaItemDefaults
@@ -14,9 +16,14 @@ import kotlinx.coroutines.flow.StateFlow
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaCover
 import tachiyomi.presentation.core.util.plus
+import eu.kanade.presentation.browse.components.GlobalSearchCardRow
+import tachiyomi.presentation.core.components.material.padding
 
 @Composable
 fun BrowseSourceList(
+    latestItems: List<Manga>?,
+    browseItems: List<Manga>?,
+    getMangaState: @Composable (Manga) -> androidx.compose.runtime.State<Manga>,
     mangaList: LazyPagingItems<StateFlow<Manga>>,
     contentPadding: PaddingValues,
     onMangaClick: (Manga) -> Unit,
@@ -99,3 +106,7 @@ private fun BrowseSourceListItem(
         onClick = onClick,
     )
 }
+
+
+
+

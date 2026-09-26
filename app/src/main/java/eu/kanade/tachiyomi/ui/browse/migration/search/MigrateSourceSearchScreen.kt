@@ -107,6 +107,9 @@ data class MigrateSourceSearchScreen(
                 }
             }
             BrowseSourceContent(
+                latestItems = null,
+                browseItems = null,
+                getMangaState = { androidx.compose.runtime.produceState<Manga>(initialValue = it) { value = it } },
                 source = viewModel.source,
                 mangaList = viewModel.mangaPagerFlowFlow.collectAsLazyPagingItems(),
                 columns = viewModel.getColumnsPreference(LocalConfiguration.current.orientation),

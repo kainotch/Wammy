@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.browse.source.browse
+﻿package eu.kanade.tachiyomi.ui.browse.source.browse
 
 import android.content.res.Configuration
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -43,6 +43,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 import logcat.LogPriority
 import logcat.logcat
 import mihon.core.viewmodel.StateViewModel
@@ -60,6 +61,7 @@ import tachiyomi.domain.manga.interactor.GetLibraryManga
 import tachiyomi.domain.manga.interactor.GetManga
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaUpdate
+import mihon.domain.manga.model.toDomainManga
 import tachiyomi.domain.manga.model.MangaWithChapterCount
 import tachiyomi.domain.manga.model.toMangaUpdate
 import tachiyomi.domain.source.interactor.GetRemoteManga
@@ -87,6 +89,7 @@ class BrowseSourceViewModel(
     private val getManga: GetManga = Injekt.get(),
     private val getFavorites: GetFavorites = Injekt.get(),
     private val getLibraryManga: GetLibraryManga = Injekt.get(),
+    private val networkToLocalManga: tachiyomi.domain.manga.interactor.NetworkToLocalManga = Injekt.get(),
     private val updateManga: UpdateManga = Injekt.get(),
     private val addTracks: AddTracks = Injekt.get(),
     private val getIncognitoState: GetIncognitoState = Injekt.get(),
@@ -128,6 +131,57 @@ class BrowseSourceViewModel(
 
     // Forces the browse pager to recreate after file-system updates like delete/refresh.
     private val refreshGeneration = MutableStateFlow(0L)
+
+    private fun loadFeed() {
+        viewModelScope.launchIO {
+            val catalogueSource = source as? CatalogueSource ?: return@launchIO
+
+            val latestDeferred = if (catalogueSource.supportsLatest) {
+                async {
+                    try {
+                        val page = catalogueSource.getLatestUpdates(1)
+                        page.mangas.map { it.toDomainManga(sourceId, catalogueSource.isNovelSource()) }
+                            .distinctBy { it.url }
+                            .let { networkToLocalManga(it) }
+                    } catch (e: Exception) {
+                        emptyList()
+                    }
+                }
+            } else null
+
+            val browseDeferred = async {
+                try {
+                    val page = catalogueSource.getPopularManga(1)
+                    page.mangas.map { it.toDomainManga(sourceId, catalogueSource.isNovelSource()) }
+                        .distinctBy { it.url }
+                        .let { networkToLocalManga(it) }
+                } catch (e: Exception) {
+                    emptyList()
+                }
+            }
+
+            latestDeferred?.let { deferred ->
+                launch {
+                    val latest = deferred.await()
+                    mutableState.update { it.copy(latestItems = latest) }
+                }
+            }
+            launch {
+                val popular = browseDeferred.await()
+                mutableState.update { it.copy(browseItems = popular) }
+            }
+        }
+    }
+
+    @androidx.compose.runtime.Composable
+    fun getMangaState(initialManga: Manga): androidx.compose.runtime.State<Manga> {
+        return androidx.compose.runtime.produceState(initialValue = initialManga) {
+            getManga.subscribe(initialManga.url, initialManga.source)
+                .collect { manga ->
+                    if (manga != null) value = manga
+                }
+        }
+    }
 
     /**
      * Jump to a specific page. This recreates the pager starting from that page.
@@ -173,6 +227,7 @@ class BrowseSourceViewModel(
         .stateIn(viewModelScope, SharingStarted.Lazily, sourcePreferences.autoApplyFilterPresets.get())
 
     init {
+        loadFeed()
         // Load filter presets from storage
         refreshFilterPresets()
 
@@ -1008,8 +1063,13 @@ class BrowseSourceViewModel(
         val selectionMode: Boolean = false,
         val selection: Set<Manga> = emptySet(),
         val translateTitles: Boolean = false,
+        val latestItems: List<Manga>? = null,
+        val browseItems: List<Manga>? = null,
         val translatedTitles: Map<Long, String> = emptyMap(),
     ) {
         val isUserQuery get() = listing is Listing.Search && !listing.query.isNullOrEmpty()
     }
 }
+
+
+

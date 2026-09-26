@@ -2,6 +2,7 @@ package eu.kanade.presentation.browse.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -9,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.Modifier
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import eu.kanade.presentation.library.components.CommonMangaItemDefaults
@@ -17,9 +19,14 @@ import kotlinx.coroutines.flow.StateFlow
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.domain.manga.model.MangaCover
 import tachiyomi.presentation.core.util.plus
+import eu.kanade.presentation.browse.components.GlobalSearchCardRow
+import tachiyomi.presentation.core.components.material.padding
 
 @Composable
 fun BrowseSourceCompactGrid(
+    latestItems: List<Manga>?,
+    browseItems: List<Manga>?,
+    getMangaState: @Composable (Manga) -> androidx.compose.runtime.State<Manga>,
     mangaList: LazyPagingItems<StateFlow<Manga>>,
     columns: GridCells,
     contentPadding: PaddingValues,
@@ -39,6 +46,40 @@ fun BrowseSourceCompactGrid(
         verticalArrangement = Arrangement.spacedBy(CommonMangaItemDefaults.GridVerticalSpacer),
         horizontalArrangement = Arrangement.spacedBy(CommonMangaItemDefaults.GridHorizontalSpacer),
     ) {
+        if (latestItems != null && latestItems.isNotEmpty()) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                androidx.compose.foundation.layout.Column {
+                    androidx.compose.material3.Text(
+                        text = tachiyomi.presentation.core.i18n.stringResource(tachiyomi.i18n.MR.strings.latest),
+                        style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = androidx.compose.material3.MaterialTheme.padding.medium, vertical = androidx.compose.material3.MaterialTheme.padding.small)
+                    )
+                    GlobalSearchCardRow(
+                        titles = latestItems,
+                        getManga = getMangaState,
+                        onClick = onMangaClick,
+                        onLongClick = onMangaLongClick,
+                    )
+                }
+            }
+        }
+        if (browseItems != null && browseItems.isNotEmpty()) {
+            item(span = { GridItemSpan(maxLineSpan) }) {
+                androidx.compose.foundation.layout.Column {
+                    androidx.compose.material3.Text(
+                        text = tachiyomi.presentation.core.i18n.stringResource(tachiyomi.i18n.MR.strings.popular),
+                        style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = androidx.compose.material3.MaterialTheme.padding.medium, vertical = androidx.compose.material3.MaterialTheme.padding.small)
+                    )
+                    GlobalSearchCardRow(
+                        titles = browseItems,
+                        getManga = getMangaState,
+                        onClick = onMangaClick,
+                        onLongClick = onMangaLongClick,
+                    )
+                }
+            }
+        }
         if (mangaList.loadState.prepend is LoadState.Loading) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 BrowseSourceLoadingItem()
@@ -106,3 +147,7 @@ private fun BrowseSourceCompactGridItem(
         onClick = onClick,
     )
 }
+
+
+
+
