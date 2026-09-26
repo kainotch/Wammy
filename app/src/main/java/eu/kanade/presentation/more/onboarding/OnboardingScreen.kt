@@ -1,4 +1,4 @@
-package eu.kanade.presentation.more.onboarding
+﻿package eu.kanade.presentation.more.onboarding
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -70,7 +70,7 @@ fun OnboardingScreen(
             modifier = Modifier
                 .padding(vertical = MaterialTheme.padding.small)
                 .clip(MaterialTheme.shapes.small)
-                .fillMaxSize()
+                .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
             AnimatedContent(
@@ -88,3 +88,4 @@ fun OnboardingScreen(
         }
     }
 }
+
