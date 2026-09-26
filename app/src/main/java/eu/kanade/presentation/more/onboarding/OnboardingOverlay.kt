@@ -112,9 +112,9 @@ fun OnboardingOverlay(
         Dialog(onDismissRequest = { /* Must complete */ }) {
             Surface(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .fillMaxWidth(0.85f)
                     .wrapContentHeight(),
-                shape = RoundedCornerShape(28.dp),
+                shape = RoundedCornerShape(24.dp),
                 color = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Column(
@@ -125,24 +125,31 @@ fun OnboardingOverlay(
                     Surface(
                         shape = CircleShape,
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
-                        modifier = Modifier.size(56.dp)
+                        modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
-                            imageVector = Icons.Outlined.RocketLaunch,
+                            imageVector = androidx.compose.material.icons.Icons.Outlined.Info,
                             contentDescription = null,
-                            modifier = Modifier.padding(16.dp),
+                            modifier = Modifier.padding(12.dp),
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    // Title
+                    
+                    // Dynamic Title based on step
                     Text(
-                        text = stringResource(MR.strings.onboarding_heading),
-                        style = MaterialTheme.typography.headlineSmall,
+                        text = when(currentStep) {
+                            1 -> "Storage Setup"
+                            2 -> "Permissions"
+                            else -> "Getting Started"
+                        },
+                        style = MaterialTheme.typography.titleLarge,
                         textAlign = TextAlign.Center
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    // Dots (only for remaining steps)
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    // Dots
                     Row(
                         horizontalArrangement = Arrangement.Center,
                         modifier = Modifier.fillMaxWidth()
@@ -150,8 +157,9 @@ fun OnboardingOverlay(
                         (1..steps.lastIndex).forEach { index ->
                             Box(
                                 modifier = Modifier
-                                    .padding(horizontal = 4.dp)
-                                    .size(if (index == currentStep) 10.dp else 6.dp)
+                                    .padding(horizontal = 3.dp)
+                                    .width(if (index == currentStep) 16.dp else 6.dp)
+                                    .height(6.dp)
                                     .clip(CircleShape)
                                     .background(
                                         if (index == currentStep) MaterialTheme.colorScheme.primary 
@@ -160,14 +168,7 @@ fun OnboardingOverlay(
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(24.dp))
-                    // Subtitle
-                    Text(
-                        text = stringResource(MR.strings.onboarding_description),
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    
                     Spacer(modifier = Modifier.height(24.dp))
                     
                     // Content
@@ -179,7 +180,7 @@ fun OnboardingOverlay(
                         AnimatedContent(
                             targetState = currentStep,
                             transitionSpec = {
-                                materialSharedAxisX(
+                                soup.compose.material.motion.animation.materialSharedAxisX(
                                     forward = targetState > initialState,
                                     slideDistance = slideDistance,
                                 )
@@ -189,17 +190,24 @@ fun OnboardingOverlay(
                             steps[it].Content()
                         }
                     }
+                    
                     Spacer(modifier = Modifier.height(24.dp))
-                    // Next Button
+                    
+                    // Buttons (Kotatsu style text buttons)
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        TextButton(onClick = { currentStep-- }) {
-                            Text("Back")
+                        if (currentStep > 1) {
+                            TextButton(onClick = { currentStep-- }) {
+                                Text("Back", color = MaterialTheme.colorScheme.primary)
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.width(8.dp))
                         }
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Button(
+                        
+                        TextButton(
                             enabled = steps[currentStep].isComplete,
                             onClick = {
                                 if (isLastStep) {
@@ -211,9 +219,10 @@ fun OnboardingOverlay(
                         ) {
                             Text(
                                 text = stringResource(
-                                    if (isLastStep) MR.strings.onboarding_action_finish
-                                    else MR.strings.onboarding_action_next
-                                )
+                                    if (isLastStep) tachiyomi.i18n.MR.strings.onboarding_action_finish
+                                    else tachiyomi.i18n.MR.strings.onboarding_action_next
+                                ),
+                                color = MaterialTheme.colorScheme.primary
                             )
                         }
                     }
@@ -222,5 +231,3 @@ fun OnboardingOverlay(
         }
     }
 }
-
-
