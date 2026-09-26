@@ -255,6 +255,7 @@ object DiscoverTab : Tab {
                             Spacer(modifier = Modifier.height(24.dp))
                         }
 
+                        if (recentlyRead.isNotEmpty()) {
                         item {
                             Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
                                 SectionHeader(title = "Recently Read", onSeeAll = {
@@ -262,44 +263,32 @@ object DiscoverTab : Tab {
                                       HistoryTab.filterEvent.trySend(filter)
                                       tabNavigator.current = HistoryTab
                                   })
-                                if (recentlyRead.isEmpty()) {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(
-                                            text = "No recently read manga",
-                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                    }
-                                } else {
-                                    LazyRow(
-                                        contentPadding = PaddingValues(horizontal = 16.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        items(recentlyRead) { history ->
-                                            Box(modifier = Modifier.width(90.dp)) {
-                                                MangaCompactGridItem(
-                                                    isSelected = false,
-                                                    title = history.title,
-                                                    coverData = history.coverData,
-                                                    coverBadgeStart = {},
-                                                    coverBadgeEnd = {},
-                                                    onLongClick = {},
-                                                    onClick = {
-                                                        scope.launch {
-                                                            navigator.push(MangaScreen(history.mangaId))
-                                                        }
-                                                    },
-                                                    onClickContinueReading = null
-                                                )
-                                            }
+                                LazyRow(
+                                    contentPadding = PaddingValues(horizontal = 16.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    items(recentlyRead) { history ->
+                                        Box(modifier = Modifier.width(90.dp)) {
+                                            MangaCompactGridItem(
+                                                isSelected = false,
+                                                title = history.title,
+                                                coverData = history.coverData,
+                                                coverBadgeStart = {},
+                                                coverBadgeEnd = {},
+                                                onLongClick = {},
+                                                onClick = {
+                                                    scope.launch {
+                                                        navigator.push(MangaScreen(history.mangaId))
+                                                    }
+                                                },
+                                                onClickContinueReading = null
+                                            )
                                         }
                                     }
                                 }
                             }
                         }
+                    }
 
                         if (animatedState.sources.isNotEmpty()) {
                             val firstSource = animatedState.sources.first()
@@ -310,7 +299,7 @@ object DiscoverTab : Tab {
                                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                         val titleText = firstSource.name
                                         val subtitleText = if (firstSource.lang == "all" || firstSource.lang.isEmpty()) null else eu.kanade.tachiyomi.util.system.LocaleHelper.getLocalizedDisplayName(firstSource.lang)
-                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(BrowseSourceScreen(firstSource.id, GetRemoteManga.QUERY_POPULAR)) })
+                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(BrowseSourceScreen(firstSource.id, GetRemoteManga.QUERY_POPULAR, isFeed = true)) })
                                         SkeletonCarousel()
                                     }
                                     LaunchedEffect(firstSource.id) {
@@ -321,7 +310,7 @@ object DiscoverTab : Tab {
                                     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
                                         val titleText = firstSource.name
                                         val subtitleText = if (firstSource.lang == "all" || firstSource.lang.isEmpty()) null else eu.kanade.tachiyomi.util.system.LocaleHelper.getLocalizedDisplayName(firstSource.lang)
-                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(BrowseSourceScreen(firstSource.id, GetRemoteManga.QUERY_POPULAR)) })
+                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(BrowseSourceScreen(firstSource.id, GetRemoteManga.QUERY_POPULAR, isFeed = true)) })
                                         LazyRow(
                                             contentPadding = PaddingValues(horizontal = 16.dp),
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -351,7 +340,7 @@ object DiscoverTab : Tab {
                             }
 
                             item {
-                                SectionHeader(title = "Recently Updated", onSeeAll = { navigator.push(BrowseSourceScreen(firstSource.id, GetRemoteManga.QUERY_LATEST)) })
+                                SectionHeader(title = "Recently Updated", onSeeAll = { navigator.push(BrowseSourceScreen(firstSource.id, GetRemoteManga.QUERY_LATEST, isFeed = true)) })
 
                                 val latest = viewModel.latestCache[firstSource.id]
 
@@ -405,7 +394,7 @@ object DiscoverTab : Tab {
                                     Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
                                         val titleText = source.name
                                         val subtitleText = if (source.lang == "all" || source.lang.isEmpty()) null else eu.kanade.tachiyomi.util.system.LocaleHelper.getLocalizedDisplayName(source.lang)
-                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(BrowseSourceScreen(source.id, GetRemoteManga.QUERY_POPULAR)) })
+                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(BrowseSourceScreen(source.id, GetRemoteManga.QUERY_POPULAR, isFeed = true)) })
                                         SkeletonCarousel()
                                     }
                                     LaunchedEffect(source.id) {
@@ -416,7 +405,7 @@ object DiscoverTab : Tab {
                                     Column(modifier = Modifier.fillMaxWidth().padding(bottom = 24.dp)) {
                                         val titleText = source.name
                                         val subtitleText = if (source.lang == "all" || source.lang.isEmpty()) null else eu.kanade.tachiyomi.util.system.LocaleHelper.getLocalizedDisplayName(source.lang)
-                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(BrowseSourceScreen(source.id, GetRemoteManga.QUERY_POPULAR)) })
+                                        SectionHeader(title = titleText, subtitle = subtitleText, onSeeAll = { navigator.push(BrowseSourceScreen(source.id, GetRemoteManga.QUERY_POPULAR, isFeed = true)) })
                                         LazyRow(
                                             contentPadding = PaddingValues(horizontal = 16.dp),
                                             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -776,6 +765,10 @@ fun EmptyDiscoverScreen(isNovel: Boolean, onBrowseExtensions: () -> Unit) {
         }
     }
 }
+
+
+
+
 
 
 

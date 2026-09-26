@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi
+﻿package eu.kanade.tachiyomi
 
 import android.annotation.SuppressLint
 import android.app.Application
@@ -221,17 +221,29 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
             },
         )
 
-        val defaultReposAdded = preferenceStore.getBoolean("default_repos_added_v2", false)
+        val defaultReposAdded = preferenceStore.getBoolean("default_repos_added_v5", false)
         if (!defaultReposAdded.get()) {
             Injekt.get<kotlinx.coroutines.CoroutineScope>().launchIO {
                 val repo = Injekt.get<mihon.domain.extension.repository.ExtensionStoreRepository>()
                 val jsPluginManager = Injekt.get<eu.kanade.tachiyomi.jsplugin.JsPluginManager>()
-                jsPluginManager.addRepository("Novel Extensions", "https://raw.githubusercontent.com/LNReader/lnreader-plugins/plugins/v3.0.0/.dist/plugins.min.json")
+                
+                // Auto-delete the old LNReader JS repo for existing users
+                jsPluginManager.repositories.value.filter { "lnreader" in it.url.lowercase() }.forEach { jsPluginManager.removeRepository(it.url) }
+                
+                // Auto-delete old Keiyoushi and NovelSourcery repos for existing users
+                val allRepos = repo.getAll()
+                allRepos.forEach { extStore ->
+                    val url = extStore.indexUrl.lowercase()
+                    if ("keiyoushi" in url || "novelsourcery" in url || "tsundoku" in url) {
+                        repo.remove(extStore.indexUrl)
+                    }
+                }
                 
                 while (!defaultReposAdded.get()) {
                     try {
-                        val mangaResult = repo.insert("https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json", isNovel = false)
-                        if (mangaResult.isSuccess) {
+                        val mangaResult = repo.insert("https://raw.githubusercontent.com/kainotch/Extension-source-M/repo/index.pb", isNovel = false)
+                        val novelResult = repo.insert("https://raw.githubusercontent.com/kainotch/Extension-source-N/repo/index.pb", isNovel = true)
+                        if (mangaResult.isSuccess || novelResult.isSuccess) {
                             defaultReposAdded.set(true)
                             val extensionManager = Injekt.get<eu.kanade.tachiyomi.extension.ExtensionManager>()
                             extensionManager.findAvailableExtensions()
@@ -349,3 +361,12 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
 }
 
 private const val ACTION_DISABLE_INCOGNITO_MODE = "tachi.action.DISABLE_INCOGNITO_MODE"
+
+
+
+
+
+
+
+
+

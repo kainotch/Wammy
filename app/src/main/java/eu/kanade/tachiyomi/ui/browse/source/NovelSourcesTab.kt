@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.browse.source
+﻿package eu.kanade.tachiyomi.ui.browse.source
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
@@ -75,11 +75,7 @@ fun Screen.novelSourcesTab(): TabContent {
                 ),
                 contentPadding = contentPadding,
                 onClickItem = { source, listing ->
-                    if (listing == BrowseSourceViewModel.Listing.Popular) {
-                        navigator.push(SourceFeedScreen(source.id))
-                    } else {
-                        navigator.push(BrowseSourceScreen(source.id, listing.query))
-                    }
+                    navigator.push(BrowseSourceScreen(source.id, listing.query, isFeed = true))
                 },
                 onLongClickItem = { source ->
                     screenModel.showSourceDialog(source)
@@ -142,3 +138,4 @@ fun Screen.novelSourcesTab(): TabContent {
         },
     )
 }
+
