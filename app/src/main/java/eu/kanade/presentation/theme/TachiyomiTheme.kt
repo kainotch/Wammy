@@ -1,4 +1,4 @@
-package eu.kanade.presentation.theme
+﻿package eu.kanade.presentation.theme
 
 import android.content.Context
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -10,6 +10,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import eu.kanade.domain.ui.UiPreferences
 import eu.kanade.domain.ui.model.AppTheme
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import eu.kanade.presentation.theme.colorscheme.BaseColorScheme
 import eu.kanade.presentation.theme.colorscheme.CatppuccinColorScheme
 import eu.kanade.presentation.theme.colorscheme.GreenAppleColorScheme
@@ -39,9 +41,11 @@ fun TachiyomiTheme(
     content: @Composable () -> Unit,
 ) {
     val uiPreferences = Injekt.get<UiPreferences>()
+    val prefAppTheme by uiPreferences.appTheme.collectAsState()
+    val prefIsAmoled by uiPreferences.themeDarkAmoled.collectAsState()
     BaseTachiyomiTheme(
-        appTheme = appTheme ?: uiPreferences.appTheme.get(),
-        isAmoled = amoled ?: uiPreferences.themeDarkAmoled.get(),
+        appTheme = appTheme ?: prefAppTheme,
+        isAmoled = amoled ?: prefIsAmoled,
         seedColor = seedColor,
         content = content,
     )
@@ -115,3 +119,4 @@ private val colorSchemes: Map<AppTheme, BaseColorScheme> = mapOf(
     AppTheme.YINYANG to YinYangColorScheme,
     AppTheme.YOTSUBA to YotsubaColorScheme,
 )
+
