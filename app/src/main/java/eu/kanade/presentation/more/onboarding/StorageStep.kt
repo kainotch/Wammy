@@ -1,4 +1,4 @@
-package eu.kanade.presentation.more.onboarding
+﻿package eu.kanade.presentation.more.onboarding
 
 import android.content.ActivityNotFoundException
 import androidx.compose.foundation.layout.Arrangement
@@ -69,18 +69,7 @@ internal class StorageStep : OnboardingStep {
                 Text(stringResource(MR.strings.onboarding_storage_action_select))
             }
 
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 8.dp),
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
-            )
 
-            Text(stringResource(MR.strings.onboarding_storage_help_info, stringResource(MR.strings.app_name)))
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = { handler.openUri(SettingsDataScreen.HELP_URL) },
-            ) {
-                Text(stringResource(MR.strings.onboarding_storage_help_action))
-            }
         }
 
         LaunchedEffect(Unit) {
@@ -89,3 +78,4 @@ internal class StorageStep : OnboardingStep {
         }
     }
 }
+
