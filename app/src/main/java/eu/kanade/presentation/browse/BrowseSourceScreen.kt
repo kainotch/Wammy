@@ -84,6 +84,7 @@ fun BrowseSourceContent(
     onTranslateManga: (Manga) -> Unit = {},
     titleMaxLines: Int = 2,
     skipCoverLoading: Boolean = false,
+    showFeeds: Boolean = false,
 ) {
     val context = LocalContext.current
     val errorState = mangaList.loadState.refresh.takeIf { it is LoadState.Error }
@@ -108,15 +109,17 @@ fun BrowseSourceContent(
     }
 
     if (mangaList.itemCount == 0 && mangaList.loadState.refresh is LoadState.Loading) {
-        if (displayMode == LibraryDisplayMode.List) {
-            LoadingScreen(Modifier.padding(contentPadding))
-        } else {
-            BrowseSourceSkeletonGrid(columns = columns, contentPadding = contentPadding)
+        if (!showFeeds) {
+            if (displayMode == LibraryDisplayMode.List) {
+                LoadingScreen(Modifier.padding(contentPadding))
+            } else {
+                BrowseSourceSkeletonGrid(columns = columns, contentPadding = contentPadding)
+            }
+            return
         }
-        return
     }
 
-    if (mangaList.itemCount == 0) {
+    if (mangaList.itemCount == 0 && !showFeeds) {
         EmptyScreen(
             modifier = Modifier.padding(contentPadding),
             message = when (errorState) {
@@ -192,6 +195,8 @@ fun BrowseSourceContent(
                 onMangaVisible = onTranslateManga,
                 titleMaxLines = titleMaxLines,
                 skipCoverLoading = skipCoverLoading,
+                showFeeds = showFeeds,
+                source = source,
             )
         }
         LibraryDisplayMode.List -> {
@@ -210,6 +215,8 @@ fun BrowseSourceContent(
                 onMangaVisible = onTranslateManga,
                 titleMaxLines = titleMaxLines,
                 skipCoverLoading = skipCoverLoading,
+                showFeeds = showFeeds,
+                source = source,
             )
         }
         LibraryDisplayMode.CompactGrid, LibraryDisplayMode.CoverOnlyGrid -> {
@@ -229,6 +236,8 @@ fun BrowseSourceContent(
                 onMangaVisible = onTranslateManga,
                 titleMaxLines = titleMaxLines,
                 skipCoverLoading = skipCoverLoading,
+                showFeeds = showFeeds,
+                source = source,
             )
         }
     }
@@ -298,4 +307,7 @@ private fun BrowseSourceSkeletonGrid(
         }
     }
 }
+
+
+
 

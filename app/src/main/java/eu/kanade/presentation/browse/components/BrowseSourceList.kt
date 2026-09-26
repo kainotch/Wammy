@@ -1,4 +1,4 @@
-package eu.kanade.presentation.browse.components
+﻿package eu.kanade.presentation.browse.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -35,10 +35,54 @@ fun BrowseSourceList(
     onMangaVisible: (Manga) -> Unit = {},
     titleMaxLines: Int = 2,
     skipCoverLoading: Boolean = false,
+    showFeeds: Boolean = false,
+    source: eu.kanade.tachiyomi.source.Source? = null,
 ) {
     LazyColumn(
         contentPadding = contentPadding + PaddingValues(vertical = 8.dp),
     ) {
+        if (showFeeds) {
+            if (source?.supportsLatest == true) {
+                item {
+                    androidx.compose.foundation.layout.Column {
+                        androidx.compose.material3.Text(
+                            text = tachiyomi.presentation.core.i18n.stringResource(tachiyomi.i18n.MR.strings.latest),
+                            style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(horizontal = androidx.compose.material3.MaterialTheme.padding.medium, vertical = androidx.compose.material3.MaterialTheme.padding.small)
+                        )
+                        if (latestItems == null) {
+                            eu.kanade.presentation.browse.components.GlobalSearchSkeletonRow()
+                        } else if (latestItems.isNotEmpty()) {
+                            eu.kanade.presentation.browse.components.GlobalSearchCardRow(
+                                titles = latestItems,
+                                getManga = getMangaState,
+                                onClick = onMangaClick,
+                                onLongClick = onMangaLongClick,
+                            )
+                        }
+                    }
+                }
+            }
+            item {
+                androidx.compose.foundation.layout.Column {
+                    androidx.compose.material3.Text(
+                        text = tachiyomi.presentation.core.i18n.stringResource(tachiyomi.i18n.MR.strings.popular),
+                        style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(horizontal = androidx.compose.material3.MaterialTheme.padding.medium, vertical = androidx.compose.material3.MaterialTheme.padding.small)
+                    )
+                    if (browseItems == null) {
+                        eu.kanade.presentation.browse.components.GlobalSearchSkeletonRow()
+                    } else if (browseItems.isNotEmpty()) {
+                        eu.kanade.presentation.browse.components.GlobalSearchCardRow(
+                            titles = browseItems,
+                            getManga = getMangaState,
+                            onClick = onMangaClick,
+                            onLongClick = onMangaLongClick,
+                        )
+                    }
+                }
+            }
+        }
         item {
             if (mangaList.loadState.prepend is LoadState.Loading) {
                 BrowseSourceLoadingItem()
@@ -86,6 +130,8 @@ private fun BrowseSourceListItem(
     isSelected: Boolean = false,
     titleMaxLines: Int = 2,
     skipCoverLoading: Boolean = false,
+    showFeeds: Boolean = false,
+    source: eu.kanade.tachiyomi.source.Source? = null,
 ) {
     MangaListItem(
         isSelected = isSelected,
@@ -106,6 +152,10 @@ private fun BrowseSourceListItem(
         onClick = onClick,
     )
 }
+
+
+
+
 
 
 

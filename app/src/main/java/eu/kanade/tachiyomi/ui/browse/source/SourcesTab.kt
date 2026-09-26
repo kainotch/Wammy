@@ -59,7 +59,7 @@ fun Screen.sourcesTab(): TabContent {
                 state = state,
                 contentPadding = contentPadding,
                 onClickItem = { source, listing ->
-                    navigator.push(BrowseSourceScreen(source.id, listing.query))
+                    navigator.push(BrowseSourceScreen(source.id, listing.query, isFeed = true))
                 },
                 onClickPin = viewModel::togglePin,
                 onLongClickItem = viewModel::showSourceDialog,
@@ -120,4 +120,5 @@ fun Screen.sourcesTab(): TabContent {
         },
     )
 }
+
 

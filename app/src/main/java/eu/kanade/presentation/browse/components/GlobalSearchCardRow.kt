@@ -1,4 +1,4 @@
-package eu.kanade.presentation.browse.components
+﻿package eu.kanade.presentation.browse.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +14,18 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
+
 import eu.kanade.presentation.library.components.CommonMangaItemDefaults
 import eu.kanade.presentation.library.components.MangaComfortableGridItem
 import tachiyomi.domain.manga.model.Manga
@@ -90,3 +102,46 @@ private fun EmptyResultItem() {
             ),
     )
 }
+
+@Composable
+fun GlobalSearchSkeletonRow() {
+    androidx.compose.foundation.lazy.LazyRow(
+        contentPadding = PaddingValues(MaterialTheme.padding.small),
+        horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.extraSmall),
+        userScrollEnabled = false,
+    ) {
+        items(5) {
+            val transition = rememberInfiniteTransition(label = "skeleton")
+            val alpha by transition.animateFloat(
+                initialValue = 0.2f,
+                targetValue = 0.6f,
+                animationSpec = infiniteRepeatable(
+                    animation = tween(1000),
+                    repeatMode = RepeatMode.Reverse
+                ),
+                label = "alpha"
+            )
+            Column(
+                modifier = Modifier.width(96.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .width(96.dp)
+                        .aspectRatio(eu.kanade.presentation.manga.components.MangaCover.Book.ratio)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha))
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(top = 4.dp)
+                        .width(72.dp)
+                        .height(12.dp)
+                        .clip(RoundedCornerShape(4.dp))
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = alpha))
+                )
+            }
+        }
+    }
+}
+
+

@@ -39,6 +39,8 @@ fun BrowseSourceComfortableGrid(
     onMangaVisible: (Manga) -> Unit = {},
     titleMaxLines: Int = 2,
     skipCoverLoading: Boolean = false,
+    showFeeds: Boolean = false,
+    source: eu.kanade.tachiyomi.source.Source? = null,
 ) {
     LazyVerticalGrid(
         columns = columns,
@@ -46,24 +48,28 @@ fun BrowseSourceComfortableGrid(
         verticalArrangement = Arrangement.spacedBy(CommonMangaItemDefaults.GridVerticalSpacer),
         horizontalArrangement = Arrangement.spacedBy(CommonMangaItemDefaults.GridHorizontalSpacer),
     ) {
-        if (latestItems != null && latestItems.isNotEmpty()) {
-            item(span = { GridItemSpan(maxLineSpan) }) {
-                androidx.compose.foundation.layout.Column {
-                    androidx.compose.material3.Text(
-                        text = tachiyomi.presentation.core.i18n.stringResource(tachiyomi.i18n.MR.strings.latest),
-                        style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(horizontal = androidx.compose.material3.MaterialTheme.padding.medium, vertical = androidx.compose.material3.MaterialTheme.padding.small)
-                    )
-                    GlobalSearchCardRow(
-                        titles = latestItems,
-                        getManga = getMangaState,
-                        onClick = onMangaClick,
-                        onLongClick = onMangaLongClick,
-                    )
+        if (showFeeds) {
+            if (source?.supportsLatest == true) {
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    androidx.compose.foundation.layout.Column {
+                        androidx.compose.material3.Text(
+                            text = tachiyomi.presentation.core.i18n.stringResource(tachiyomi.i18n.MR.strings.latest),
+                            style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
+                            modifier = Modifier.padding(horizontal = androidx.compose.material3.MaterialTheme.padding.medium, vertical = androidx.compose.material3.MaterialTheme.padding.small)
+                        )
+                        if (latestItems == null) {
+                            eu.kanade.presentation.browse.components.GlobalSearchSkeletonRow()
+                        } else if (latestItems.isNotEmpty()) {
+                            GlobalSearchCardRow(
+                                titles = latestItems,
+                                getManga = getMangaState,
+                                onClick = onMangaClick,
+                                onLongClick = onMangaLongClick,
+                            )
+                        }
+                    }
                 }
             }
-        }
-        if (browseItems != null && browseItems.isNotEmpty()) {
             item(span = { GridItemSpan(maxLineSpan) }) {
                 androidx.compose.foundation.layout.Column {
                     androidx.compose.material3.Text(
@@ -71,12 +77,16 @@ fun BrowseSourceComfortableGrid(
                         style = androidx.compose.material3.MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(horizontal = androidx.compose.material3.MaterialTheme.padding.medium, vertical = androidx.compose.material3.MaterialTheme.padding.small)
                     )
-                    GlobalSearchCardRow(
-                        titles = browseItems,
-                        getManga = getMangaState,
-                        onClick = onMangaClick,
-                        onLongClick = onMangaLongClick,
-                    )
+                    if (browseItems == null) {
+                        eu.kanade.presentation.browse.components.GlobalSearchSkeletonRow()
+                    } else if (browseItems.isNotEmpty()) {
+                        GlobalSearchCardRow(
+                            titles = browseItems,
+                            getManga = getMangaState,
+                            onClick = onMangaClick,
+                            onLongClick = onMangaLongClick,
+                        )
+                    }
                 }
             }
         }
@@ -128,6 +138,8 @@ private fun BrowseSourceComfortableGridItem(
     isSelected: Boolean = false,
     titleMaxLines: Int = 2,
     skipCoverLoading: Boolean = false,
+    showFeeds: Boolean = false,
+    source: eu.kanade.tachiyomi.source.Source? = null,
 ) {
     MangaComfortableGridItem(
         isSelected = isSelected,
@@ -148,6 +160,11 @@ private fun BrowseSourceComfortableGridItem(
         onClick = onClick,
     )
 }
+
+
+
+
+
 
 
 

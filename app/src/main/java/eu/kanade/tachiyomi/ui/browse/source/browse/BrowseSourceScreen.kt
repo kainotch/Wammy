@@ -97,6 +97,7 @@ import uy.kohesive.injekt.api.get
 data class BrowseSourceScreen(
     val sourceId: Long,
     private val listingQuery: String?,
+    val isFeed: Boolean = false,
 ) : Screen(), AssistContentScreen {
 
     private var assistUrl: String? = null
@@ -484,10 +485,11 @@ data class BrowseSourceScreen(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         ) { paddingValues ->
             val isSearching = state.isUserQuery
-            val showFeeds = !isSearching && state.listing == BrowseSourceViewModel.Listing.Popular
+            val showFeeds = !isSearching && isFeed
             BrowseSourceContent(
                 latestItems = if (showFeeds) state.latestItems else null,
                 browseItems = if (showFeeds) state.browseItems else null,
+                showFeeds = showFeeds,
                 getMangaState = { viewModel.getMangaState(it) },
                 source = viewModel.source,
                 mangaList = mangaList,
@@ -796,5 +798,6 @@ private fun LocalNovelsAddToCategoryDialog(
         },
     )
 }
+
 
 
