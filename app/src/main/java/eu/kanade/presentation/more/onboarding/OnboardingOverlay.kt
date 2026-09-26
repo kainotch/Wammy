@@ -109,7 +109,7 @@ fun OnboardingOverlay(
             }
         }
     } else {
-        Dialog(onDismissRequest = { /* Must complete */ }) {
+        Dialog(onDismissRequest = { /* Must complete */ }, properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false)) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth(0.85f)
@@ -118,8 +118,7 @@ fun OnboardingOverlay(
                 color = MaterialTheme.colorScheme.surfaceVariant
             ) {
                 Column(
-                    modifier = Modifier.padding(24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Icon
                     Surface(
@@ -231,3 +230,4 @@ fun OnboardingOverlay(
         }
     }
 }
+
