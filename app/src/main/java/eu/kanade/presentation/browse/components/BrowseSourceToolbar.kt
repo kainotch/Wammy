@@ -7,6 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Checklist
+import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Public
@@ -55,6 +57,8 @@ fun BrowseSourceToolbar(
     onHelpClick: () -> Unit,
     onSettingsClick: () -> Unit,
     onSearch: (String) -> Unit,
+    onToggleSelectionMode: (() -> Unit)? = null,
+    onFilterClick: (() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     showPageNumber: Boolean = false,
     currentPage: Int = 1,
@@ -126,6 +130,24 @@ fun BrowseSourceToolbar(
                                 title = stringResource(MR.strings.action_settings),
                                 icon = androidx.compose.material.icons.Icons.Outlined.Settings,
                                 onClick = onSettingsClick,
+                            ),
+                        )
+                    }
+                    if (onToggleSelectionMode != null) {
+                        add(
+                            AppBar.Action(
+                                title = stringResource(MR.strings.action_select_all),
+                                icon = androidx.compose.material.icons.Icons.Outlined.Checklist,
+                                onClick = onToggleSelectionMode,
+                            ),
+                        )
+                    }
+                    if (onFilterClick != null) {
+                        add(
+                            AppBar.Action(
+                                title = stringResource(MR.strings.action_filter),
+                                icon = androidx.compose.material.icons.Icons.Outlined.FilterList,
+                                onClick = onFilterClick,
                             ),
                         )
                     }
@@ -298,6 +320,7 @@ fun BrowseSourceToolbar(
         )
     }
 }
+
 
 
 

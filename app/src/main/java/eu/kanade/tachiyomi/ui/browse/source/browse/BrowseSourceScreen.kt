@@ -289,6 +289,8 @@ data class BrowseSourceScreen(
                         onHelpClick = onHelpClick,
                         onSettingsClick = { navigator.push(SourcePreferencesScreen(sourceId)) },
                         onSearch = viewModel::search,
+                        onToggleSelectionMode = viewModel::toggleSelectionMode,
+                        onFilterClick = if (state.filters.isNotEmpty()) viewModel::openFilterSheet else null,
                     )
 
                     Row(
@@ -795,3 +797,4 @@ private fun LocalNovelsAddToCategoryDialog(
         },
     )
 }
+
