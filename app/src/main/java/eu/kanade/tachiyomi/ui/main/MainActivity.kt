@@ -79,6 +79,12 @@ import eu.kanade.tachiyomi.ui.manga.MangaScreen
 import eu.kanade.tachiyomi.ui.more.NewUpdateScreen
 import eu.kanade.tachiyomi.ui.more.OnboardingScreen
 import eu.kanade.tachiyomi.ui.setting.SettingsScreen
+import eu.kanade.presentation.more.onboarding.OnboardingOverlay
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.isNavigationBarNeedsScrim
 import eu.kanade.tachiyomi.util.system.updaterEnabled
@@ -322,11 +328,20 @@ class MainActivity : BaseActivity() {
     @Composable
     private fun ShowOnboarding() {
         val navigator = LocalNavigator.currentOrThrow
+        var showOnboarding by remember { mutableStateOf(!preferences.shownOnboardingFlow.get()) }
 
-        LaunchedEffect(Unit) {
-            if (!preferences.shownOnboardingFlow.get() && navigator.lastItem !is OnboardingScreen) {
-                navigator.push(OnboardingScreen())
-            }
+        if (showOnboarding) {
+            OnboardingOverlay(
+                onComplete = {
+                    preferences.shownOnboardingFlow.set(true)
+                    showOnboarding = false
+                },
+                onRestoreBackup = {
+                    preferences.shownOnboardingFlow.set(true)
+                    showOnboarding = false
+                    navigator.push(SettingsScreen(SettingsScreen.Destination.DataAndStorage))
+                }
+            )
         }
     }
 
