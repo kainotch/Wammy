@@ -7,6 +7,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.automirrored.outlined.HelpOutline
+import androidx.compose.material.icons.outlined.Public
 import androidx.compose.material.icons.automirrored.filled.ViewList
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material3.AlertDialog
@@ -102,23 +105,26 @@ fun BrowseSourceToolbar(
                     )
                     if (isLocalSource) {
                         add(
-                            AppBar.OverflowAction(
+                            AppBar.Action(
                                 title = stringResource(MR.strings.label_help),
+                                icon = androidx.compose.material.icons.Icons.AutoMirrored.Outlined.HelpOutline,
                                 onClick = onHelpClick,
                             ),
                         )
                     } else {
                         add(
-                            AppBar.OverflowAction(
+                            AppBar.Action(
                                 title = stringResource(MR.strings.action_open_in_web_view),
+                                icon = androidx.compose.material.icons.Icons.Outlined.Public,
                                 onClick = onWebViewClick,
                             ),
                         )
                     }
                     if (isConfigurableSource) {
                         add(
-                            AppBar.OverflowAction(
+                            AppBar.Action(
                                 title = stringResource(MR.strings.action_settings),
+                                icon = androidx.compose.material.icons.Icons.Outlined.Settings,
                                 onClick = onSettingsClick,
                             ),
                         )
@@ -292,4 +298,6 @@ fun BrowseSourceToolbar(
         )
     }
 }
+
+
 
