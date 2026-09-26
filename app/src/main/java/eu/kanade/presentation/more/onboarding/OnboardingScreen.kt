@@ -1,4 +1,4 @@
-package eu.kanade.presentation.more.onboarding
+﻿package eu.kanade.presentation.more.onboarding
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -26,6 +26,8 @@ import tachiyomi.presentation.core.screens.InfoScreen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -82,7 +84,7 @@ fun OnboardingScreen(
             shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.surfaceVariant
         ) {
-            Column(
+            Column(modifier = Modifier.verticalScroll(rememberScrollState()),
                 modifier = Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -197,3 +199,4 @@ fun OnboardingScreen(
         }
     }
 }
+
