@@ -58,7 +58,6 @@ fun BrowseSourceToolbar(
     onSettingsClick: () -> Unit,
     onSearch: (String) -> Unit,
     onToggleSelectionMode: (() -> Unit)? = null,
-    onFilterClick: (() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     showPageNumber: Boolean = false,
     currentPage: Int = 1,
@@ -142,15 +141,7 @@ fun BrowseSourceToolbar(
                             ),
                         )
                     }
-                    if (onFilterClick != null) {
-                        add(
-                            AppBar.Action(
-                                title = stringResource(MR.strings.action_filter),
-                                icon = androidx.compose.material.icons.Icons.Outlined.FilterList,
-                                onClick = onFilterClick,
-                            ),
-                        )
-                    }
+
                 },
             )
 
@@ -320,6 +311,8 @@ fun BrowseSourceToolbar(
         )
     }
 }
+
+
 
 
 
