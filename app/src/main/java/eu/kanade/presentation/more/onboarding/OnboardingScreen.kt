@@ -84,8 +84,7 @@ fun OnboardingScreen(
             shape = RoundedCornerShape(28.dp),
             color = MaterialTheme.colorScheme.surfaceVariant
         ) {
-            Column(modifier = Modifier.verticalScroll(rememberScrollState()),
-                modifier = Modifier.padding(24.dp),
+            Column(modifier = Modifier.padding(24.dp).verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 // Icon
@@ -199,4 +198,5 @@ fun OnboardingScreen(
         }
     }
 }
+
 
