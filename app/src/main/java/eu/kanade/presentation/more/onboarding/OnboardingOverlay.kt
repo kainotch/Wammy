@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -64,13 +65,11 @@ fun OnboardingOverlay(
 
     if (currentStep == 0) {
         ModalBottomSheet(
-            onDismissRequest = { /* Cannot be dismissed, must press continue */ },
+            onDismissRequest = { currentStep = 1 },
             sheetState = sheetState
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(24.dp)
+                modifier = Modifier.fillMaxWidth().fillMaxHeight(0.6f).padding(24.dp)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
@@ -222,3 +221,4 @@ fun OnboardingOverlay(
         }
     }
 }
+
