@@ -553,7 +553,7 @@ class LocalNovelSource : CatalogueSource, UnmeteredSource {
 
     companion object {
         const val ID = 1L // Different from LocalSource ID (0L)
-        const val HELP_URL = "https://kainotch.github.io/wammy-otaku.github.io/docs/guides/local-source/novels"
+        const val HELP_URL = "https://kainotch.github.io/WammyWeb/docs/guides/local-source-advanced"
 
         private val LATEST_THRESHOLD = 7.days.inWholeMilliseconds
 

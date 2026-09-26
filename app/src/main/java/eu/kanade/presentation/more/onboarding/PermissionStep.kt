@@ -81,14 +81,7 @@ internal class PermissionStep : OnboardingStep {
         }
 
         Column {
-            PermissionCheckbox(
-                title = stringResource(MR.strings.onboarding_permission_install_apps),
-                subtitle = stringResource(MR.strings.onboarding_permission_install_apps_description),
-                granted = installGranted,
-                onButtonClick = {
-                    context.launchRequestPackageInstallsPermission()
-                },
-            )
+
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 val permissionRequester = rememberLauncherForActivityResult(
@@ -213,3 +206,4 @@ internal class PermissionStep : OnboardingStep {
         )
     }
 }
+

@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.browse.source
+﻿package eu.kanade.tachiyomi.ui.browse.source
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FilterList
@@ -59,11 +59,7 @@ fun Screen.sourcesTab(): TabContent {
                 state = state,
                 contentPadding = contentPadding,
                 onClickItem = { source, listing ->
-                    if (listing == BrowseSourceViewModel.Listing.Popular) {
-                        navigator.push(SourceFeedScreen(source.id))
-                    } else {
-                        navigator.push(BrowseSourceScreen(source.id, listing.query))
-                    }
+                    navigator.push(BrowseSourceScreen(source.id, listing.query))
                 },
                 onClickPin = viewModel::togglePin,
                 onLongClickItem = viewModel::showSourceDialog,
@@ -124,3 +120,4 @@ fun Screen.sourcesTab(): TabContent {
         },
     )
 }
+

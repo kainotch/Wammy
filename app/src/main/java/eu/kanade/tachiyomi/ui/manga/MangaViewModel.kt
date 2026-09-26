@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.manga
+﻿package eu.kanade.tachiyomi.ui.manga
 
 import android.app.Application
 import android.content.Context
@@ -364,7 +364,7 @@ class MangaViewModel(
                     emptyList()
                 }
 
-                val filteredMangas = savedMangas.filter { it.id != manga.id }
+                val filteredMangas = savedMangas.filter { it.id != manga.id }.distinctBy { it.id }
                 
                 updateSuccessState { 
                     it.copy(
@@ -1912,5 +1912,6 @@ sealed class ChapterList {
         val isDownloaded = downloadState == Download.State.DOWNLOADED
     }
 }
+
 
 
