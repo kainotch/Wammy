@@ -62,7 +62,7 @@ fun OnboardingOverlay(
         )
     }
     val isLastStep = currentStep == steps.lastIndex
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
 
     if (currentStep == 0) {
         ModalBottomSheet(
@@ -70,7 +70,7 @@ fun OnboardingOverlay(
             sheetState = sheetState
         ) {
             Column(
-                modifier = Modifier.fillMaxWidth().fillMaxHeight(0.6f).padding(24.dp)
+                modifier = Modifier.fillMaxWidth().padding(24.dp)
                     .verticalScroll(rememberScrollState()),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
