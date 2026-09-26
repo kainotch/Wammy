@@ -1,4 +1,4 @@
-package eu.kanade.domain.ui
+﻿package eu.kanade.domain.ui
 
 import eu.kanade.domain.ui.model.AppTheme
 import eu.kanade.domain.ui.model.TabletUiMode
@@ -16,7 +16,7 @@ class UiPreferences(
     preferenceStore: PreferenceStore,
 ) {
 
-    val themeMode: Preference<ThemeMode> = preferenceStore.getEnum("pref_theme_mode_key", ThemeMode.SYSTEM)
+    val themeMode: Preference<ThemeMode> = preferenceStore.getEnum("pref_theme_mode_key", ThemeMode.DARK)
 
     val appTheme: Preference<AppTheme> = preferenceStore.getEnum(
         "pref_app_theme",
@@ -46,3 +46,4 @@ class UiPreferences(
         }
     }
 }
+
