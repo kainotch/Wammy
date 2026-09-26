@@ -24,6 +24,27 @@ import tachiyomi.presentation.core.components.material.padding
 import tachiyomi.presentation.core.i18n.stringResource
 import tachiyomi.presentation.core.screens.InfoScreen
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+
+
 @Composable
 fun OnboardingScreen(
     onComplete: () -> Unit,
@@ -46,44 +67,132 @@ fun OnboardingScreen(
         currentStep--
     }
 
-    InfoScreen(
-        icon = Icons.Outlined.RocketLaunch,
-        headingText = stringResource(MR.strings.onboarding_heading),
-        subtitleText = stringResource(MR.strings.onboarding_description),
-        acceptText = stringResource(
-            if (isLastStep) {
-                MR.strings.onboarding_action_finish
-            } else {
-                MR.strings.onboarding_action_next
-            },
-        ),
-        canAccept = steps[currentStep].isComplete,
-        onAcceptClick = {
-            if (isLastStep) {
-                onComplete()
-            } else {
-                currentStep++
-            }
-        },
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background),
+        contentAlignment = Alignment.Center
     ) {
-        Box(
+        Surface(
             modifier = Modifier
-                .padding(vertical = MaterialTheme.padding.small)
-                .clip(MaterialTheme.shapes.small)
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+                .padding(24.dp)
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant
         ) {
-            AnimatedContent(
-                targetState = currentStep,
-                transitionSpec = {
-                    materialSharedAxisX(
-                        forward = targetState > initialState,
-                        slideDistance = slideDistance,
-                    )
-                },
-                label = "stepContent",
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                steps[it].Content()
+                // Icon
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    modifier = Modifier.size(56.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.RocketLaunch,
+                        contentDescription = null,
+                        modifier = Modifier.padding(16.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Title
+                Text(
+                    text = stringResource(MR.strings.onboarding_heading),
+                    style = MaterialTheme.typography.headlineSmall,
+                    textAlign = TextAlign.Center
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Dots
+                Row(
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    steps.indices.forEach { index ->
+                        Box(
+                            modifier = Modifier
+                                .padding(horizontal = 4.dp)
+                                .size(if (index == currentStep) 10.dp else 6.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (index == currentStep) MaterialTheme.colorScheme.primary 
+                                    else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+                                )
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Subtitle
+                Text(
+                    text = stringResource(MR.strings.onboarding_description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Content
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                ) {
+                    AnimatedContent(
+                        targetState = currentStep,
+                        transitionSpec = {
+                            materialSharedAxisX(
+                                forward = targetState > initialState,
+                                slideDistance = slideDistance,
+                            )
+                        },
+                        label = "stepContent",
+                    ) {
+                        steps[it].Content()
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Next Button
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    if (currentStep > 0) {
+                        TextButton(onClick = { currentStep-- }) {
+                            Text("Back")
+                        }
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                    Button(
+                        enabled = steps[currentStep].isComplete,
+                        onClick = {
+                            if (isLastStep) {
+                                onComplete()
+                            } else {
+                                currentStep++
+                            }
+                        }
+                    ) {
+                        Text(
+                            text = stringResource(
+                                if (isLastStep) MR.strings.onboarding_action_finish
+                                else MR.strings.onboarding_action_next
+                            )
+                        )
+                    }
+                }
             }
         }
     }
