@@ -100,10 +100,10 @@ fun BrowseSourceToolbar(
                     contentDescription = stringResource(MR.strings.action_select_all),
                 )
             }
-            androidx.compose.material3.IconButton(onClick = onInverseSelection ?: {}) {
+            androidx.compose.material3.IconButton(onClick = onClearSelection ?: {}) {
                 androidx.compose.material3.Icon(
                     imageVector = androidx.compose.material.icons.Icons.Outlined.FlipToBack,
-                    contentDescription = stringResource(MR.strings.action_select_inverse),
+                    contentDescription = "Deselect All",
                 )
             }
             if (onAddToLibrary != null) {

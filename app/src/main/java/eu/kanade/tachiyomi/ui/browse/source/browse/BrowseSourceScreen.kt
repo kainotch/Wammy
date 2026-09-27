@@ -296,7 +296,6 @@ data class BrowseSourceScreen(
                         onToggleSelectionMode = viewModel::toggleSelectionMode,
                         onSelectAll = { viewModel.selectAll(mangaList.itemSnapshotList.items.mapNotNull { it.value }) },
                         onClearSelection = viewModel::clearSelection,
-                        onInverseSelection = { viewModel.invertSelection(mangaList.itemSnapshotList.items.mapNotNull { it.value }) },
                         onAddToLibrary = { 
                             if (source is LocalNovelSource) {
                                 viewModel.showBulkAddLocalNovelsDialog()
