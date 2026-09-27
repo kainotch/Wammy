@@ -8,6 +8,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Checklist
+import androidx.compose.material.icons.outlined.SelectAll
+import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.FilterList
 import androidx.compose.material.icons.outlined.FlipToBack
 import androidx.compose.material.icons.outlined.Settings
@@ -62,6 +64,7 @@ fun BrowseSourceToolbar(
     onSelectAll: (() -> Unit)? = null,
     onClearSelection: (() -> Unit)? = null,
     onInverseSelection: (() -> Unit)? = null,
+    onAddToLibrary: (() -> Unit)? = null,
     selectionMode: Boolean = false,
     selectionCount: Int = 0,
     scrollBehavior: TopAppBarScrollBehavior? = null,
@@ -87,12 +90,13 @@ fun BrowseSourceToolbar(
         onChangeSearchQuery = onSearchQueryChange,
         onSearch = onSearch,
         onClickCloseSearch = navigateUp,
-        actionModeCounter = if (selectionMode) selectionCount else 0,
-        onCancelActionMode = onClearSelection ?: {},
+        isActionMode = selectionMode,
+        actionModeCounter = selectionCount,
+        onCancelActionMode = onToggleSelectionMode ?: {},
         actionModeActions = {
             androidx.compose.material3.IconButton(onClick = onSelectAll ?: {}) {
                 androidx.compose.material3.Icon(
-                    imageVector = Icons.Outlined.Checklist,
+                    imageVector = Icons.Outlined.SelectAll,
                     contentDescription = stringResource(MR.strings.action_select_all),
                 )
             }
@@ -101,6 +105,14 @@ fun BrowseSourceToolbar(
                     imageVector = androidx.compose.material.icons.Icons.Outlined.FlipToBack,
                     contentDescription = stringResource(MR.strings.action_select_inverse),
                 )
+            }
+            if (onAddToLibrary != null) {
+                androidx.compose.material3.IconButton(onClick = onAddToLibrary) {
+                    androidx.compose.material3.Icon(
+                        imageVector = Icons.Outlined.Favorite,
+                        contentDescription = stringResource(MR.strings.add_to_library),
+                    )
+                }
             }
         },
         actions = {
