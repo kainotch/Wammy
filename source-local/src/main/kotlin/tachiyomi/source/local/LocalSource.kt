@@ -1,4 +1,4 @@
-﻿package tachiyomi.source.local
+package tachiyomi.source.local
 
 import android.content.Context
 import com.hippo.unifile.UniFile

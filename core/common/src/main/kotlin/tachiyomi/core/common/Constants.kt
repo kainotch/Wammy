@@ -1,4 +1,4 @@
-﻿package tachiyomi.core.common
+package tachiyomi.core.common
 
 object Constants {
     const val URL_HELP = "https://kainotch.github.io/WammyWeb/docs/faq/general"

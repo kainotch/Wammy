@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.ui.browse.migration.sources
+package eu.kanade.tachiyomi.ui.browse.migration.sources
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
