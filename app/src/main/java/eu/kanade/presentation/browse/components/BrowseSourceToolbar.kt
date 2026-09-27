@@ -167,15 +167,7 @@ fun BrowseSourceToolbar(
                             ),
                         )
                     }
-                    if (onToggleSelectionMode != null) {
-                        add(
-                            AppBar.Action(
-                                title = stringResource(MR.strings.action_select_all),
-                                icon = androidx.compose.material.icons.Icons.Outlined.Checklist,
-                                onClick = { selectingBulkActions = true },
-                            ),
-                        )
-                    }
+
 
                 },
             )
@@ -207,36 +199,7 @@ fun BrowseSourceToolbar(
                 }
             }
             
-            DropdownMenu(
-                expanded = selectingBulkActions,
-                onDismissRequest = { selectingBulkActions = false },
-            ) {
-                androidx.compose.material3.DropdownMenuItem(
-                    text = { Text(text = "Toggle Selection Mode") },
-                    onClick = {
-                        selectingBulkActions = false
-                        onToggleSelectionMode?.invoke()
-                    }
-                )
-                if (onSelectAll != null) {
-                    androidx.compose.material3.DropdownMenuItem(
-                        text = { Text(text = stringResource(MR.strings.action_select_all)) },
-                        onClick = {
-                            selectingBulkActions = false
-                            onSelectAll.invoke()
-                        }
-                    )
-                }
-                if (onClearSelection != null) {
-                    androidx.compose.material3.DropdownMenuItem(
-                        text = { Text(text = "Deselect All") },
-                        onClick = {
-                            selectingBulkActions = false
-                            onClearSelection.invoke()
-                        }
-                    )
-                }
-            }
+
         },
         scrollBehavior = scrollBehavior,
     )
