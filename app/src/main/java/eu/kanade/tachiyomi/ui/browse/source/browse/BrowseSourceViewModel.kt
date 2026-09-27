@@ -958,7 +958,7 @@ class BrowseSourceViewModel(
         mutableState.update { state ->
             // For local novel source include all items (favorites too, for delete/refresh operations).
             val candidates = if (source is LocalNovelSource) mangaList else mangaList.filter { !it.favorite }
-            state.copy(selection = state.selection + candidates)
+            state.copy(selection = state.selection + candidates, selectionMode = true)
         }
     }
 

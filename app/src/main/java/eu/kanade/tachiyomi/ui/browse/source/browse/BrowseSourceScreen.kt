@@ -294,6 +294,8 @@ data class BrowseSourceScreen(
                         onSettingsClick = { navigator.push(SourcePreferencesScreen(sourceId)) },
                         onSearch = viewModel::search,
                         onToggleSelectionMode = viewModel::toggleSelectionMode,
+                        onSelectAll = { viewModel.selectAll(mangaList.itemSnapshotList.items.mapNotNull { it.value }) },
+                        onClearSelection = viewModel::clearSelection,
                     )
 
                     Row(

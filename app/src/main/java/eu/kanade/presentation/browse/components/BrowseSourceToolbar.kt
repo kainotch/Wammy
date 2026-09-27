@@ -58,6 +58,8 @@ fun BrowseSourceToolbar(
     onSettingsClick: () -> Unit,
     onSearch: (String) -> Unit,
     onToggleSelectionMode: (() -> Unit)? = null,
+    onSelectAll: (() -> Unit)? = null,
+    onClearSelection: (() -> Unit)? = null,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     showPageNumber: Boolean = false,
     currentPage: Int = 1,
@@ -71,6 +73,7 @@ fun BrowseSourceToolbar(
     val canOpenPageDialog = onPageJump != null || onPageRangeLoad != null
 
     var selectingDisplayMode by remember { mutableStateOf(false) }
+    var selectingBulkActions by remember { mutableStateOf(false) }
     var showPageJumpDialog by remember { mutableStateOf(false) }
 
     SearchToolbar(
@@ -137,7 +140,7 @@ fun BrowseSourceToolbar(
                             AppBar.Action(
                                 title = stringResource(MR.strings.action_select_all),
                                 icon = androidx.compose.material.icons.Icons.Outlined.Checklist,
-                                onClick = onToggleSelectionMode,
+                                onClick = { selectingBulkActions = true },
                             ),
                         )
                     }
@@ -169,6 +172,37 @@ fun BrowseSourceToolbar(
                 ) {
                     selectingDisplayMode = false
                     onDisplayModeChange(LibraryDisplayMode.List)
+                }
+            }
+            
+            DropdownMenu(
+                expanded = selectingBulkActions,
+                onDismissRequest = { selectingBulkActions = false },
+            ) {
+                androidx.compose.material3.DropdownMenuItem(
+                    text = { Text(text = "Toggle Selection Mode") },
+                    onClick = {
+                        selectingBulkActions = false
+                        onToggleSelectionMode?.invoke()
+                    }
+                )
+                if (onSelectAll != null) {
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = { Text(text = stringResource(MR.strings.action_select_all)) },
+                        onClick = {
+                            selectingBulkActions = false
+                            onSelectAll.invoke()
+                        }
+                    )
+                }
+                if (onClearSelection != null) {
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = { Text(text = "Deselect All") },
+                        onClick = {
+                            selectingBulkActions = false
+                            onClearSelection.invoke()
+                        }
+                    )
                 }
             }
         },
