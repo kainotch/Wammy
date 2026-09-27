@@ -167,8 +167,15 @@ fun BrowseSourceToolbar(
                             ),
                         )
                     }
-
-
+                    if (onToggleSelectionMode != null) {
+                        add(
+                            AppBar.Action(
+                                title = stringResource(MR.strings.action_select_all),
+                                icon = androidx.compose.material.icons.Icons.Outlined.Checklist,
+                                onClick = onToggleSelectionMode,
+                            ),
+                        )
+                    }
                 },
             )
 
