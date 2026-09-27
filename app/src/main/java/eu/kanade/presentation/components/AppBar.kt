@@ -353,8 +353,11 @@ fun SearchToolbar(
         },
         navigateUp = if (searchQuery == null) navigateUp else onClickCloseSearch,
         actions = {
-            key("search") {
-                val onClick = { onChangeSearchQuery("") }
+            if (activeActionMode) {
+                actionModeActions()
+            } else {
+                key("search") {
+                    val onClick = { onChangeSearchQuery("") }
 
                 if (!searchEnabled) {
                     // Don't show search action
@@ -405,6 +408,7 @@ fun SearchToolbar(
             }
 
             key("actions") { actions() }
+            }
         },
         isActionMode = activeActionMode,
         onCancelActionMode = onCancelActionMode,
