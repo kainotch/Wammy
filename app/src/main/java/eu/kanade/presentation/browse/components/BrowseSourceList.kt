@@ -58,6 +58,7 @@ fun BrowseSourceList(
                                 getManga = getMangaState,
                                 onClick = onMangaClick,
                                 onLongClick = onMangaLongClick,
+                                selection = selection,
                             )
                         }
                     }
@@ -78,6 +79,7 @@ fun BrowseSourceList(
                             getManga = getMangaState,
                             onClick = onMangaClick,
                             onLongClick = onMangaLongClick,
+                                selection = selection,
                         )
                     }
                 }

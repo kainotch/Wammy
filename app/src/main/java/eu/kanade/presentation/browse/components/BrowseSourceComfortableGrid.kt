@@ -65,6 +65,7 @@ fun BrowseSourceComfortableGrid(
                                 getManga = getMangaState,
                                 onClick = onMangaClick,
                                 onLongClick = onMangaLongClick,
+                                selection = selection,
                             )
                         }
                     }
@@ -85,6 +86,7 @@ fun BrowseSourceComfortableGrid(
                             getManga = getMangaState,
                             onClick = onMangaClick,
                             onLongClick = onMangaLongClick,
+                                selection = selection,
                         )
                     }
                 }
