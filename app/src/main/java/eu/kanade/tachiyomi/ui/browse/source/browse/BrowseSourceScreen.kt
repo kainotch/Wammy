@@ -41,6 +41,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -119,6 +121,7 @@ data class BrowseSourceScreen(
             },
         )
         val state by viewModel.state.collectAsState()
+        var forceFeed by rememberSaveable { mutableStateOf(isFeed) }
         val source = viewModel.source
 
         val navigator = LocalNavigator.currentOrThrow
@@ -299,9 +302,31 @@ data class BrowseSourceScreen(
                             .padding(horizontal = MaterialTheme.padding.small),
                         horizontalArrangement = Arrangement.spacedBy(MaterialTheme.padding.small),
                     ) {
+                        if (isFeed) {
+                            FilterChip(
+                                selected = forceFeed && state.listing == Listing.Popular,
+                                onClick = {
+                                    forceFeed = true
+                                    viewModel.resetFilters()
+                                    viewModel.setListing(Listing.Popular)
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Home,
+                                        contentDescription = null,
+                                        modifier = Modifier.size(FilterChipDefaults.IconSize),
+                                    )
+                                },
+                                label = {
+                                    Text(text = "Home")
+                                },
+                            )
+                        }
+                        
                         FilterChip(
-                            selected = state.listing == Listing.Popular,
+                            selected = !forceFeed && state.listing == Listing.Popular,
                             onClick = {
+                                forceFeed = false
                                 viewModel.resetFilters()
                                 viewModel.setListing(Listing.Popular)
                             },
@@ -309,8 +334,7 @@ data class BrowseSourceScreen(
                                 Icon(
                                     imageVector = Icons.Outlined.Favorite,
                                     contentDescription = null,
-                                    modifier = Modifier
-                                        .size(FilterChipDefaults.IconSize),
+                                    modifier = Modifier.size(FilterChipDefaults.IconSize),
                                 )
                             },
                             label = {
@@ -321,6 +345,7 @@ data class BrowseSourceScreen(
                             FilterChip(
                                 selected = state.listing == Listing.Latest,
                                 onClick = {
+                                    forceFeed = false
                                     viewModel.resetFilters()
                                     viewModel.setListing(Listing.Latest)
                                 },
@@ -485,7 +510,7 @@ data class BrowseSourceScreen(
             snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
         ) { paddingValues ->
             val isSearching = state.isUserQuery
-            val showFeeds = !isSearching && isFeed
+            val showFeeds = !isSearching && forceFeed
             BrowseSourceContent(
                 latestItems = if (showFeeds) state.latestItems else null,
                 browseItems = if (showFeeds) state.browseItems else null,
