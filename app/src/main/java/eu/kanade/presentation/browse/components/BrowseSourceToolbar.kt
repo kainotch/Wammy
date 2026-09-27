@@ -9,6 +9,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Checklist
 import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.FlipToBack
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.automirrored.outlined.HelpOutline
 import androidx.compose.material.icons.outlined.Public
@@ -60,6 +61,9 @@ fun BrowseSourceToolbar(
     onToggleSelectionMode: (() -> Unit)? = null,
     onSelectAll: (() -> Unit)? = null,
     onClearSelection: (() -> Unit)? = null,
+    onInverseSelection: (() -> Unit)? = null,
+    selectionMode: Boolean = false,
+    selectionCount: Int = 0,
     scrollBehavior: TopAppBarScrollBehavior? = null,
     showPageNumber: Boolean = false,
     currentPage: Int = 1,
@@ -83,6 +87,22 @@ fun BrowseSourceToolbar(
         onChangeSearchQuery = onSearchQueryChange,
         onSearch = onSearch,
         onClickCloseSearch = navigateUp,
+        actionModeCounter = if (selectionMode) selectionCount else 0,
+        onCancelActionMode = onClearSelection ?: {},
+        actionModeActions = {
+            androidx.compose.material3.IconButton(onClick = onSelectAll ?: {}) {
+                androidx.compose.material3.Icon(
+                    imageVector = Icons.Outlined.Checklist,
+                    contentDescription = stringResource(MR.strings.action_select_all),
+                )
+            }
+            androidx.compose.material3.IconButton(onClick = onInverseSelection ?: {}) {
+                androidx.compose.material3.Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Outlined.FlipToBack,
+                    contentDescription = stringResource(MR.strings.action_select_inverse),
+                )
+            }
+        },
         actions = {
             // Page number indicator (clickable to jump to page)
             if (showPageNumber && canOpenPageDialog) {

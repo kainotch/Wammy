@@ -273,15 +273,25 @@ fun SearchToolbar(
     onSearch: (String) -> Unit = {},
     onClickCloseSearch: () -> Unit = { onChangeSearchQuery(null) },
     actions: @Composable RowScope.() -> Unit = {},
+    actionModeCounter: Int = 0,
+    onCancelActionMode: () -> Unit = {},
+    actionModeActions: @Composable RowScope.() -> Unit = {},
     scrollBehavior: TopAppBarScrollBehavior? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
 ) {
+    val isActionMode by remember(actionModeCounter) {
+        androidx.compose.runtime.derivedStateOf { actionModeCounter > 0 }
+    }
     val focusRequester = remember { FocusRequester() }
 
     AppBar(
         modifier = modifier,
         titleContent = {
+            if (isActionMode) {
+                AppBarTitle(actionModeCounter.toString())
+                return@AppBar
+            }
             if (searchQuery == null) return@AppBar titleContent()
 
             val keyboardController = LocalSoftwareKeyboardController.current
@@ -395,7 +405,8 @@ fun SearchToolbar(
 
             key("actions") { actions() }
         },
-        isActionMode = false,
+        isActionMode = isActionMode,
+        onCancelActionMode = onCancelActionMode,
         scrollBehavior = scrollBehavior,
     )
 }

@@ -962,6 +962,16 @@ class BrowseSourceViewModel(
         }
     }
 
+
+    fun invertSelection(mangaList: List<Manga>) {
+        mutableState.update { state ->
+            val candidates = if (source is LocalNovelSource) mangaList else mangaList.filter { !it.favorite }
+            val currentSelection = state.selection
+            val newSelection = candidates.filterNot { it in currentSelection }
+            state.copy(selection = newSelection.toSet())
+        }
+    }
+
     fun clearSelection() {
         mutableState.update { it.copy(selection = emptySet()) }
     }
