@@ -13,6 +13,13 @@
 </p>
 
 <p align="center">
+  <a href="https://discord.com/invite/qybFSATs7Q">
+    <img src=".github/images/discord_logo.png" alt="Join our Discord" width="50" align="middle"/>
+  </a>
+  <b>&nbsp;&larr; Click on the image to join our Discord!</b>
+</p>
+
+<p align="center">
   <a href="https://github.com/kainotch/Wammy/releases"><img src="https://img.shields.io/github/v/release/kainotch/Wammy?style=for-the-badge&logo=github&color=6200EE" alt="Latest Release"/></a>
   <a href="https://github.com/kainotch/Wammy/blob/main/LICENSE"><img src="https://img.shields.io/github/license/kainotch/Wammy?style=for-the-badge&color=gray" alt="License"/></a>
 </p>
