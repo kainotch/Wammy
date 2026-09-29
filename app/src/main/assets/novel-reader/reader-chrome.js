@@ -3,7 +3,7 @@
 // Replaces:
 //   __SAFE_TOP_VAR__ / __SAFE_BOTTOM_VAR__ - CSS custom property names
 //   __SAFE_TOP__ / __SAFE_BOTTOM__         - px values (numbers)
-//   __OBJECT__                             - global object name (Tsundoku)
+//   __OBJECT__                             - global object name (Wammy)
 //   __MENU_KEY__                           - runtime menu-visible key
 //   __MENU_VISIBLE__                       - true / false
 //   __EVENT__                              - menu-visibility CustomEvent name
