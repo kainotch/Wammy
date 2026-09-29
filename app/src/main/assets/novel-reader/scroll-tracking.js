@@ -1,6 +1,6 @@
 // Page-side scroll listener for the novel WebView reader.
 // Installed once per load via NovelWebViewStyler.injectScrollTracking(), which substitutes the
-// __TSUNDOKU_OBJECT_NAME__ / __CHAPTER_DIVIDER_CLASS__ / __CHAPTER_ID_ATTR__ /
+// __WAMMY_OBJECT_NAME__ / __CHAPTER_DIVIDER_CLASS__ / __CHAPTER_ID_ATTR__ /
 // __INFINITE_SCROLL_ENABLED__ / __LOAD_THRESHOLD__ / __DONE_THRESHOLD__ / __PROGRESS_EVENT__ /
 // __PAGED_ENABLED__ tokens.
 //
@@ -19,9 +19,9 @@
 // reporting instead).
 
 (function () {
-    window.__TSUNDOKU_OBJECT_NAME__ = window.__TSUNDOKU_OBJECT_NAME__ || {};
-    window.__TSUNDOKU_OBJECT_NAME__.runtime = window.__TSUNDOKU_OBJECT_NAME__.runtime || {};
-    var runtime = window.__TSUNDOKU_OBJECT_NAME__.runtime;
+    window.__WAMMY_OBJECT_NAME__ = window.__WAMMY_OBJECT_NAME__ || {};
+    window.__WAMMY_OBJECT_NAME__.runtime = window.__WAMMY_OBJECT_NAME__.runtime || {};
+    var runtime = window.__WAMMY_OBJECT_NAME__.runtime;
 
     if (runtime.infiniteScrollInstalled || __PAGED_ENABLED__) {
         return;

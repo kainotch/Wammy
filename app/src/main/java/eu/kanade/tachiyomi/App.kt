@@ -230,19 +230,19 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
                 // Auto-delete the old LNReader JS repo for existing users
                 jsPluginManager.repositories.value.filter { "lnreader" in it.url.lowercase() }.forEach { jsPluginManager.removeRepository(it.url) }
                 
-                // Auto-delete old Keiyoushi and NovelSourcery repos for existing users
+                // Auto-delete old custom kainotch and tsundoku repos to migrate to official repos
                 val allRepos = repo.getAll()
                 allRepos.forEach { extStore ->
                     val url = extStore.indexUrl.lowercase()
-                    if ("keiyoushi" in url || "novelsourcery" in url || "tsundoku" in url) {
+                    if ("extension-source-m" in url || "extension-source-n" in url || "tsundoku" in url) {
                         repo.remove(extStore.indexUrl)
                     }
                 }
                 
                 while (!defaultReposAdded.get()) {
                     try {
-                        val mangaResult = repo.insert("https://raw.githubusercontent.com/kainotch/Extension-source-M/repo/index.pb", isNovel = false)
-                        val novelResult = repo.insert("https://raw.githubusercontent.com/kainotch/Extension-source-N/repo/index.pb", isNovel = true)
+                        val mangaResult = repo.insert("https://github.com/keiyoushi/extensions/raw/repo/index.pb", isNovel = false)
+                        val novelResult = repo.insert("https://github.com/novelsourcery/extensions/raw/repo/index.pb", isNovel = true)
                         if (mangaResult.isSuccess || novelResult.isSuccess) {
                             defaultReposAdded.set(true)
                             val extensionManager = Injekt.get<eu.kanade.tachiyomi.extension.ExtensionManager>()

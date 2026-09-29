@@ -1,7 +1,7 @@
 -- Re-key tracker sync_ids to stay compatible with upstream mihon backups.
--- Trackers exclusive to tsundoku (NovelUpdates, NovelList, RanobeDb) previously
+-- Trackers exclusive to wammy (NovelUpdates, NovelList, RanobeDb) previously
 -- occupied ids 10-12, pushing MangaBaka/Hikka to 13/14 instead of upstream's 11/10.
--- Step 1: move the tsundoku-exclusive trackers out of the way, into the 100+ range.
+-- Step 1: move the wammy-exclusive trackers out of the way, into the 100+ range.
 UPDATE manga_sync SET sync_id = 100 WHERE sync_id = 10; -- NovelUpdates
 UPDATE manga_sync SET sync_id = 101 WHERE sync_id = 11; -- NovelList
 UPDATE manga_sync SET sync_id = 102 WHERE sync_id = 12; -- RanobeDb
