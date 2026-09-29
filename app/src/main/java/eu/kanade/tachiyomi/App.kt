@@ -234,7 +234,7 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
                 val allRepos = repo.getAll()
                 allRepos.forEach { extStore ->
                     val url = extStore.indexUrl.lowercase()
-                    if ("keiyoushi" in url || "novelsourcery" in url || "wammy" in url) {
+                    if ("keiyoushi" in url || "novelsourcery" in url || "tsundoku" in url) {
                         repo.remove(extStore.indexUrl)
                     }
                 }
