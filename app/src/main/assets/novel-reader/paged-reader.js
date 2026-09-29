@@ -22,8 +22,8 @@
 // __PROGRESS_EVENT__ (same shape as scroll-tracking.js).
 
 (function () {
-    window.__TSUNDOKU_OBJECT_NAME__ = window.__TSUNDOKU_OBJECT_NAME__ || {};
-    var T = window.__TSUNDOKU_OBJECT_NAME__;
+    window.__WAMMY_OBJECT_NAME__ = window.__WAMMY_OBJECT_NAME__ || {};
+    var T = window.__WAMMY_OBJECT_NAME__;
     T.runtime = T.runtime || {};
     var runtime = T.runtime;
 
@@ -36,9 +36,9 @@
     var PAGE_EVENT = '__PAGE_EVENT__';
     var PROGRESS_EVENT = '__PROGRESS_EVENT__';
     var CONTAINER_ID = '__CHAPTERS_CONTAINER_ID__';
-    var NO_TRANSITION_CLASS = 'tsundoku-paged-no-transition';
-    var TRANSITION_ID = 'tsundoku-paged-chapter-transition';
-    var TRANSITION_VISIBLE_CLASS = 'tsundoku-visible';
+    var NO_TRANSITION_CLASS = 'wammy-paged-no-transition';
+    var TRANSITION_ID = 'wammy-paged-chapter-transition';
+    var TRANSITION_VISIBLE_CLASS = 'wammy-visible';
     var enabled = __PAGED_ENABLED__;
 
     // User/snippet-tunable behavior constants - read live from T.config.paged everywhere below
@@ -260,9 +260,9 @@
         if (!el) {
             el = document.createElement('div');
             el.id = TRANSITION_ID;
-            el.className = 'tsundoku-paged-chapter-transition';
+            el.className = 'wammy-paged-chapter-transition';
             var badge = document.createElement('div');
-            badge.className = 'tsundoku-paged-transition-badge';
+            badge.className = 'wammy-paged-transition-badge';
             badge.innerHTML = CHEVRON_SVG;
             el.appendChild(badge);
             document.body.appendChild(el);
