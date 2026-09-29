@@ -13,9 +13,10 @@
 </p>
 
 <p align="center">
-  <a href="YOUR_DISCORD_LINK_HERE">
-    <img src=".github/images/discord_logo.jpg" alt="Join our Discord" width="200"/>
+  <a href="https://discord.com/invite/qybFSATs7Q">
+    <img src=".github/images/discord_logo.png" alt="Join our Discord" width="50" align="middle"/>
   </a>
+  <b>&nbsp;&larr; Click on the image to join our Discord!</b>
 </p>
 
 <p align="center">
