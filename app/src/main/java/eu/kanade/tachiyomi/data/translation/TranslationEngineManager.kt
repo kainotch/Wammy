@@ -31,6 +31,7 @@ class TranslationEngineManager(
      */
     val engines: List<TranslationEngine> by lazy {
         listOf(
+            GoogleTranslateScraperEngine(), // Free, scraper (Moved to default)
             LibreTranslateEngine(), // Free, open-source
             OpenAITranslateEngine(), // Paid, high quality
             NvidiaNimTranslateEngine(), // OpenAI-compatible NIM endpoint
@@ -41,7 +42,6 @@ class TranslationEngineManager(
             DeepLTranslateEngine(), // Paid, high quality
             GoogleTranslateEngine(), // Paid, comprehensive
             GeminiTranslateEngine(), // Paid, Google AI
-            GoogleTranslateScraperEngine(), // Free, scraper
             CustomHttpTranslateEngine(), // Custom HTTP endpoint
         )
     }
