@@ -241,8 +241,8 @@ class App : Application(), DefaultLifecycleObserver, SingletonImageLoader.Factor
                 
                 while (!defaultReposAdded.get()) {
                     try {
-                        val mangaResult = repo.insert("https://raw.githubusercontent.com/keiyoushi/extensions/repo/index.min.json", isNovel = false)
-                        val novelResult = repo.insert("https://raw.githubusercontent.com/novelsourcery/extensions/repo/index.min.json", isNovel = true)
+                        val mangaResult = repo.insert("https://github.com/keiyoushi/extensions/raw/repo/index.pb", isNovel = false)
+                        val novelResult = repo.insert("https://github.com/novelsourcery/extensions/raw/repo/index.pb", isNovel = true)
                         if (mangaResult.isSuccess || novelResult.isSuccess) {
                             defaultReposAdded.set(true)
                             val extensionManager = Injekt.get<eu.kanade.tachiyomi.extension.ExtensionManager>()
