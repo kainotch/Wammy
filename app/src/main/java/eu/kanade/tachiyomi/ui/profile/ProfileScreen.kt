@@ -52,6 +52,10 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import eu.kanade.tachiyomi.data.auth.AuthManager
+import eu.kanade.tachiyomi.data.sync.AuthorizationResult
+import eu.kanade.tachiyomi.data.sync.DriveSyncManager
+import eu.kanade.tachiyomi.data.sync.SyncResult
+import androidx.activity.result.IntentSenderRequest
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -65,6 +69,10 @@ class ProfileScreen : Screen {
         val scope = rememberCoroutineScope()
         val authManager: AuthManager = Injekt.get()
         val user by authManager.currentUser.collectAsState()
+        val driveSyncManager: DriveSyncManager = Injekt.get()
+        val driveApiHelper: eu.kanade.tachiyomi.data.sync.DriveApiHelper = Injekt.get()
+        var isSyncing by remember { mutableStateOf(false) }
+        var lastSyncStatus by remember { mutableStateOf<String?>(null) }
 
         val webClientId = "997612260567-i7gkfnks53c0tlh9kvfslmml0bnn0lle.apps.googleusercontent.com"
 
@@ -311,7 +319,163 @@ class ProfileScreen : Screen {
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.height(48.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    // === Google Drive Sync Section ===
+                    var pendingAction by remember { mutableStateOf<String?>(null) }
+
+                    val consentLauncher = rememberLauncherForActivityResult(
+                        contract = ActivityResultContracts.StartIntentSenderForResult()
+                    ) { result ->
+                        if (result.resultCode == android.app.Activity.RESULT_OK) {
+                            scope.launch {
+                                isSyncing = true
+                                lastSyncStatus = null
+                                val syncResult = if (pendingAction == "backup") {
+                                    driveSyncManager.backup()
+                                } else {
+                                    driveSyncManager.restore()
+                                }
+                                when (syncResult) {
+                                    is SyncResult.Success -> {
+                                        lastSyncStatus = "✓ ${syncResult.message}"
+                                        Toast.makeText(context, syncResult.message, Toast.LENGTH_SHORT).show()
+                                    }
+                                    is SyncResult.Error -> {
+                                        lastSyncStatus = "✗ ${syncResult.message}"
+                                        Toast.makeText(context, syncResult.message, Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                                isSyncing = false
+                                pendingAction = null
+                            }
+                        }
+                    }
+
+                    fun launchDriveAction(action: String) {
+                        scope.launch {
+                            isSyncing = true
+                            lastSyncStatus = null
+                            pendingAction = action
+
+                            when (val authResult = driveApiHelper.requestDriveAuthorization()) {
+                                is AuthorizationResult.Success -> {
+                                    val syncResult = if (action == "backup") {
+                                        driveSyncManager.backup()
+                                    } else {
+                                        driveSyncManager.restore()
+                                    }
+                                    when (syncResult) {
+                                        is SyncResult.Success -> {
+                                            lastSyncStatus = "✓ ${syncResult.message}"
+                                            Toast.makeText(context, syncResult.message, Toast.LENGTH_SHORT).show()
+                                        }
+                                        is SyncResult.Error -> {
+                                            lastSyncStatus = "✗ ${syncResult.message}"
+                                            Toast.makeText(context, syncResult.message, Toast.LENGTH_LONG).show()
+                                        }
+                                    }
+                                    isSyncing = false
+                                }
+                                is AuthorizationResult.NeedsConsent -> {
+                                    isSyncing = false
+                                    try {
+                                        val intentSenderRequest = IntentSenderRequest.Builder(authResult.pendingIntent).build()
+                                        consentLauncher.launch(intentSenderRequest)
+                                    } catch (e: Exception) {
+                                        lastSyncStatus = "✗ Could not open consent screen"
+                                    }
+                                }
+                                is AuthorizationResult.Error -> {
+                                    lastSyncStatus = "✗ ${authResult.message}"
+                                    isSyncing = false
+                                }
+                            }
+                        }
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp)
+                            .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+                            .padding(20.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "Cloud Sync",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "Backup & restore your library via Google Drive",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.6f),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            Button(
+                                onClick = { launchDriveAction("backup") },
+                                enabled = !isSyncing,
+                                modifier = Modifier.weight(1f).height(48.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF4285F4),
+                                    contentColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                if (isSyncing && pendingAction == "backup") {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(18.dp),
+                                        color = Color.White,
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Text("Backup", fontWeight = FontWeight.Bold)
+                                }
+                            }
+
+                            Button(
+                                onClick = { launchDriveAction("restore") },
+                                enabled = !isSyncing,
+                                modifier = Modifier.weight(1f).height(48.dp),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = Color(0xFF34A853),
+                                    contentColor = Color.White
+                                ),
+                                shape = RoundedCornerShape(12.dp)
+                            ) {
+                                if (isSyncing && pendingAction == "restore") {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(18.dp),
+                                        color = Color.White,
+                                        strokeWidth = 2.dp
+                                    )
+                                } else {
+                                    Text("Restore", fontWeight = FontWeight.Bold)
+                                }
+                            }
+                        }
+
+                        if (lastSyncStatus != null) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = lastSyncStatus!!,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = if (lastSyncStatus!!.startsWith("✓")) Color(0xFF81C784) else Color(0xFFE57373),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -370,7 +534,27 @@ class ProfileScreen : Screen {
                                     val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
                                     val firebaseCredential = GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
                                     FirebaseAuth.getInstance().signInWithCredential(firebaseCredential).addOnCompleteListener { task ->
-                                        if (!task.isSuccessful) {
+                                        if (task.isSuccessful) {
+                                            // Auto-restore: pull library from Google Drive
+                                            Toast.makeText(context, "Signed in! Restoring your library...", Toast.LENGTH_SHORT).show()
+                                            scope.launch {
+                                                try {
+                                                    val authResult = driveApiHelper.requestDriveAuthorization()
+                                                    if (authResult is AuthorizationResult.Success) {
+                                                        when (val syncResult = driveSyncManager.restore()) {
+                                                            is SyncResult.Success -> {
+                                                                Toast.makeText(context, syncResult.message, Toast.LENGTH_LONG).show()
+                                                            }
+                                                            is SyncResult.Error -> {
+                                                                android.util.Log.e("ProfileScreen", "Auto-restore failed: ${syncResult.message}")
+                                                            }
+                                                        }
+                                                    }
+                                                } catch (e: Exception) {
+                                                    android.util.Log.e("ProfileScreen", "Auto-restore error", e)
+                                                }
+                                            }
+                                        } else {
                                             android.util.Log.e("ProfileScreen", "Auth Failed", task.exception)
                                             Toast.makeText(context, "Firebase Auth Failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                                         }
