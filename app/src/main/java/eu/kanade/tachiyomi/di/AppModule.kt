@@ -135,6 +135,10 @@ class AppModule(val app: Application) : InjektModule {
         
         addSingletonFactory { eu.kanade.tachiyomi.data.auth.AuthManager() }
 
+        // Google Drive Sync
+        addSingletonFactory { eu.kanade.tachiyomi.data.sync.DriveApiHelper(app, get<eu.kanade.tachiyomi.network.NetworkHelper>().client) }
+        addSingletonFactory { eu.kanade.tachiyomi.data.sync.DriveSyncManager(app, get()) }
+
         addSingletonFactory { ChapterCache(app, get()) }
         addSingletonFactory { CoverCache(app) }
         addSingletonFactory { LibrarySettingsCache(app) }
