@@ -524,18 +524,6 @@ class ProfileScreen : Screen {
                                     FirebaseAuth.getInstance().signInWithCredential(firebaseCredential).addOnCompleteListener { task ->
                                         if (task.isSuccessful) {
                                             Toast.makeText(context, "Signed in successfully!", Toast.LENGTH_SHORT).show()
-                                            // Check if user has a Firestore profile (username)
-                                            val uid = FirebaseAuth.getInstance().currentUser?.uid
-                                            if (uid != null) {
-                                                scope.launch {
-                                                    val repo = eu.kanade.tachiyomi.data.sync.FirestoreUserRepository()
-                                                    val hasProfile = repo.hasProfile(uid)
-                                                    if (!hasProfile) {
-                                                        // First-time user â€” redirect to Gatekeeper
-                                                        navigator.push(UsernamePickerScreen())
-                                                    }
-                                                }
-                                            }
                                         } else {
                                             android.util.Log.e("ProfileScreen", "Auth Failed", task.exception)
                                             Toast.makeText(context, "Firebase Auth Failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
