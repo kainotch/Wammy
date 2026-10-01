@@ -22,8 +22,8 @@ data class CloudUser(
         const val PRIVATE_COLLECTION = "private"
         const val SETTINGS_DOC = "settings"
 
-        /** Username validation regex: lowercase letter first, then lowercase letters/digits/underscores, 3-20 chars total. */
-        val USERNAME_REGEX = Regex("^[a-z][a-z0-9_]{2,19}$")
+        /** Username validation regex: lowercase letter or number first, then lowercase letters/digits/underscores, 3-20 chars total. */
+        val USERNAME_REGEX = Regex("^[a-z0-9][a-z0-9_]{2,19}$")
 
         /** Reserved usernames that cannot be claimed. */
         val RESERVED_USERNAMES = setOf(
@@ -46,7 +46,7 @@ data class CloudUser(
             return when {
                 username.length < 3 -> "Username must be at least 3 characters"
                 username.length > 20 -> "Username must be 20 characters or less"
-                !USERNAME_REGEX.matches(username) -> "Only lowercase letters, numbers, and underscores allowed. Must start with a letter"
+                !USERNAME_REGEX.matches(username) -> "Only lowercase letters, numbers, and underscores allowed. Cannot start with an underscore"
                 username in RESERVED_USERNAMES -> "This username is reserved"
                 else -> null
             }
