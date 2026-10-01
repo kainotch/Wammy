@@ -100,6 +100,13 @@ data class TrackInfoDialogHomeScreen(
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
         val context = LocalContext.current
+        
+        androidx.compose.runtime.DisposableEffect(Unit) {
+            onDispose {
+                eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleBackup(context)
+            }
+        }
+        
         val viewModel = viewModel<Model>(
             factory = Model.Factory,
             extras = CreationExtras {
