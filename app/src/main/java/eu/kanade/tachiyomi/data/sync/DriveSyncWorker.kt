@@ -59,16 +59,25 @@ class DriveSyncWorker(
             return@withContext Result.success()
         }
 
+        var completed = false
         try {
             if (isRestoreCheck) {
                 doRestoreCheck(driveSyncManager, driveApiHelper, accessToken)
             } else {
                 doBackup(driveSyncManager)
             }
+            completed = true
             Result.success()
         } catch (e: Exception) {
-            logcat(LogPriority.ERROR, e) { "DriveSyncWorker: Failed" }
+            logcat(LogPriority.ERROR, e) { "DriveSyncWorker: Failed or cancelled" }
             Result.failure()
+        } finally {
+            // If the worker was killed by WorkManager (e.g., 10 minute limit) while a notification was showing,
+            // this ensures the notification doesn't get stuck forever on the screen.
+            if (!completed) {
+                context.cancelNotification(NOTIF_ID_BACKUP)
+                context.cancelNotification(NOTIF_ID_RESTORE)
+            }
         }
     }
 
