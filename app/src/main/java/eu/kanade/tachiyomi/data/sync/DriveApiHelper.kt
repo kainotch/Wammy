@@ -133,11 +133,57 @@ class DriveApiHelper(
 
         val body = response.body?.string() ?: return@withContext null
 
-        // Simple JSON parsing — avoid adding a dependency for one field
-        // Response format: {"files":[{"id":"xxx","name":"wammy_sync.json.gz"}]}
-        val idRegex = """"id"\s*:\s*"([^"]+)"""".toRegex()
-        val match = idRegex.find(body)
-        match?.groupValues?.get(1)
+        // Parse all files and prefer the .tachibk file over the old .json.gz
+        try {
+            val files = org.json.JSONObject(body).optJSONArray("files")
+            if (files == null || files.length() == 0) return@withContext null
+
+            // Prefer .tachibk over .json.gz
+            var tachibkId: String? = null
+            var fallbackId: String? = null
+            for (i in 0 until files.length()) {
+                val file = files.getJSONObject(i)
+                val name = file.optString("name")
+                val id = file.optString("id")
+                if (name == SYNC_FILE_NAME) {
+                    tachibkId = id
+                } else {
+                    fallbackId = id
+                }
+            }
+            tachibkId ?: fallbackId
+        } catch (e: Exception) {
+            // Fallback to regex parsing
+            val idRegex = """"id"\s*:\s*"([^"]+)"""".toRegex()
+            idRegex.find(body)?.groupValues?.get(1)
+        }
+    }
+
+    /**
+     * Find ONLY the legacy sync file (wammy_sync.json.gz) for cleanup purposes.
+     * @return The file ID of the legacy file, or null if it doesn't exist.
+     */
+    suspend fun findLegacySyncFile(accessToken: String): String? = withContext(Dispatchers.IO) {
+        val query = java.net.URLEncoder.encode("name='wammy_sync.json.gz'", "UTF-8")
+        val url = "$DRIVE_FILES_URL?spaces=appDataFolder&q=$query&fields=files(id)"
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Bearer $accessToken")
+            .get()
+            .build()
+
+        try {
+            val response = client.newCall(request).execute()
+            if (!response.isSuccessful) return@withContext null
+            val body = response.body?.string() ?: return@withContext null
+            val files = org.json.JSONObject(body).optJSONArray("files")
+            if (files != null && files.length() > 0) {
+                return@withContext files.getJSONObject(0).optString("id")
+            }
+        } catch (e: Exception) {
+            logcat(LogPriority.WARN, e) { "Failed to find legacy sync file" }
+        }
+        null
     }
 
     /**
