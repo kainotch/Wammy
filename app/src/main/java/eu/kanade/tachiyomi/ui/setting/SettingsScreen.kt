@@ -31,6 +31,12 @@ class SettingsScreen(
 
     @Composable
     override fun Content() {
+        val context = androidx.compose.ui.platform.LocalContext.current
+        androidx.compose.runtime.DisposableEffect(Unit) {
+            onDispose {
+                eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleBackup(context)
+            }
+        }
         val parentNavigator = LocalNavigator.currentOrThrow
         if (!isTabletUi()) {
             Navigator(

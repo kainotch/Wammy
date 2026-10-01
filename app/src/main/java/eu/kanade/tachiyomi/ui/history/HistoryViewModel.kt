@@ -143,12 +143,14 @@ class HistoryViewModel(
     fun removeFromHistory(history: HistoryWithRelations) {
         viewModelScope.launchIO {
             removeHistory.await(history)
+            eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleBackup(Injekt.get<android.app.Application>())
         }
     }
 
     fun removeAllFromHistory(mangaId: Long) {
         viewModelScope.launchIO {
             removeHistory.await(mangaId)
+            eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleBackup(Injekt.get<android.app.Application>())
         }
     }
 
@@ -156,6 +158,7 @@ class HistoryViewModel(
         viewModelScope.launchIO {
             val result = removeHistory.awaitAll()
             if (!result) return@launchIO
+            eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleBackup(Injekt.get<android.app.Application>())
             _events.send(Event.HistoryCleared)
         }
     }
