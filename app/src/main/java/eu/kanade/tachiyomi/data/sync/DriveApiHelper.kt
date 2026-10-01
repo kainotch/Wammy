@@ -32,7 +32,7 @@ class DriveApiHelper(
         private const val DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata"
         private const val DRIVE_FILES_URL = "https://www.googleapis.com/drive/v3/files"
         private const val DRIVE_UPLOAD_URL = "https://www.googleapis.com/upload/drive/v3/files"
-        private const val SYNC_FILE_NAME = "wammy_sync.json.gz"
+        private const val SYNC_FILE_NAME = "wammy_backup.tachibk"
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
         private val GZIP_MEDIA_TYPE = "application/gzip".toMediaType()
     }
@@ -86,11 +86,39 @@ class DriveApiHelper(
     }
 
     /**
+     * Gets the last modified time of the sync file in the cloud (ISO 8601 string)
+     */
+    suspend fun getSyncFileModifiedTime(accessToken: String): String? = withContext(Dispatchers.IO) {
+        val query = java.net.URLEncoder.encode("name='wammy_backup.tachibk' or name='wammy_sync.json.gz'", "UTF-8")
+        val url = "$DRIVE_FILES_URL?spaces=appDataFolder&q=$query&fields=files(id,modifiedTime)"
+        val request = Request.Builder()
+            .url(url)
+            .addHeader("Authorization", "Bearer $accessToken")
+            .get()
+            .build()
+
+        try {
+            val response = client.newCall(request).execute()
+            if (!response.isSuccessful) return@withContext null
+            val body = response.body?.string() ?: return@withContext null
+            val files = org.json.JSONObject(body).optJSONArray("files")
+            if (files != null && files.length() > 0) {
+                return@withContext files.getJSONObject(0).optString("modifiedTime")
+            }
+        } catch (e: Exception) {
+            logcat(LogPriority.ERROR, e) { "Failed to fetch file modified time" }
+        }
+        null
+    }
+
+    /**
      * Find the sync file in the appdata folder.
      * @return The file ID, or null if the file doesn't exist yet.
      */
     suspend fun findSyncFile(accessToken: String): String? = withContext(Dispatchers.IO) {
-        val url = "$DRIVE_FILES_URL?spaces=appDataFolder&q=name='$SYNC_FILE_NAME'&fields=files(id,name,modifiedTime)"
+        // Look for either the new or old filename so we don't lose user data from the previous build
+        val query = java.net.URLEncoder.encode("name='wammy_backup.tachibk' or name='wammy_sync.json.gz'", "UTF-8")
+        val url = "$DRIVE_FILES_URL?spaces=appDataFolder&q=$query&fields=files(id,name,modifiedTime)"
         val request = Request.Builder()
             .url(url)
             .addHeader("Authorization", "Bearer $accessToken")

@@ -135,6 +135,11 @@ class MainActivity : BaseActivity() {
         val splashScreen = if (isLaunch) installSplashScreen() else null
 
         super.onCreate(savedInstanceState)
+        
+        // Schedule Google Drive background restore check on app launch
+        eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleRestoreCheck(this)
+        // Also ensure a periodic sync happens every 12 hours as a fallback
+        eu.kanade.tachiyomi.data.sync.DriveSyncWorker.schedulePeriodicBackup(this)
 
         Migrator.awaitAndRelease()
 
