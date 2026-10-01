@@ -112,6 +112,7 @@ class MainActivity : BaseActivity() {
 
     private val libraryPreferences: LibraryPreferences by injectLazy()
     private val preferences: BasePreferences by injectLazy()
+    private val uiPreferences: eu.kanade.domain.ui.UiPreferences by injectLazy()
 
     private val downloadCache: DownloadCache by injectLazy()
     private val chapterCache: ChapterCache by injectLazy()
@@ -157,20 +158,27 @@ class MainActivity : BaseActivity() {
             val downloadOnly by preferences.downloadedOnly.collectAsState()
             val indexing by downloadCache.isInitializing.collectAsState()
 
-            val isSystemInDarkTheme = isSystemInDarkTheme()
+            val themeMode by uiPreferences.themeMode.collectAsState()
+            val isSystemDark = isSystemInDarkTheme()
+            val isDark = when (themeMode) {
+                eu.kanade.domain.ui.model.ThemeMode.LIGHT -> false
+                eu.kanade.domain.ui.model.ThemeMode.DARK -> true
+                eu.kanade.domain.ui.model.ThemeMode.SYSTEM -> isSystemDark
+            }
+            
             val statusBarBackgroundColor = when {
                 indexing -> IndexingBannerBackgroundColor
                 downloadOnly -> DownloadedOnlyBannerBackgroundColor
                 incognito -> IncognitoModeBannerBackgroundColor
                 else -> MaterialTheme.colorScheme.surface
             }
-            LaunchedEffect(isSystemInDarkTheme, statusBarBackgroundColor) {
+            LaunchedEffect(isDark, statusBarBackgroundColor) {
                 // Draw edge-to-edge and set system bars color to transparent
                 val lightStyle = SystemBarStyle.light(Color.TRANSPARENT, Color.BLACK)
                 val darkStyle = SystemBarStyle.dark(Color.TRANSPARENT)
                 enableEdgeToEdge(
                     statusBarStyle = if (statusBarBackgroundColor.luminance() > 0.5) lightStyle else darkStyle,
-                    navigationBarStyle = if (isSystemInDarkTheme) darkStyle else lightStyle,
+                    navigationBarStyle = if (isDark) darkStyle else lightStyle,
                 )
             }
 
