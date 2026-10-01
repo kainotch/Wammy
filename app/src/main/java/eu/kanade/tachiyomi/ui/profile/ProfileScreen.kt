@@ -73,6 +73,47 @@ class ProfileScreen : Screen {
         val driveApiHelper: eu.kanade.tachiyomi.data.sync.DriveApiHelper = Injekt.get()
         var isSyncing by remember { mutableStateOf(false) }
         var lastSyncStatus by remember { mutableStateOf<String?>(null) }
+        var pendingAction by remember { mutableStateOf<String?>(null) }
+
+        val consentLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartIntentSenderForResult()
+        ) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                scope.launch {
+                    isSyncing = true
+                    lastSyncStatus = null
+                    val syncResult = if (pendingAction == "backup") {
+                        driveSyncManager.backup()
+                    } else {
+                        driveSyncManager.restore()
+                    }
+                    when (syncResult) {
+                        is SyncResult.Success -> {
+                            lastSyncStatus = syncResult.message
+                            Toast.makeText(context, syncResult.message, Toast.LENGTH_SHORT).show()
+                        }
+                        is SyncResult.Error -> {
+                            lastSyncStatus = syncResult.message
+                            Toast.makeText(context, syncResult.message, Toast.LENGTH_LONG).show()
+                        }
+                    }
+                    isSyncing = false
+                    pendingAction = null
+                }
+            }
+        }
+        
+        val notificationPermissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { /* Just recording that they answered */ }
+        
+        LaunchedEffect(user) {
+            if (user != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+        }
 
         val webClientId = "997612260567-i7gkfnks53c0tlh9kvfslmml0bnn0lle.apps.googleusercontent.com"
 
@@ -322,35 +363,6 @@ class ProfileScreen : Screen {
                     Spacer(modifier = Modifier.height(32.dp))
 
                     // === Google Drive Sync Section ===
-                    var pendingAction by remember { mutableStateOf<String?>(null) }
-
-                    val consentLauncher = rememberLauncherForActivityResult(
-                        contract = ActivityResultContracts.StartIntentSenderForResult()
-                    ) { result ->
-                        if (result.resultCode == android.app.Activity.RESULT_OK) {
-                            scope.launch {
-                                isSyncing = true
-                                lastSyncStatus = null
-                                val syncResult = if (pendingAction == "backup") {
-                                    driveSyncManager.backup()
-                                } else {
-                                    driveSyncManager.restore()
-                                }
-                                when (syncResult) {
-                                    is SyncResult.Success -> {
-                                        lastSyncStatus = "✓ ${syncResult.message}"
-                                        Toast.makeText(context, syncResult.message, Toast.LENGTH_SHORT).show()
-                                    }
-                                    is SyncResult.Error -> {
-                                        lastSyncStatus = "✗ ${syncResult.message}"
-                                        Toast.makeText(context, syncResult.message, Toast.LENGTH_LONG).show()
-                                    }
-                                }
-                                isSyncing = false
-                                pendingAction = null
-                            }
-                        }
-                    }
 
                     fun launchDriveAction(action: String) {
                         scope.launch {
@@ -539,15 +551,26 @@ class ProfileScreen : Screen {
                                             Toast.makeText(context, "Signed in! Restoring your library...", Toast.LENGTH_SHORT).show()
                                             scope.launch {
                                                 try {
-                                                    val authResult = driveApiHelper.requestDriveAuthorization()
-                                                    if (authResult is AuthorizationResult.Success) {
-                                                        when (val syncResult = driveSyncManager.restore()) {
-                                                            is SyncResult.Success -> {
-                                                                Toast.makeText(context, syncResult.message, Toast.LENGTH_LONG).show()
+                                                    when (val authResult = driveApiHelper.requestDriveAuthorization()) {
+                                                        is AuthorizationResult.Success -> {
+                                                            val syncResult = driveSyncManager.restore()
+                                                            when (syncResult) {
+                                                                is SyncResult.Success -> {
+                                                                    Toast.makeText(context, syncResult.message, Toast.LENGTH_LONG).show()
+                                                                }
+                                                                is SyncResult.Error -> {
+                                                                    android.util.Log.e("ProfileScreen", "Auto-restore failed: ${syncResult.message}")
+                                                                }
                                                             }
-                                                            is SyncResult.Error -> {
-                                                                android.util.Log.e("ProfileScreen", "Auto-restore failed: ${syncResult.message}")
-                                                            }
+                                                        }
+                                                        is AuthorizationResult.NeedsConsent -> {
+                                                            // We need user permission to access Drive! Trigger the popup.
+                                                            pendingAction = "restore"
+                                                            val intentSenderRequest = androidx.activity.result.IntentSenderRequest.Builder(authResult.pendingIntent).build()
+                                                            consentLauncher.launch(intentSenderRequest)
+                                                        }
+                                                        is AuthorizationResult.Error -> {
+                                                            android.util.Log.e("ProfileScreen", "Auto-restore auth error: ${authResult.message}")
                                                         }
                                                     }
                                                 } catch (e: Exception) {
