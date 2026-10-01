@@ -476,6 +476,7 @@ class ProfileScreen : Screen {
                             }
                         }
 
+
                         if (lastSyncStatus != null) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
@@ -483,6 +484,62 @@ class ProfileScreen : Screen {
                                 style = MaterialTheme.typography.bodySmall,
                                 color = if (lastSyncStatus!!.startsWith("✓")) Color(0xFF81C784) else Color(0xFFE57373),
                                 textAlign = TextAlign.Center
+                            )
+                        }
+
+                        // Last synced timestamp
+                        val syncPrefs = context.getSharedPreferences(
+                            eu.kanade.tachiyomi.data.sync.DriveSyncWorker.PREFS_NAME,
+                            android.content.Context.MODE_PRIVATE
+                        )
+                        val lastSyncTime = syncPrefs.getLong(eu.kanade.tachiyomi.data.sync.DriveSyncWorker.KEY_LAST_SYNC_TIME, 0L)
+                        if (lastSyncTime > 0L) {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            val elapsed = System.currentTimeMillis() - lastSyncTime
+                            val timeAgo = when {
+                                elapsed < 60_000 -> "just now"
+                                elapsed < 3_600_000 -> "${elapsed / 60_000} min ago"
+                                elapsed < 86_400_000 -> "${elapsed / 3_600_000}h ago"
+                                else -> "${elapsed / 86_400_000}d ago"
+                            }
+                            Text(
+                                text = "Last synced: $timeAgo",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.5f),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+
+                        // Auto-sync toggle
+                        Spacer(modifier = Modifier.height(12.dp))
+                        var autoSyncEnabled by remember {
+                            mutableStateOf(
+                                syncPrefs.getBoolean(eu.kanade.tachiyomi.data.sync.DriveSyncWorker.KEY_AUTO_SYNC_ENABLED, true)
+                            )
+                        }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Auto-sync",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color.White.copy(alpha = 0.7f)
+                            )
+                            Switch(
+                                checked = autoSyncEnabled,
+                                onCheckedChange = { enabled ->
+                                    autoSyncEnabled = enabled
+                                    syncPrefs.edit().putBoolean(
+                                        eu.kanade.tachiyomi.data.sync.DriveSyncWorker.KEY_AUTO_SYNC_ENABLED,
+                                        enabled
+                                    ).apply()
+                                },
+                                colors = SwitchDefaults.colors(
+                                    checkedThumbColor = Color(0xFF4285F4),
+                                    checkedTrackColor = Color(0xFF4285F4).copy(alpha = 0.5f)
+                                )
                             )
                         }
                     }

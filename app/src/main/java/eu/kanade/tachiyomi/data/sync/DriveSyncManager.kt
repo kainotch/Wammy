@@ -15,6 +15,7 @@ import kotlinx.coroutines.withContext
 import logcat.LogPriority
 import tachiyomi.core.common.util.system.logcat
 import java.io.File
+import java.security.MessageDigest
 
 /**
  * Orchestrates Google Drive cloud sync using the existing tachibk backup system.
@@ -70,8 +71,22 @@ class DriveSyncManager(
                     return@withContext SyncResult.Error("Failed to create backup: ${e.message}")
                 }
 
-                // 2. Read the bytes and upload to Drive
+                // 2. Read the bytes and check if anything actually changed
                 val backupBytes = tempFile.readBytes()
+                
+                // Hash check: skip upload if backup is identical to the last one
+                val newHash = MessageDigest.getInstance("SHA-256")
+                    .digest(backupBytes)
+                    .joinToString("") { "%02x".format(it) }
+                val prefs = context.getSharedPreferences("wammy_sync_prefs", Context.MODE_PRIVATE)
+                val lastHash = prefs.getString("last_backup_hash", null)
+                
+                if (newHash == lastHash) {
+                    logcat(LogPriority.INFO) { "DriveSync: Backup unchanged (hash match), skipping upload" }
+                    tempFile.delete()
+                    return@withContext SyncResult.Success("Already up to date")
+                }
+                
                 val existingFileId = driveApiHelper.findSyncFile(accessToken)
 
                 val uploadedFileId = driveApiHelper.uploadSyncFile(
@@ -85,6 +100,13 @@ class DriveSyncManager(
 
                 if (uploadedFileId != null) {
                     logcat(LogPriority.INFO) { "DriveSync: Upload complete (${backupBytes.size} bytes)" }
+                    
+                    // Save hash so we can skip identical uploads next time
+                    prefs.edit().putString("last_backup_hash", newHash).apply()
+                    
+                    // Clean up legacy sync file if it still exists
+                    cleanupLegacyFile(accessToken)
+                    
                     SyncResult.Success("Backup uploaded to Google Drive")
                 } else {
                     SyncResult.Error("Failed to upload backup to Google Drive")
@@ -152,6 +174,24 @@ class DriveSyncManager(
                 logcat(LogPriority.ERROR, e) { "DriveSync: Fatal error during restore" }
                 SyncResult.Error(e.message ?: "Unknown restore error")
             }
+        }
+    }
+    /**
+     * Delete the old legacy sync file (wammy_sync.json.gz) if it still exists on Drive.
+     * This is a one-time cleanup — once deleted, the query will never find it again.
+     */
+    private suspend fun cleanupLegacyFile(accessToken: String) {
+        try {
+            val legacyFileId = driveApiHelper.findLegacySyncFile(accessToken)
+            if (legacyFileId != null) {
+                val deleted = driveApiHelper.deleteSyncFile(accessToken, legacyFileId)
+                if (deleted) {
+                    logcat(LogPriority.INFO) { "DriveSync: Cleaned up legacy wammy_sync.json.gz" }
+                }
+            }
+        } catch (e: Exception) {
+            // Non-critical — just log and move on
+            logcat(LogPriority.WARN, e) { "DriveSync: Failed to cleanup legacy file (non-critical)" }
         }
     }
 }

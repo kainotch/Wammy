@@ -162,6 +162,10 @@ class ReaderViewModel @JvmOverloads constructor(
 
     val hasValidArgs = mangaId != -1L && initialChapterId != -1L
 
+    /** Tracks whether reading progress actually changed during this session (for smart auto-sync) */
+    var hasProgressChanged = false
+        private set
+
     private val eventChannel = Channel<Event>()
     val eventFlow = eventChannel.receiveAsFlow()
 
@@ -964,6 +968,7 @@ class ReaderViewModel @JvmOverloads constructor(
         }
         readerChapter.requestedPage = pageIndex
         chapterPageIndex = pageIndex
+        hasProgressChanged = true
 
         if (!incognitoMode && page.status !is Page.State.Error) {
             readerChapter.chapter.last_page_read = pageIndex
