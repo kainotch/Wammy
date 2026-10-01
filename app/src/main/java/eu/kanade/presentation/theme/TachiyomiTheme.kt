@@ -1,4 +1,4 @@
-﻿package eu.kanade.presentation.theme
+package eu.kanade.presentation.theme
 
 import android.content.Context
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -43,9 +43,11 @@ fun TachiyomiTheme(
     val uiPreferences = Injekt.get<UiPreferences>()
     val prefAppTheme by uiPreferences.appTheme.collectAsState()
     val prefIsAmoled by uiPreferences.themeDarkAmoled.collectAsState()
+    val themeMode by uiPreferences.themeMode.collectAsState()
     BaseTachiyomiTheme(
         appTheme = appTheme ?: prefAppTheme,
         isAmoled = amoled ?: prefIsAmoled,
+        themeMode = themeMode,
         seedColor = seedColor,
         content = content,
     )
@@ -56,17 +58,23 @@ fun TachiyomiPreviewTheme(
     appTheme: AppTheme = AppTheme.DEFAULT,
     isAmoled: Boolean = false,
     content: @Composable () -> Unit,
-) = BaseTachiyomiTheme(appTheme, isAmoled, content = content)
+) = BaseTachiyomiTheme(appTheme, isAmoled, eu.kanade.domain.ui.model.ThemeMode.SYSTEM, content = content)
 
 @Composable
 private fun BaseTachiyomiTheme(
     appTheme: AppTheme,
     isAmoled: Boolean,
+    themeMode: eu.kanade.domain.ui.model.ThemeMode,
     seedColor: Int? = null,
     content: @Composable () -> Unit,
 ) {
     val context = LocalContext.current
-    val isDark = isSystemInDarkTheme()
+    val isSystemDark = isSystemInDarkTheme()
+    val isDark = when (themeMode) {
+        eu.kanade.domain.ui.model.ThemeMode.LIGHT -> false
+        eu.kanade.domain.ui.model.ThemeMode.DARK -> true
+        eu.kanade.domain.ui.model.ThemeMode.SYSTEM -> isSystemDark
+    }
     MaterialExpressiveTheme(
         colorScheme = remember(appTheme, isDark, isAmoled, seedColor) {
             if (seedColor != null) {

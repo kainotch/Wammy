@@ -73,6 +73,9 @@ class ProfileScreen : Screen {
         val user by authManager.currentUser.collectAsState()
 
         
+        var cloudUser by remember { mutableStateOf<eu.kanade.tachiyomi.data.sync.CloudUser?>(null) }
+        val repo = remember { eu.kanade.tachiyomi.data.sync.FirestoreUserRepository() }
+
         val notificationPermissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
         ) { /* Just recording that they answered */ }
@@ -82,6 +85,35 @@ class ProfileScreen : Screen {
                 if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
                     notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
                 }
+            }
+            // Check if logged-in user has a Firestore profile (username)
+            // If not, redirect to Gatekeeper
+            if (user != null) {
+                val uid = user?.uid
+                if (uid != null) {
+                    val hasProfile = repo.hasProfile(uid)
+                    if (!hasProfile) {
+                        navigator.push(UsernamePickerScreen())
+                    }
+                }
+            }
+        }
+
+        DisposableEffect(user) {
+            var listener: com.google.firebase.firestore.ListenerRegistration? = null
+            if (user != null) {
+                val uid = user!!.uid
+                listener = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                    .collection(eu.kanade.tachiyomi.data.sync.CloudUser.COLLECTION)
+                    .document(uid)
+                    .addSnapshotListener { snapshot, error ->
+                        if (error == null && snapshot != null && snapshot.exists()) {
+                            cloudUser = snapshot.toObject(eu.kanade.tachiyomi.data.sync.CloudUser::class.java)
+                        }
+                    }
+            }
+            onDispose {
+                listener?.remove()
             }
         }
 
@@ -190,12 +222,21 @@ class ProfileScreen : Screen {
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = user?.displayName ?: "Unknown User",
-                                style = MaterialTheme.typography.titleLarge,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Column {
+                                Text(
+                                    text = user?.displayName ?: "Unknown User",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                if (cloudUser?.username != null) {
+                                    Text(
+                                        text = "@${cloudUser!!.username}",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = Color.White.copy(alpha = 0.7f)
+                                    )
+                                }
+                            }
                             Spacer(modifier = Modifier.width(16.dp))
                             Surface(
                                 color = Color.White.copy(alpha = 0.15f),
@@ -215,8 +256,21 @@ class ProfileScreen : Screen {
                     Spacer(modifier = Modifier.height(24.dp))
                         if (showEditDialog) {
                             var newName by remember { mutableStateOf(user?.displayName ?: "") }
+                            var newUsername by remember(cloudUser) { mutableStateOf(cloudUser?.username ?: "") }
                             var newPhotoUrl by remember { mutableStateOf(user?.photoUrl?.toString() ?: "") }
+                            var usernameError by remember { mutableStateOf<String?>(null) }
                             var isUpdating by remember { mutableStateOf(false) }
+                            
+                            var isOnCooldown = false
+                            var cooldownDaysLeft = 0
+                            cloudUser?.usernameChangedAt?.let { changedAt ->
+                                val elapsedMs = System.currentTimeMillis() - (changedAt.seconds * 1000L)
+                                val cooldownMs = eu.kanade.tachiyomi.data.sync.CloudUser.USERNAME_CHANGE_COOLDOWN_MS
+                                if (elapsedMs < cooldownMs) {
+                                    isOnCooldown = true
+                                    cooldownDaysLeft = ((cooldownMs - elapsedMs) / (1000L * 60 * 60 * 24)).toInt().coerceAtLeast(1)
+                                }
+                            }
                             
                             val photoPickerLauncher = rememberLauncherForActivityResult(
                                 contract = ActivityResultContracts.PickVisualMedia()
@@ -244,8 +298,27 @@ class ProfileScreen : Screen {
                                         OutlinedTextField(
                                             value = newName,
                                             onValueChange = { newName = it },
-                                            label = { Text("Name") },
+                                            label = { Text("Display Name") },
                                             singleLine = true
+                                        )
+                                        OutlinedTextField(
+                                            value = newUsername,
+                                            onValueChange = { 
+                                                val cleaned = it.lowercase().filter { c -> c.isLetterOrDigit() || c == '_' }
+                                                newUsername = cleaned
+                                                usernameError = eu.kanade.tachiyomi.data.sync.CloudUser.validateUsername(cleaned)
+                                            },
+                                            label = { Text("Username") },
+                                            singleLine = true,
+                                            enabled = !isOnCooldown,
+                                            isError = usernameError != null,
+                                            supportingText = { 
+                                                if (isOnCooldown) {
+                                                    Text("You can change your username in $cooldownDaysLeft days", color = MaterialTheme.colorScheme.error)
+                                                } else {
+                                                    usernameError?.let { msg -> Text(msg) }
+                                                }
+                                            }
                                         )
                                         
                                         Column {
@@ -279,6 +352,26 @@ class ProfileScreen : Screen {
                                     TextButton(
                                         onClick = {
                                             isUpdating = true
+                                            
+                                            // Helper function to update Firestore after Auth succeeds
+                                            fun updateFirestoreAndFinish(finalPhotoUrl: String) {
+                                                scope.launch {
+                                                    val uid = user?.uid
+                                                    if (uid != null) {
+                                                        repo.updateProfile(uid, displayName = newName, avatarUrl = finalPhotoUrl.ifEmpty { null })
+                                                        if (cloudUser?.username != newUsername && newUsername.isNotEmpty()) {
+                                                            val renameResult = repo.renameUsername(uid, cloudUser?.username ?: "", newUsername)
+                                                            if (renameResult.isFailure) {
+                                                                Toast.makeText(context, "Username error: ${renameResult.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                                                            }
+                                                        }
+                                                        cloudUser = repo.getUser(uid)
+                                                    }
+                                                    isUpdating = false
+                                                    showEditDialog = false
+                                                }
+                                            }
+
                                             if (newPhotoUrl.startsWith("file://")) {
                                                 val fileUri = android.net.Uri.parse(newPhotoUrl)
                                                 val file = java.io.File(fileUri.path!!)
@@ -298,7 +391,7 @@ class ProfileScreen : Screen {
                                                             .build()
                                                             
                                                         val response = client.newCall(request).execute()
-                                                        val responseUrl = response.body?.string() ?: ""
+                                                        val responseUrl = response.body?.string()?.trim() ?: ""
                                                         
                                                         withContext(Dispatchers.Main) {
                                                             if (response.isSuccessful && responseUrl.startsWith("http")) {
@@ -307,9 +400,11 @@ class ProfileScreen : Screen {
                                                                     photoUri = android.net.Uri.parse(responseUrl)
                                                                 }
                                                                 user?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
-                                                                    isUpdating = false
-                                                                    showEditDialog = false
-                                                                    if (!task.isSuccessful) {
+                                                                    if (task.isSuccessful) {
+                                                                        updateFirestoreAndFinish(responseUrl)
+                                                                    } else {
+                                                                        isUpdating = false
+                                                                        showEditDialog = false
                                                                         Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
                                                                     }
                                                                 }
@@ -333,15 +428,17 @@ class ProfileScreen : Screen {
                                                     }
                                                 }
                                                 user?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
-                                                    isUpdating = false
-                                                    showEditDialog = false
-                                                    if (!task.isSuccessful) {
+                                                    if (task.isSuccessful) {
+                                                        updateFirestoreAndFinish(newPhotoUrl)
+                                                    } else {
+                                                        isUpdating = false
+                                                        showEditDialog = false
                                                         Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
                                                     }
                                                 }
                                             }
                                         },
-                                        enabled = !isUpdating
+                                        enabled = !isUpdating && usernameError == null
                                     ) {
                                         if (isUpdating) {
                                             CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
@@ -427,6 +524,18 @@ class ProfileScreen : Screen {
                                     FirebaseAuth.getInstance().signInWithCredential(firebaseCredential).addOnCompleteListener { task ->
                                         if (task.isSuccessful) {
                                             Toast.makeText(context, "Signed in successfully!", Toast.LENGTH_SHORT).show()
+                                            // Check if user has a Firestore profile (username)
+                                            val uid = FirebaseAuth.getInstance().currentUser?.uid
+                                            if (uid != null) {
+                                                scope.launch {
+                                                    val repo = eu.kanade.tachiyomi.data.sync.FirestoreUserRepository()
+                                                    val hasProfile = repo.hasProfile(uid)
+                                                    if (!hasProfile) {
+                                                        // First-time user â€” redirect to Gatekeeper
+                                                        navigator.push(UsernamePickerScreen())
+                                                    }
+                                                }
+                                            }
                                         } else {
                                             android.util.Log.e("ProfileScreen", "Auth Failed", task.exception)
                                             Toast.makeText(context, "Firebase Auth Failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
