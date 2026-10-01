@@ -17,7 +17,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.foundation.clickable
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.MultipartBody
@@ -122,39 +124,48 @@ class ProfileScreen : Screen {
                     ) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
                     }
-                    var showMenu by remember { mutableStateOf(false) }
+                    @OptIn(ExperimentalMaterial3Api::class)
+                    var showBottomSheet by remember { mutableStateOf(false) }
+                    
                     Box {
                         IconButton(
-                            onClick = { showMenu = true },
+                            onClick = { showBottomSheet = true },
                             modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
                         ) {
-                            Icon(Icons.Default.MoreHoriz, contentDescription = "Options", tint = Color.White)
+                            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.White)
                         }
-                        DropdownMenu(
-                            expanded = showMenu,
-                            onDismissRequest = { showMenu = false }
+                    }
+                    
+                    if (showBottomSheet) {
+                        @OptIn(ExperimentalMaterial3Api::class)
+                        ModalBottomSheet(
+                            onDismissRequest = { showBottomSheet = false },
+                            containerColor = MaterialTheme.colorScheme.surface
                         ) {
-                            DropdownMenuItem(
-                                text = { Text("Edit Profile") },
-                                onClick = { 
-                                    showMenu = false
-                                    showEditDialog = true
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Settings") },
-                                onClick = { 
-                                    showMenu = false
-                                    navigator.push(eu.kanade.tachiyomi.ui.setting.SettingsScreen())
-                                }
-                            )
-                            DropdownMenuItem(
-                                text = { Text("Cloud Sync") },
-                                onClick = { 
-                                    showMenu = false
-                                    navigator.push(CloudSyncScreen())
-                                }
-                            )
+                            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp)) {
+                                ListItem(
+                                    headlineContent = { Text("Settings") },
+                                    modifier = Modifier.clickable { 
+                                        showBottomSheet = false
+                                        navigator.push(eu.kanade.tachiyomi.ui.setting.SettingsScreen())
+                                    }
+                                )
+                                ListItem(
+                                    headlineContent = { Text("Cloud Sync") },
+                                    modifier = Modifier.clickable { 
+                                        showBottomSheet = false
+                                        navigator.push(CloudSyncScreen())
+                                    }
+                                )
+                                ListItem(
+                                    headlineContent = { Text("Sign Out", color = MaterialTheme.colorScheme.error) },
+                                    modifier = Modifier.clickable { 
+                                        showBottomSheet = false
+                                        authManager.signOut()
+                                        navigator.pop()
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -164,44 +175,44 @@ class ProfileScreen : Screen {
                         .fillMaxSize()
                         .padding(top = 100.dp)
                         .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.Start
                 ) {
                     Spacer(modifier = Modifier.height(32.dp))
-                    Row(
+                    Column(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
+                        horizontalAlignment = Alignment.Start
                     ) {
                         AsyncImage(
                             model = user?.photoUrl?.toString()?.replace("s96-c", "s192-c"),
                             contentDescription = "Profile Picture",
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(64.dp).clip(CircleShape)
+                            modifier = Modifier.size(80.dp).clip(CircleShape)
                         )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column(horizontalAlignment = Alignment.Start) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = user?.displayName ?: "Unknown User",
-                                style = MaterialTheme.typography.displaySmall,
+                                style = MaterialTheme.typography.titleLarge,
                                 color = Color.White,
                                 fontWeight = FontWeight.Bold
                             )
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Surface(
+                                color = Color.White.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(16.dp),
+                                onClick = { showEditDialog = true }
+                            ) {
+                                Text(
+                                    text = "Edit",
+                                    color = Color.White,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(24.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Button(
-                            onClick = { authManager.signOut(); navigator.pop() },
-                            modifier = Modifier.weight(1f).height(50.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
-                            shape = RoundedCornerShape(25.dp)
-                        ) {
-                            Text("Sign Out", fontWeight = FontWeight.Bold)
-                        }
-
                         if (showEditDialog) {
                             var newName by remember { mutableStateOf(user?.displayName ?: "") }
                             var newPhotoUrl by remember { mutableStateOf(user?.photoUrl?.toString() ?: "") }
@@ -351,7 +362,6 @@ class ProfileScreen : Screen {
                                 }
                             )
                         }
-                    }
                     Spacer(modifier = Modifier.height(32.dp))
 
 
