@@ -73,7 +73,7 @@ class TrackerManager {
      * Trackers that are only for manga (no novel support).
      * These should be hidden when tracking novels.
      */
-    val mangaOnlyTrackers = listOf(komga, kavita, suwayomi, hikka)
+    val mangaOnlyTrackers = listOf(kitsu, shikimori, bangumi, komga, kavita, suwayomi, hikka)
 
     /**
      * Trackers that are only for novels.

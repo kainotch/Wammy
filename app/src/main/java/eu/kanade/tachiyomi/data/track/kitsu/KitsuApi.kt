@@ -163,6 +163,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
                     .awaitSuccess()
                     .parseAs<KitsuAlgoliaSearchResult>()
                     .hits
+                    .filter { it.subtype != "novel" }
                     .map { it.toTrack() }
             }
         }
