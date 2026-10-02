@@ -44,13 +44,14 @@ class FirestoreUserRepository {
 
     /**
      * Checks if a username is available (not yet claimed).
+     * Returns a tri-state: Available, Taken, or Error (so the UI can distinguish network errors).
      */
-    suspend fun isUsernameAvailable(username: String): Boolean {
+    suspend fun checkUsernameAvailability(username: String): UsernameAvailability {
         return try {
             val doc = usernamesCollection.document(username).get().await()
-            !doc.exists()
+            if (doc.exists()) UsernameAvailability.Taken else UsernameAvailability.Available
         } catch (e: Exception) {
-            false
+            UsernameAvailability.Error(e.message ?: "Could not check availability")
         }
     }
 
@@ -269,4 +270,14 @@ class FirestoreUserRepository {
             Result.failure(e)
         }
     }
+}
+
+/**
+ * Tri-state result for username availability checks.
+ * Prevents ghost "username taken" errors when the real issue is a network/permission error.
+ */
+sealed class UsernameAvailability {
+    data object Available : UsernameAvailability()
+    data object Taken : UsernameAvailability()
+    data class Error(val message: String) : UsernameAvailability()
 }
