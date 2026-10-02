@@ -45,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.CustomCredential
+import eu.kanade.tachiyomi.data.sync.DriveApiHelper
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -75,10 +76,21 @@ class ProfileScreen : Screen {
         
         var cloudUser by remember { mutableStateOf<eu.kanade.tachiyomi.data.sync.CloudUser?>(null) }
         val repo = remember { eu.kanade.tachiyomi.data.sync.FirestoreUserRepository() }
+        val driveApiHelper: DriveApiHelper = remember { Injekt.get() }
 
         val notificationPermissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
         ) { /* Just recording that they answered */ }
+
+        val driveConsentLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartIntentSenderForResult()
+        ) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                // If they successfully authorized Drive, trigger the restore check!
+                eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleRestoreCheck(context)
+                Toast.makeText(context, "Google Drive connected! Checking for restore...", Toast.LENGTH_SHORT).show()
+            }
+        }
         
         LaunchedEffect(user) {
             if (user != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
@@ -524,6 +536,24 @@ class ProfileScreen : Screen {
                                     FirebaseAuth.getInstance().signInWithCredential(firebaseCredential).addOnCompleteListener { task ->
                                         if (task.isSuccessful) {
                                             Toast.makeText(context, "Signed in successfully!", Toast.LENGTH_SHORT).show()
+                                            
+                                            // Request Google Drive permission for sync immediately after login
+                                            scope.launch {
+                                                when (val authResult = driveApiHelper.requestDriveAuthorization()) {
+                                                    is AuthorizationResult.NeedsConsent -> {
+                                                        // New device/account -> prompt for Drive permission
+                                                        val intentSenderRequest = IntentSenderRequest.Builder(authResult.pendingIntent).build()
+                                                        driveConsentLauncher.launch(intentSenderRequest)
+                                                    }
+                                                    is AuthorizationResult.Success -> {
+                                                        // Already authorized (silently got token) -> trigger restore check now!
+                                                        eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleRestoreCheck(context)
+                                                    }
+                                                    is AuthorizationResult.Error -> {
+                                                        android.util.Log.e("ProfileScreen", "Drive Auth Error: ${authResult.message}")
+                                                    }
+                                                }
+                                            }
                                         } else {
                                             android.util.Log.e("ProfileScreen", "Auth Failed", task.exception)
                                             Toast.makeText(context, "Firebase Auth Failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
