@@ -12,8 +12,10 @@ import logcat.LogPriority
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okio.IOException
+import okio.source
 import tachiyomi.core.common.util.system.logcat
 
 /**
@@ -98,12 +100,13 @@ class DriveApiHelper(
             .build()
 
         try {
-            val response = client.newCall(request).execute()
-            if (!response.isSuccessful) return@withContext null
-            val body = response.body?.string() ?: return@withContext null
-            val files = org.json.JSONObject(body).optJSONArray("files")
-            if (files != null && files.length() > 0) {
-                return@withContext files.getJSONObject(0).optString("modifiedTime")
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return@withContext null
+                val body = response.body?.string() ?: return@withContext null
+                val files = org.json.JSONObject(body).optJSONArray("files")
+                if (files != null && files.length() > 0) {
+                    return@withContext files.getJSONObject(0).optString("modifiedTime")
+                }
             }
         } catch (e: Exception) {
             logcat(LogPriority.ERROR, e) { "Failed to fetch file modified time" }
@@ -125,13 +128,13 @@ class DriveApiHelper(
             .get()
             .build()
 
-        val response = client.newCall(request).execute()
-        if (!response.isSuccessful) {
-            logcat(LogPriority.ERROR) { "Drive findSyncFile failed: ${response.code}" }
-            return@withContext null
+        val body = client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                logcat(LogPriority.ERROR) { "Drive findSyncFile failed: ${response.code}" }
+                return@withContext null
+            }
+            response.body?.string() ?: return@withContext null
         }
-
-        val body = response.body?.string() ?: return@withContext null
 
         // Parse all files and prefer the .tachibk file over the old .json.gz
         try {
@@ -173,12 +176,13 @@ class DriveApiHelper(
             .build()
 
         try {
-            val response = client.newCall(request).execute()
-            if (!response.isSuccessful) return@withContext null
-            val body = response.body?.string() ?: return@withContext null
-            val files = org.json.JSONObject(body).optJSONArray("files")
-            if (files != null && files.length() > 0) {
-                return@withContext files.getJSONObject(0).optString("id")
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) return@withContext null
+                val body = response.body?.string() ?: return@withContext null
+                val files = org.json.JSONObject(body).optJSONArray("files")
+                if (files != null && files.length() > 0) {
+                    return@withContext files.getJSONObject(0).optString("id")
+                }
             }
         } catch (e: Exception) {
             logcat(LogPriority.WARN, e) { "Failed to find legacy sync file" }
@@ -187,10 +191,10 @@ class DriveApiHelper(
     }
 
     /**
-     * Download the sync file from Drive.
-     * @return The gzipped bytes, or null on failure.
+     * Download the sync file from Drive directly to a temp file (streaming, avoids OOM).
+     * @return The temp file containing the backup, or null on failure.
      */
-    suspend fun downloadSyncFile(accessToken: String, fileId: String): ByteArray? = withContext(Dispatchers.IO) {
+    suspend fun downloadSyncFileToFile(accessToken: String, fileId: String): java.io.File? = withContext(Dispatchers.IO) {
         val url = "$DRIVE_FILES_URL/$fileId?alt=media"
         val request = Request.Builder()
             .url(url)
@@ -199,12 +203,19 @@ class DriveApiHelper(
             .build()
 
         try {
-            val response = client.newCall(request).execute()
-            if (!response.isSuccessful) {
-                logcat(LogPriority.ERROR) { "Drive download failed: ${response.code}" }
-                return@withContext null
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) {
+                    logcat(LogPriority.ERROR) { "Drive download failed: ${response.code}" }
+                    return@withContext null
+                }
+                val tempFile = java.io.File(context.cacheDir, "wammy_drive_download.tachibk")
+                response.body?.byteStream()?.use { inputStream ->
+                    tempFile.outputStream().use { outputStream ->
+                        inputStream.copyTo(outputStream)
+                    }
+                } ?: return@withContext null
+                tempFile
             }
-            response.body?.bytes()
         } catch (e: IOException) {
             logcat(LogPriority.ERROR, e) { "Drive download IOException" }
             null
@@ -212,23 +223,23 @@ class DriveApiHelper(
     }
 
     /**
-     * Upload (create or update) the sync file in the appdata folder.
-     * @param data The gzipped payload bytes.
+     * Upload (create or update) the sync file in the appdata folder using streaming.
+     * @param file The backup file to upload.
      * @param existingFileId If non-null, updates the existing file. Otherwise creates a new one.
      * @return The file ID of the created/updated file, or null on failure.
      */
     suspend fun uploadSyncFile(
         accessToken: String,
-        data: ByteArray,
+        file: java.io.File,
         existingFileId: String? = null,
     ): String? = withContext(Dispatchers.IO) {
         try {
             if (existingFileId != null) {
                 // Update existing file (simple upload)
-                updateFile(accessToken, existingFileId, data)
+                updateFile(accessToken, existingFileId, file)
             } else {
                 // Create new file (multipart upload with metadata)
-                createFile(accessToken, data)
+                createFile(accessToken, file)
             }
         } catch (e: Exception) {
             logcat(LogPriority.ERROR, e) { "Drive upload failed" }
@@ -236,51 +247,75 @@ class DriveApiHelper(
         }
     }
 
-    private fun createFile(accessToken: String, data: ByteArray): String? {
-        // Multipart upload: metadata + content
+    private fun createFile(accessToken: String, file: java.io.File): String? {
+        // Multipart upload: metadata + content (streams file directly)
         val boundary = "wammy_sync_boundary"
         val metadata = """{"name":"$SYNC_FILE_NAME","parents":["appDataFolder"]}"""
 
-        val multipartBody = buildString {
+        val metadataPart = buildString {
             append("--$boundary\r\n")
             append("Content-Type: application/json; charset=UTF-8\r\n\r\n")
             append(metadata)
             append("\r\n--$boundary\r\n")
             append("Content-Type: application/gzip\r\n")
             append("Content-Transfer-Encoding: binary\r\n\r\n")
-        }.toByteArray() + data + "\r\n--$boundary--\r\n".toByteArray()
+        }.toByteArray()
+        val endBoundary = "\r\n--$boundary--\r\n".toByteArray()
+
+        val multipartBody = object : RequestBody() {
+            override fun contentType() = "multipart/related; boundary=$boundary".toMediaType()
+            override fun contentLength() = metadataPart.size.toLong() + file.length() + endBoundary.size.toLong()
+            override fun writeTo(sink: okio.BufferedSink) {
+                sink.write(metadataPart)
+                file.source().use { source ->
+                    sink.writeAll(source)
+                }
+                sink.write(endBoundary)
+            }
+        }
 
         val request = Request.Builder()
             .url("$DRIVE_UPLOAD_URL?uploadType=multipart")
             .addHeader("Authorization", "Bearer $accessToken")
-            .post(multipartBody.toRequestBody("multipart/related; boundary=$boundary".toMediaType()))
+            .post(multipartBody)
             .build()
 
-        val response = client.newCall(request).execute()
-        if (!response.isSuccessful) {
-            logcat(LogPriority.ERROR) { "Drive create failed: ${response.code} ${response.body?.string()}" }
-            return null
-        }
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                logcat(LogPriority.ERROR) { "Drive create failed: ${response.code} ${response.body?.string()}" }
+                return null
+            }
 
-        val body = response.body?.string() ?: return null
-        val idRegex = """"id"\s*:\s*"([^"]+)"""".toRegex()
-        return idRegex.find(body)?.groupValues?.get(1)
+            val body = response.body?.string() ?: return null
+            val idRegex = """"id"\s*:\s*"([^"]+)"""".toRegex()
+            return idRegex.find(body)?.groupValues?.get(1)
+        }
     }
 
-    private fun updateFile(accessToken: String, fileId: String, data: ByteArray): String? {
+    private fun updateFile(accessToken: String, fileId: String, file: java.io.File): String? {
+        val streamBody = object : RequestBody() {
+            override fun contentType() = GZIP_MEDIA_TYPE
+            override fun contentLength() = file.length()
+            override fun writeTo(sink: okio.BufferedSink) {
+                file.source().use { source ->
+                    sink.writeAll(source)
+                }
+            }
+        }
+
         val request = Request.Builder()
             .url("$DRIVE_UPLOAD_URL/$fileId?uploadType=media")
             .addHeader("Authorization", "Bearer $accessToken")
-            .patch(data.toRequestBody(GZIP_MEDIA_TYPE))
+            .patch(streamBody)
             .build()
 
-        val response = client.newCall(request).execute()
-        if (!response.isSuccessful) {
-            logcat(LogPriority.ERROR) { "Drive update failed: ${response.code} ${response.body?.string()}" }
-            return null
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) {
+                logcat(LogPriority.ERROR) { "Drive update failed: ${response.code} ${response.body?.string()}" }
+                return null
+            }
+            return fileId
         }
-
-        return fileId
     }
 
     /**
@@ -293,8 +328,9 @@ class DriveApiHelper(
             .delete()
             .build()
 
-        val response = client.newCall(request).execute()
-        response.isSuccessful
+        client.newCall(request).execute().use { response ->
+            response.isSuccessful
+        }
     }
 }
 

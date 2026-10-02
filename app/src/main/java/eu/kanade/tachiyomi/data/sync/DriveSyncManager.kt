@@ -71,41 +71,57 @@ class DriveSyncManager(
                     return@withContext SyncResult.Error("Failed to create backup: ${e.message}")
                 }
 
-                // 2. Read the bytes and check if anything actually changed
-                val backupBytes = tempFile.readBytes()
+                // 2. Hash check: skip upload if backup is identical to the last one
+                //    Stream the file through the digest to avoid loading it all into RAM
+                val newHash = try {
+                    val digest = MessageDigest.getInstance("SHA-256")
+                    tempFile.inputStream().use { inputStream ->
+                        val buffer = ByteArray(8192)
+                        var bytesRead: Int
+                        while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                            digest.update(buffer, 0, bytesRead)
+                        }
+                    }
+                    digest.digest().joinToString("") { "%02x".format(it) }
+                } catch (e: Exception) {
+                    null // If hashing fails, just upload anyway
+                }
                 
-                // Hash check: skip upload if backup is identical to the last one
-                val newHash = MessageDigest.getInstance("SHA-256")
-                    .digest(backupBytes)
-                    .joinToString("") { "%02x".format(it) }
                 val prefs = context.getSharedPreferences("wammy_sync_prefs", Context.MODE_PRIVATE)
                 val lastHash = prefs.getString("last_backup_hash", null)
                 
-                if (newHash == lastHash) {
+                if (newHash != null && newHash == lastHash) {
                     logcat(LogPriority.INFO) { "DriveSync: Backup unchanged (hash match), skipping upload" }
                     tempFile.delete()
                     return@withContext SyncResult.Success("Already up to date")
                 }
-                
-                val existingFileId = driveApiHelper.findSyncFile(accessToken)
+
+                // 3. Get a FRESH token right before upload (the old one may have expired during backup creation)
+                val uploadToken = driveApiHelper.getAccessToken()
+                    ?: return@withContext SyncResult.Error("Drive authorization expired. Please try again.")
+
+                val existingFileId = driveApiHelper.findSyncFile(uploadToken)
 
                 val uploadedFileId = driveApiHelper.uploadSyncFile(
-                    accessToken = accessToken,
-                    data = backupBytes,
+                    accessToken = uploadToken,
+                    file = tempFile,
                     existingFileId = existingFileId,
                 )
 
-                // 3. Clean up temp file
+                // 4. Clean up temp file
+                val uploadedSize = tempFile.length()
                 tempFile.delete()
 
                 if (uploadedFileId != null) {
-                    logcat(LogPriority.INFO) { "DriveSync: Upload complete (${backupBytes.size} bytes)" }
+                    logcat(LogPriority.INFO) { "DriveSync: Upload complete ($uploadedSize bytes)" }
                     
                     // Save hash so we can skip identical uploads next time
-                    prefs.edit().putString("last_backup_hash", newHash).apply()
+                    if (newHash != null) {
+                        prefs.edit().putString("last_backup_hash", newHash).apply()
+                    }
                     
                     // Clean up legacy sync file if it still exists
-                    cleanupLegacyFile(accessToken)
+                    cleanupLegacyFile(uploadToken)
                     
                     SyncResult.Success("Backup uploaded to Google Drive")
                 } else {
@@ -133,17 +149,13 @@ class DriveSyncManager(
                 val fileId = driveApiHelper.findSyncFile(accessToken)
                     ?: return@withContext SyncResult.Error("No backup found on Google Drive. Sync your library first!")
 
-                // 2. Download it
-                val backupBytes = driveApiHelper.downloadSyncFile(accessToken, fileId)
+                // 2. Download it (streams directly to a temp file — no RAM overload)
+                val tempFile = driveApiHelper.downloadSyncFileToFile(accessToken, fileId)
                     ?: return@withContext SyncResult.Error("Failed to download backup from Google Drive")
 
-                logcat(LogPriority.INFO) { "DriveSync: Downloaded ${backupBytes.size} bytes" }
+                logcat(LogPriority.INFO) { "DriveSync: Downloaded ${tempFile.length()} bytes" }
 
-                // 3. Write to temp file
-                val tempFile = File(context.cacheDir, "wammy_drive_restore.tachibk")
-                tempFile.writeBytes(backupBytes)
-
-                // 4. Restore using the existing BackupRestorer
+                // 3. Restore using the existing BackupRestorer
                 try {
                     val notifier = BackupNotifier(context)
                     val restorer = BackupRestorer(
@@ -168,6 +180,10 @@ class DriveSyncManager(
                 } finally {
                     tempFile.delete()
                 }
+
+                // 4. Clear the backup hash so the next backup doesn't incorrectly skip
+                val prefs = context.getSharedPreferences("wammy_sync_prefs", Context.MODE_PRIVATE)
+                prefs.edit().remove("last_backup_hash").apply()
 
                 SyncResult.Success("Library restored from Google Drive!")
             } catch (e: Exception) {

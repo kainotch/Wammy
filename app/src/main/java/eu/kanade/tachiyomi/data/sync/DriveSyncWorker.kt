@@ -20,9 +20,6 @@ import eu.kanade.tachiyomi.util.system.notify
 import tachiyomi.core.common.util.system.logcat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.text.SimpleDateFormat
-import java.util.Locale
-import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
 /**
@@ -94,10 +91,12 @@ class DriveSyncWorker(
         val cloudModifiedStr = driveApiHelper.getSyncFileModifiedTime(accessToken)
 
         if (cloudModifiedStr != null) {
-            val sdf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
-                timeZone = TimeZone.getTimeZone("UTC")
+            val cloudTime = try {
+                java.time.Instant.parse(cloudModifiedStr).toEpochMilli()
+            } catch (e: Exception) {
+                logcat(LogPriority.WARN, e) { "DriveSyncWorker: Failed to parse cloud timestamp: $cloudModifiedStr" }
+                0L
             }
-            val cloudTime = sdf.parse(cloudModifiedStr)?.time ?: 0L
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             val localSyncTime = prefs.getLong(KEY_LAST_SYNC_TIME, 0L)
 
@@ -303,7 +302,7 @@ class DriveSyncWorker(
 
             WorkManager.getInstance(context).enqueueUniquePeriodicWork(
                 "DriveSyncPeriodic",
-                androidx.work.ExistingPeriodicWorkPolicy.KEEP,
+                androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
                 request
             )
         }

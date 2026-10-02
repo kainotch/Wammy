@@ -20,6 +20,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.google.firebase.auth.FirebaseAuth
 import eu.kanade.tachiyomi.data.sync.CloudUser
 import eu.kanade.tachiyomi.data.sync.FirestoreUserRepository
+import eu.kanade.tachiyomi.data.sync.UsernameAvailability
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -60,11 +61,21 @@ class UsernamePickerScreen : Screen {
             isChecking = true
             checkJob = scope.launch {
                 delay(300) // Debounce 300ms
-                val available = repo.isUsernameAvailable(name)
-                isAvailable = available
-                isChecking = false
-                if (!available) {
-                    validationError = "Username is already taken"
+                when (val result = repo.checkUsernameAvailability(name)) {
+                    is UsernameAvailability.Available -> {
+                        isAvailable = true
+                        isChecking = false
+                    }
+                    is UsernameAvailability.Taken -> {
+                        isAvailable = false
+                        isChecking = false
+                        validationError = "Username is already taken"
+                    }
+                    is UsernameAvailability.Error -> {
+                        isAvailable = null
+                        isChecking = false
+                        validationError = "Could not check availability. Check your connection."
+                    }
                 }
             }
         }
