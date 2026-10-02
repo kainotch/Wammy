@@ -104,7 +104,7 @@ class BangumiApi(
                     .awaitSuccess()
                     .parseAs<BGMSearchResult>()
                     .data
-                    .filter { it.platform == null || it.platform == "漫画" || it.platform == "小说" }
+                    .filter { it.platform == null || it.platform == "漫画" }
                     .map { it.toTrackSearch(trackId) }
             }
         }

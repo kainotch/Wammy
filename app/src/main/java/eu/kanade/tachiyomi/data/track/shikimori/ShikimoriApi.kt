@@ -79,7 +79,7 @@ class ShikimoriApi(
         return withIOContext {
             val query = $$"""
             |query($query: String) {
-                |mangas(search: $query, limit: 20) {
+                |mangas(search: $query, limit: 20, kind:"!light_novel,!novel") {
                     |id
                     |name
                     |chapters
