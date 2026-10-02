@@ -233,10 +233,10 @@ class ShikimoriApi(
         private const val OAUTH_URL = "$BASE_URL/oauth/token"
         private const val LOGIN_URL = "$BASE_URL/oauth/authorize"
 
-        private const val REDIRECT_URL = "mihon://shikimori-auth"
+        private const val REDIRECT_URL = "wammy://shikimori-auth"
 
-        private const val CLIENT_ID = "PB9dq8DzI405s7wdtwTdirYqHiyVMh--djnP7lBUqSA"
-        private const val CLIENT_SECRET = "NajpZcOBKB9sJtgNcejf8OB9jBN1OYYoo-k4h2WWZus"
+        private const val CLIENT_ID = "K4lO7NY_ntP3zEHux0Sr8r9W3ZYva3rWbzJGcrnQx2o"
+        private const val CLIENT_SECRET = "azTsk954RNyiqfLNYzcKslt2agyYjEwXX9M_s_CO_jE"
 
         fun authUrl(): Uri = LOGIN_URL.toUri().buildUpon()
             .appendQueryParameter("client_id", CLIENT_ID)
