@@ -534,8 +534,8 @@ class ProfileScreen : Screen {
                     verticalArrangement = Arrangement.Center
                 ) {
                     // App Logo (rounded square)
-                    androidx.compose.foundation.Image(
-                        painter = androidx.compose.ui.res.painterResource(eu.kanade.tachiyomi.R.mipmap.ic_launcher),
+                    AsyncImage(
+                        model = eu.kanade.tachiyomi.R.mipmap.ic_launcher,
                         contentDescription = "Wammy Logo",
                         modifier = Modifier
                             .size(100.dp)
