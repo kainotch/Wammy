@@ -9,7 +9,7 @@ class DownloadPreferences(
 
     val downloadOnlyOverWifi: Preference<Boolean> = preferenceStore.getBoolean(
         "pref_download_only_over_wifi_key",
-        true,
+        false,
     )
 
     val saveChaptersAsCBZ: Preference<Boolean> = preferenceStore.getBoolean("save_chapter_as_cbz", true)

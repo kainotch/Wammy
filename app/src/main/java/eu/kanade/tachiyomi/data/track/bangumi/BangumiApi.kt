@@ -164,14 +164,14 @@ class BangumiApi(
     }
 
     companion object {
-        private const val CLIENT_ID = "bgm291665acbd06a4c28"
-        private const val CLIENT_SECRET = "43e5ce36b207de16e5d3cfd3e79118db"
+        private const val CLIENT_ID = "bgm72226abfa153d64c9"
+        private const val CLIENT_SECRET = "e05dc17a12217832b28f2c351efda70e"
 
         private const val API_URL = "https://api.bgm.tv"
         private const val OAUTH_URL = "https://bgm.tv/oauth/access_token"
         private const val LOGIN_URL = "https://bgm.tv/oauth/authorize"
 
-        private const val REDIRECT_URL = "mihon://bangumi-auth"
+        private const val REDIRECT_URL = "wammy://bangumi-auth"
 
         private const val APP_JSON = "application/json"
 

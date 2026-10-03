@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.ui.manga
+package eu.kanade.tachiyomi.ui.manga
 
 import android.app.Application
 import android.content.Context
@@ -504,6 +504,8 @@ class MangaViewModel(
                     if (manga.removeCovers() != manga) {
                         updateManga.awaitUpdateCoverLastModified(manga.id)
                     }
+                    val context = uy.kohesive.injekt.Injekt.get<android.app.Application>()
+                    eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleBackup(context)
                     withUIContext { onRemoved() }
                 }
             } else {
@@ -559,6 +561,9 @@ class MangaViewModel(
 
                 // Finally match with enhanced tracking when available
                 addTracks.bindEnhancedTrackers(manga, state.source)
+                
+                val context = uy.kohesive.injekt.Injekt.get<android.app.Application>()
+                eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleBackup(context)
             }
         }
     }
@@ -673,6 +678,8 @@ class MangaViewModel(
 
         viewModelScope.launchIO {
             updateManga.awaitUpdateFavorite(manga.id, true)
+            val context = uy.kohesive.injekt.Injekt.get<android.app.Application>()
+            eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleBackup(context)
         }
     }
 
@@ -689,6 +696,8 @@ class MangaViewModel(
     private fun moveMangaToCategory(categoryIds: List<Long>) {
         viewModelScope.launchIO {
             setMangaCategories.await(mangaId, categoryIds)
+            val context = uy.kohesive.injekt.Injekt.get<android.app.Application>()
+            eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleBackup(context)
         }
     }
 

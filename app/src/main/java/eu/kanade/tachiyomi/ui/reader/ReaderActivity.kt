@@ -673,6 +673,10 @@ class ReaderActivity : BaseActivity() {
         stopBackgroundTtsIfRunning()
         ttsNotificationSyncJob?.cancel()
         unregisterReceiver(ttsNotificationControlReceiver)
+        // Only backup if reading progress actually changed during this session
+        if (viewModel.hasProgressChanged) {
+            eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleBackup(this)
+        }
         super.onDestroy()
         viewModel.state.value.viewer?.destroy()
         config = null

@@ -62,6 +62,7 @@
 
         <activity
             android:name=".ui.main.MainActivity"
+            android:configChanges="uiMode|orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden"
             android:exported="true"
             android:launchMode="singleTop"
             android:theme="@style/Theme.Tachiyomi.SplashScreen">
