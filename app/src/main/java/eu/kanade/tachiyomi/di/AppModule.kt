@@ -135,6 +135,19 @@ class AppModule(val app: Application) : InjektModule {
         
         addSingletonFactory { eu.kanade.tachiyomi.data.auth.AuthManager() }
 
+        // Google Drive Sync
+        addSingletonFactory { 
+            val baseClient = get<eu.kanade.tachiyomi.network.NetworkHelper>().client
+            val driveClient = baseClient.newBuilder()
+                .connectTimeout(1, java.util.concurrent.TimeUnit.MINUTES)
+                .readTimeout(10, java.util.concurrent.TimeUnit.MINUTES)
+                .writeTimeout(10, java.util.concurrent.TimeUnit.MINUTES)
+                .callTimeout(10, java.util.concurrent.TimeUnit.MINUTES)
+                .build()
+            eu.kanade.tachiyomi.data.sync.DriveApiHelper(app, driveClient) 
+        }
+        addSingletonFactory { eu.kanade.tachiyomi.data.sync.DriveSyncManager(app, get()) }
+
         addSingletonFactory { ChapterCache(app, get()) }
         addSingletonFactory { CoverCache(app) }
         addSingletonFactory { LibrarySettingsCache(app) }

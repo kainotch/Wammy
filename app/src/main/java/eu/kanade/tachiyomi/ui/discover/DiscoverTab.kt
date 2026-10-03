@@ -1,4 +1,4 @@
-﻿package eu.kanade.tachiyomi.ui.discover
+package eu.kanade.tachiyomi.ui.discover
 
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -40,6 +40,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowForward
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -155,6 +156,13 @@ object DiscoverTab : Tab {
                                         tint = MaterialTheme.colorScheme.onBackground
                                     )
                                 }
+                            }
+                            IconButton(onClick = { navigator.push(eu.kanade.tachiyomi.ui.search.UserSearchScreen()) }) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Search,
+                                    contentDescription = "Search Users",
+                                    tint = MaterialTheme.colorScheme.onBackground
+                                )
                             }
                             IconButton(onClick = { navigator.push(eu.kanade.tachiyomi.ui.profile.ProfileScreen()) }) {
                             if (user?.photoUrl != null) {

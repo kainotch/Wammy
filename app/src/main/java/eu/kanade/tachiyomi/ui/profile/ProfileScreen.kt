@@ -16,8 +16,11 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.MoreHoriz
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.foundation.clickable
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.MultipartBody
@@ -43,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.credentials.CredentialManager
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.CustomCredential
+import eu.kanade.tachiyomi.data.sync.DriveApiHelper
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -52,6 +56,10 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.GoogleAuthProvider
 import eu.kanade.tachiyomi.data.auth.AuthManager
+import eu.kanade.tachiyomi.data.sync.AuthorizationResult
+import eu.kanade.tachiyomi.data.sync.DriveSyncManager
+import eu.kanade.tachiyomi.data.sync.SyncResult
+import androidx.activity.result.IntentSenderRequest
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -65,6 +73,62 @@ class ProfileScreen : Screen {
         val scope = rememberCoroutineScope()
         val authManager: AuthManager = Injekt.get()
         val user by authManager.currentUser.collectAsState()
+
+        
+        var cloudUser by remember { mutableStateOf<eu.kanade.tachiyomi.data.sync.CloudUser?>(null) }
+        val repo = remember { eu.kanade.tachiyomi.data.sync.FirestoreUserRepository() }
+        val driveApiHelper: DriveApiHelper = remember { Injekt.get() }
+
+        val notificationPermissionLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestPermission()
+        ) { /* Just recording that they answered */ }
+
+        val driveConsentLauncher = rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.StartIntentSenderForResult()
+        ) { result ->
+            if (result.resultCode == android.app.Activity.RESULT_OK) {
+                // If they successfully authorized Drive, trigger the restore check!
+                eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleRestoreCheck(context)
+                Toast.makeText(context, "Google Drive connected! Checking for restore...", Toast.LENGTH_SHORT).show()
+            }
+        }
+        
+        LaunchedEffect(user) {
+            if (user != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }
+            // Check if logged-in user has a Firestore profile (username)
+            // If not, redirect to Gatekeeper
+            if (user != null) {
+                val uid = user?.uid
+                if (uid != null) {
+                    val hasProfile = repo.hasProfile(uid)
+                    if (!hasProfile) {
+                        navigator.push(UsernamePickerScreen())
+                    }
+                }
+            }
+        }
+
+        DisposableEffect(user) {
+            var listener: com.google.firebase.firestore.ListenerRegistration? = null
+            if (user != null) {
+                val uid = user!!.uid
+                listener = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                    .collection(eu.kanade.tachiyomi.data.sync.CloudUser.COLLECTION)
+                    .document(uid)
+                    .addSnapshotListener { snapshot, error ->
+                        if (error == null && snapshot != null && snapshot.exists()) {
+                            cloudUser = snapshot.toObject(eu.kanade.tachiyomi.data.sync.CloudUser::class.java)
+                        }
+                    }
+            }
+            onDispose {
+                listener?.remove()
+            }
+        }
 
         val webClientId = "997612260567-i7gkfnks53c0tlh9kvfslmml0bnn0lle.apps.googleusercontent.com"
 
@@ -91,6 +155,8 @@ class ProfileScreen : Screen {
                         )
                 ) {}
 
+                var showEditDialog by remember { mutableStateOf(false) }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -103,11 +169,49 @@ class ProfileScreen : Screen {
                     ) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
                     }
-                    IconButton(
-                        onClick = { },
-                        modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
-                    ) {
-                        Icon(Icons.Default.MoreHoriz, contentDescription = "Options", tint = Color.White)
+                    @OptIn(ExperimentalMaterial3Api::class)
+                    var showBottomSheet by remember { mutableStateOf(false) }
+                    
+                    Box {
+                        IconButton(
+                            onClick = { showBottomSheet = true },
+                            modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                        ) {
+                            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.White)
+                        }
+                    }
+                    
+                    if (showBottomSheet) {
+                        @OptIn(ExperimentalMaterial3Api::class)
+                        ModalBottomSheet(
+                            onDismissRequest = { showBottomSheet = false },
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ) {
+                            Column(modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp)) {
+                                ListItem(
+                                    headlineContent = { Text("Settings") },
+                                    modifier = Modifier.clickable { 
+                                        showBottomSheet = false
+                                        navigator.push(eu.kanade.tachiyomi.ui.setting.SettingsScreen())
+                                    }
+                                )
+                                ListItem(
+                                    headlineContent = { Text("Cloud Sync") },
+                                    modifier = Modifier.clickable { 
+                                        showBottomSheet = false
+                                        navigator.push(CloudSyncScreen())
+                                    }
+                                )
+                                ListItem(
+                                    headlineContent = { Text("Sign Out", color = MaterialTheme.colorScheme.error) },
+                                    modifier = Modifier.clickable { 
+                                        showBottomSheet = false
+                                        authManager.signOut()
+                                        navigator.pop()
+                                    }
+                                )
+                            }
+                        }
                     }
                 }
                 
@@ -116,55 +220,70 @@ class ProfileScreen : Screen {
                         .fillMaxSize()
                         .padding(top = 100.dp)
                         .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                    horizontalAlignment = Alignment.Start
                 ) {
                     Spacer(modifier = Modifier.height(32.dp))
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                    Column(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
+                        horizontalAlignment = Alignment.Start
                     ) {
                         AsyncImage(
                             model = user?.photoUrl?.toString()?.replace("s96-c", "s192-c"),
                             contentDescription = "Profile Picture",
                             contentScale = ContentScale.Crop,
-                            modifier = Modifier.size(64.dp).clip(CircleShape)
+                            modifier = Modifier.size(80.dp).clip(CircleShape)
                         )
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = user?.displayName ?: "Unknown User",
-                                style = MaterialTheme.typography.displaySmall,
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold
-                            )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Column {
+                                Text(
+                                    text = user?.displayName ?: "Unknown User",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                if (cloudUser?.username != null) {
+                                    Text(
+                                        text = "@${cloudUser!!.username}",
+                                        style = MaterialTheme.typography.titleSmall,
+                                        color = Color.White.copy(alpha = 0.7f)
+                                    )
+                                }
+                            }
+                            Spacer(modifier = Modifier.width(16.dp))
+                            Surface(
+                                color = Color.White.copy(alpha = 0.15f),
+                                shape = RoundedCornerShape(16.dp),
+                                onClick = { showEditDialog = true }
+                            ) {
+                                Text(
+                                    text = "Edit",
+                                    color = Color.White,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                                    fontWeight = FontWeight.Bold,
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
                         }
                     }
                     Spacer(modifier = Modifier.height(24.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
-                        horizontalArrangement = Arrangement.spacedBy(16.dp)
-                    ) {
-                        Button(
-                            onClick = { authManager.signOut(); navigator.pop() },
-                            modifier = Modifier.weight(1f).height(50.dp),
-                            colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color.Black),
-                            shape = RoundedCornerShape(25.dp)
-                        ) {
-                            Text("Sign Out", fontWeight = FontWeight.Bold)
-                        }
-                        
-                        var showEditDialog by remember { mutableStateOf(false) }
-                        IconButton(
-                            onClick = { showEditDialog = true },
-                            modifier = Modifier.size(50.dp).background(Color.White.copy(alpha = 0.2f), CircleShape)
-                        ) {
-                            Icon(Icons.Default.Settings, contentDescription = "Settings", tint = Color.White)
-                        }
-
                         if (showEditDialog) {
                             var newName by remember { mutableStateOf(user?.displayName ?: "") }
+                            var newUsername by remember(cloudUser) { mutableStateOf(cloudUser?.username ?: "") }
                             var newPhotoUrl by remember { mutableStateOf(user?.photoUrl?.toString() ?: "") }
+                            var usernameError by remember { mutableStateOf<String?>(null) }
                             var isUpdating by remember { mutableStateOf(false) }
+                            
+                            var isOnCooldown = false
+                            var cooldownDaysLeft = 0
+                            cloudUser?.usernameChangedAt?.let { changedAt ->
+                                val elapsedMs = System.currentTimeMillis() - (changedAt.seconds * 1000L)
+                                val cooldownMs = eu.kanade.tachiyomi.data.sync.CloudUser.USERNAME_CHANGE_COOLDOWN_MS
+                                if (elapsedMs < cooldownMs) {
+                                    isOnCooldown = true
+                                    cooldownDaysLeft = ((cooldownMs - elapsedMs) / (1000L * 60 * 60 * 24)).toInt().coerceAtLeast(1)
+                                }
+                            }
                             
                             val photoPickerLauncher = rememberLauncherForActivityResult(
                                 contract = ActivityResultContracts.PickVisualMedia()
@@ -192,8 +311,27 @@ class ProfileScreen : Screen {
                                         OutlinedTextField(
                                             value = newName,
                                             onValueChange = { newName = it },
-                                            label = { Text("Name") },
+                                            label = { Text("Display Name") },
                                             singleLine = true
+                                        )
+                                        OutlinedTextField(
+                                            value = newUsername,
+                                            onValueChange = { 
+                                                val cleaned = it.lowercase().filter { c -> c.isLetterOrDigit() || c == '_' }
+                                                newUsername = cleaned
+                                                usernameError = eu.kanade.tachiyomi.data.sync.CloudUser.validateUsername(cleaned)
+                                            },
+                                            label = { Text("Username") },
+                                            singleLine = true,
+                                            enabled = !isOnCooldown,
+                                            isError = usernameError != null,
+                                            supportingText = { 
+                                                if (isOnCooldown) {
+                                                    Text("You can change your username in $cooldownDaysLeft days", color = MaterialTheme.colorScheme.error)
+                                                } else {
+                                                    usernameError?.let { msg -> Text(msg) }
+                                                }
+                                            }
                                         )
                                         
                                         Column {
@@ -227,6 +365,26 @@ class ProfileScreen : Screen {
                                     TextButton(
                                         onClick = {
                                             isUpdating = true
+                                            
+                                            // Helper function to update Firestore after Auth succeeds
+                                            fun updateFirestoreAndFinish(finalPhotoUrl: String) {
+                                                scope.launch {
+                                                    val uid = user?.uid
+                                                    if (uid != null) {
+                                                        repo.updateProfile(uid, displayName = newName, avatarUrl = finalPhotoUrl.ifEmpty { null })
+                                                        if (cloudUser?.username != newUsername && newUsername.isNotEmpty()) {
+                                                            val renameResult = repo.renameUsername(uid, cloudUser?.username ?: "", newUsername)
+                                                            if (renameResult.isFailure) {
+                                                                Toast.makeText(context, "Username error: ${renameResult.exceptionOrNull()?.message}", Toast.LENGTH_LONG).show()
+                                                            }
+                                                        }
+                                                        cloudUser = repo.getUser(uid)
+                                                    }
+                                                    isUpdating = false
+                                                    showEditDialog = false
+                                                }
+                                            }
+
                                             if (newPhotoUrl.startsWith("file://")) {
                                                 val fileUri = android.net.Uri.parse(newPhotoUrl)
                                                 val file = java.io.File(fileUri.path!!)
@@ -246,7 +404,7 @@ class ProfileScreen : Screen {
                                                             .build()
                                                             
                                                         val response = client.newCall(request).execute()
-                                                        val responseUrl = response.body?.string() ?: ""
+                                                        val responseUrl = response.body?.string()?.trim() ?: ""
                                                         
                                                         withContext(Dispatchers.Main) {
                                                             if (response.isSuccessful && responseUrl.startsWith("http")) {
@@ -255,9 +413,11 @@ class ProfileScreen : Screen {
                                                                     photoUri = android.net.Uri.parse(responseUrl)
                                                                 }
                                                                 user?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
-                                                                    isUpdating = false
-                                                                    showEditDialog = false
-                                                                    if (!task.isSuccessful) {
+                                                                    if (task.isSuccessful) {
+                                                                        updateFirestoreAndFinish(responseUrl)
+                                                                    } else {
+                                                                        isUpdating = false
+                                                                        showEditDialog = false
                                                                         Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
                                                                     }
                                                                 }
@@ -281,15 +441,17 @@ class ProfileScreen : Screen {
                                                     }
                                                 }
                                                 user?.updateProfile(profileUpdates)?.addOnCompleteListener { task ->
-                                                    isUpdating = false
-                                                    showEditDialog = false
-                                                    if (!task.isSuccessful) {
+                                                    if (task.isSuccessful) {
+                                                        updateFirestoreAndFinish(newPhotoUrl)
+                                                    } else {
+                                                        isUpdating = false
+                                                        showEditDialog = false
                                                         Toast.makeText(context, "Failed to update profile", Toast.LENGTH_SHORT).show()
                                                     }
                                                 }
                                             }
                                         },
-                                        enabled = !isUpdating
+                                        enabled = !isUpdating && usernameError == null
                                     ) {
                                         if (isUpdating) {
                                             CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
@@ -310,8 +472,11 @@ class ProfileScreen : Screen {
                                 }
                             )
                         }
-                    }
-                    Spacer(modifier = Modifier.height(48.dp))
+                    Spacer(modifier = Modifier.height(32.dp))
+
+
+
+                    Spacer(modifier = Modifier.height(24.dp))
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -330,59 +495,193 @@ class ProfileScreen : Screen {
                 }
             }
         } else {
-            Scaffold(
-                topBar = {
-                    @OptIn(ExperimentalMaterial3Api::class)
-                    TopAppBar(
-                        title = { Text("Profile") },
-                        navigationIcon = {
-                            IconButton(onClick = { navigator.pop() }) {
-                                Icon(Icons.Default.Close, contentDescription = "Back")
-                            }
-                        }
-                    )
+            Box(modifier = Modifier.fillMaxSize()) {
+                // Background Image
+                androidx.compose.foundation.Image(
+                    painter = androidx.compose.ui.res.painterResource(eu.kanade.tachiyomi.R.drawable.login_bg),
+                    contentDescription = "Background",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+                
+                // Theme-aware Overlay
+                val overlayColor = MaterialTheme.colorScheme.background.copy(alpha = 0.85f)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(overlayColor)
+                )
+
+                // Top Bar for Back Button (Transparent)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .statusBarsPadding()
+                        .padding(8.dp),
+                    horizontalArrangement = Arrangement.Start
+                ) {
+                    IconButton(onClick = { navigator.pop() }) {
+                        Icon(Icons.Default.Close, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
+                    }
                 }
-            ) { paddingValues ->
+
+                // Main Content
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(paddingValues)
-                        .padding(16.dp),
+                        .padding(horizontal = 32.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Text("You are not logged in.", style = MaterialTheme.typography.titleLarge)
+                    // App Logo (rounded square)
+                    AsyncImage(
+                        model = eu.kanade.tachiyomi.R.mipmap.ic_launcher,
+                        contentDescription = "Wammy Logo",
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                    )
+                    
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = {
-                        scope.launch {
-                            try {
-                                val credentialManager = CredentialManager.create(context)
-                                val googleIdOption: GetGoogleIdOption = GetGoogleIdOption.Builder()
-                                    .setFilterByAuthorizedAccounts(false)
-                                    .setServerClientId(webClientId)
-                                    .build()
-                                val request: GetCredentialRequest = GetCredentialRequest.Builder()
-                                    .addCredentialOption(googleIdOption)
-                                    .build()
-                                val result = credentialManager.getCredential(context, request)
-                                val credential = result.credential
-                                if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                                    val firebaseCredential = GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
-                                    FirebaseAuth.getInstance().signInWithCredential(firebaseCredential).addOnCompleteListener { task ->
-                                        if (!task.isSuccessful) {
-                                            android.util.Log.e("ProfileScreen", "Auth Failed", task.exception)
-                                            Toast.makeText(context, "Firebase Auth Failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                    
+                    // App Title
+                    Text(
+                        text = "Wammy",
+                        style = MaterialTheme.typography.displaySmall,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    
+                    // App Subtitle
+                    Text(
+                        text = "Manga • Manhwa • Novels",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    
+                    Spacer(modifier = Modifier.height(64.dp))
+                    
+                    // Welcome Text
+                    Text(
+                        text = "Welcome",
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onBackground
+                    )
+                    
+                    // Welcome Subtitle
+                    Text(
+                        text = "Sign in with your Google account\nto continue to Wammy.",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(top = 16.dp, bottom = 48.dp)
+                    )
+                    
+                    // Sign In Button
+                    Surface(
+                        onClick = {
+                            scope.launch {
+                                try {
+                                    val credentialManager = CredentialManager.create(context)
+                                    val request1: GetCredentialRequest = GetCredentialRequest.Builder()
+                                        .addCredentialOption(GetGoogleIdOption.Builder()
+                                            .setFilterByAuthorizedAccounts(true)
+                                            .setServerClientId(webClientId)
+                                            .build())
+                                        .build()
+                                        
+                                    val result = try {
+                                        credentialManager.getCredential(context, request1)
+                                    } catch (e: androidx.credentials.exceptions.NoCredentialException) {
+                                        val request2 = GetCredentialRequest.Builder()
+                                            .addCredentialOption(GetGoogleIdOption.Builder()
+                                                .setFilterByAuthorizedAccounts(false)
+                                                .setServerClientId(webClientId)
+                                                .build())
+                                            .build()
+                                        credentialManager.getCredential(context, request2)
+                                    }
+                                    val credential = result.credential
+                                    if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                                        val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                                        val firebaseCredential = GoogleAuthProvider.getCredential(googleIdTokenCredential.idToken, null)
+                                        FirebaseAuth.getInstance().signInWithCredential(firebaseCredential).addOnCompleteListener { task ->
+                                            if (task.isSuccessful) {
+                                                Toast.makeText(context, "Signed in successfully!", Toast.LENGTH_SHORT).show()
+                                                
+                                                // Request Google Drive permission for sync immediately after login
+                                                scope.launch {
+                                                    when (val authResult = driveApiHelper.requestDriveAuthorization()) {
+                                                        is AuthorizationResult.NeedsConsent -> {
+                                                            // New device/account -> prompt for Drive permission
+                                                            val intentSenderRequest = IntentSenderRequest.Builder(authResult.pendingIntent).build()
+                                                            driveConsentLauncher.launch(intentSenderRequest)
+                                                        }
+                                                        is AuthorizationResult.Success -> {
+                                                            // Already authorized (silently got token) -> trigger restore check now!
+                                                            eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleRestoreCheck(context)
+                                                        }
+                                                        is AuthorizationResult.Error -> {
+                                                            android.util.Log.e("ProfileScreen", "Drive Auth Error: ${authResult.message}")
+                                                        }
+                                                    }
+                                                }
+                                            } else {
+                                                android.util.Log.e("ProfileScreen", "Auth Failed", task.exception)
+                                                Toast.makeText(context, "Firebase Auth Failed: ${task.exception?.message}", Toast.LENGTH_LONG).show()
+                                            }
                                         }
                                     }
+                                } catch (e: Exception) {
+                                    android.util.Log.e("ProfileScreen", "Sign in failed", e)
+                                    Toast.makeText(context, "Sign in failed: ${e.message}", Toast.LENGTH_LONG).show()
                                 }
-                            } catch (e: Exception) {
-                                android.util.Log.e("ProfileScreen", "Sign in failed", e)
-                                Toast.makeText(context, "Sign in failed: ${e.message}", Toast.LENGTH_LONG).show()
                             }
+                        },
+                        shape = RoundedCornerShape(percent = 50),
+                        color = MaterialTheme.colorScheme.surface,
+                        shadowElevation = 4.dp,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(56.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            // Google Icon & Text
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                androidx.compose.foundation.Image(
+                                    painter = androidx.compose.ui.res.painterResource(eu.kanade.tachiyomi.R.drawable.ic_google),
+                                    contentDescription = "Google Logo",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Box(
+                                    modifier = Modifier
+                                        .width(1.dp)
+                                        .height(24.dp)
+                                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+                                )
+                                Spacer(modifier = Modifier.width(16.dp))
+                                Text(
+                                    text = "Sign in with Google",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                            
+                            // Arrow icon
+                            Icon(
+                                androidx.compose.material.icons.Icons.Filled.ArrowForward,
+                                contentDescription = "Forward",
+                                tint = MaterialTheme.colorScheme.onSurface
+                            )
                         }
-                    }) {
-                        Text("Sign in with Google")
                     }
                 }
             }
