@@ -1,7 +1,9 @@
 package eu.kanade.tachiyomi.ui.profile
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -9,7 +11,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -18,12 +20,21 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import eu.kanade.tachiyomi.data.sync.CloudUser
+import eu.kanade.tachiyomi.data.sync.FavoriteManga
+import eu.kanade.tachiyomi.data.sync.FirestoreUserRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import tachiyomi.domain.source.service.SourceManager
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class PublicProfileScreen(
     private val uid: String,
@@ -33,8 +44,20 @@ class PublicProfileScreen(
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
+        val scope = rememberCoroutineScope()
+        val repo = remember { FirestoreUserRepository() }
+        val sourceManager: SourceManager = remember { Injekt.get() }
 
         val highResPhotoUrl = if (user.avatarUrl.isNotEmpty()) user.avatarUrl else null
+
+        // Load favorites
+        var topManga by remember { mutableStateOf<List<FavoriteManga>>(emptyList()) }
+        var topNovels by remember { mutableStateOf<List<FavoriteManga>>(emptyList()) }
+
+        LaunchedEffect(uid) {
+            topManga = repo.getTopManga(uid)
+            topNovels = repo.getTopNovels(uid)
+        }
 
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
             AsyncImage(
@@ -136,21 +159,203 @@ class PublicProfileScreen(
                 }
                 
                 Spacer(modifier = Modifier.height(32.dp))
-                
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp)
-                        .height(180.dp)
-                        .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
+
+                // ── Top 5 Favorites Section ──
+                var selectedFavTab by remember { mutableIntStateOf(0) }
+                val favTabs = listOf("Manga", "Novels")
+                val currentFavList = if (selectedFavTab == 0) topManga else topNovels
+
+                Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
                     Text(
-                        text = "Top 5 Fav Manga\n(Coming Soon)",
-                        color = Color.White.copy(alpha = 0.5f),
-                        textAlign = TextAlign.Center
+                        text = "Top 5 Favorites",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        favTabs.forEachIndexed { index, title ->
+                            FilterChip(
+                                selected = selectedFavTab == index,
+                                onClick = { selectedFavTab = index },
+                                label = { Text(title) },
+                            )
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    if (currentFavList.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(160.dp)
+                                .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                text = "No favorites set yet.",
+                                color = Color.White.copy(alpha = 0.5f),
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    } else {
+                        var selectedFav by remember { mutableStateOf<FavoriteManga?>(null) }
+
+                        androidx.compose.foundation.lazy.LazyRow(
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            items(items = currentFavList, key = { it.title }) { fav ->
+                                val index = currentFavList.indexOf(fav)
+                                Box(
+                                    modifier = Modifier
+                                        .width(110.dp)
+                                        .height(160.dp)
+                                        .clip(RoundedCornerShape(10.dp))
+                                        .clickable { selectedFav = fav },
+                                ) {
+                                    AsyncImage(
+                                        model = fav.thumbnailUrl,
+                                        contentDescription = fav.title,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize(),
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .align(Alignment.BottomCenter)
+                                            .background(
+                                                brush = Brush.verticalGradient(
+                                                    colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f)),
+                                                ),
+                                            )
+                                            .padding(6.dp),
+                                    ) {
+                                        Text(
+                                            text = fav.title,
+                                            color = Color.White,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            maxLines = 2,
+                                            overflow = TextOverflow.Ellipsis,
+                                        )
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .align(Alignment.TopStart)
+                                            .padding(4.dp)
+                                            .size(22.dp)
+                                            .background(MaterialTheme.colorScheme.primary, CircleShape),
+                                        contentAlignment = Alignment.Center,
+                                    ) {
+                                        Text(
+                                            text = "${index + 1}",
+                                            color = MaterialTheme.colorScheme.onPrimary,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            fontWeight = FontWeight.Bold,
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // Info Dialog
+                        if (selectedFav != null) {
+                            val fav = selectedFav!!
+                            val hasExtension = sourceManager.get(fav.sourceId) != null
+
+                            AlertDialog(
+                                onDismissRequest = { selectedFav = null },
+                                title = {
+                                    Text(fav.title, fontWeight = FontWeight.Bold)
+                                },
+                                text = {
+                                    Column {
+                                        Row(verticalAlignment = Alignment.Top) {
+                                            AsyncImage(
+                                                model = fav.thumbnailUrl,
+                                                contentDescription = fav.title,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier
+                                                    .width(80.dp)
+                                                    .height(120.dp)
+                                                    .clip(RoundedCornerShape(8.dp)),
+                                            )
+                                            Spacer(modifier = Modifier.width(12.dp))
+                                            Column {
+                                                if (fav.author.isNotEmpty()) {
+                                                    Text("by ${fav.author}", style = MaterialTheme.typography.bodyMedium)
+                                                }
+                                                Spacer(modifier = Modifier.height(4.dp))
+                                                Text("Source: ${fav.sourceName}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                                if (fav.genres.isNotEmpty()) {
+                                                    Spacer(modifier = Modifier.height(4.dp))
+                                                    Text(
+                                                        fav.genres.take(3).joinToString(" · "),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                    )
+                                                }
+                                            }
+                                        }
+                                        if (fav.description.isNotEmpty()) {
+                                            Spacer(modifier = Modifier.height(12.dp))
+                                            Text(
+                                                fav.description.take(200) + if (fav.description.length > 200) "..." else "",
+                                                style = MaterialTheme.typography.bodySmall,
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        if (hasExtension) {
+                                            Button(
+                                                onClick = {
+                                                    selectedFav = null
+                                                    scope.launch {
+                                                        val mangaRepo: tachiyomi.domain.manga.repository.MangaRepository = Injekt.get()
+                                                        val localManga = withContext(Dispatchers.IO) {
+                                                            mangaRepo.getMangaByUrlAndSourceId(fav.mangaUrl, fav.sourceId)
+                                                        }
+                                                        if (localManga != null) {
+                                                            navigator.push(eu.kanade.tachiyomi.ui.manga.MangaScreen(localManga.id, fromSource = true))
+                                                        } else {
+                                                            navigator.push(eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen(fav.sourceId, fav.mangaUrl))
+                                                        }
+                                                    }
+                                                },
+                                                modifier = Modifier.fillMaxWidth(),
+                                            ) {
+                                                Text("📖  Read")
+                                            }
+                                        } else {
+                                            Text(
+                                                "⚠️ Extension \"${fav.sourceName}\" not installed",
+                                                style = MaterialTheme.typography.bodySmall,
+                                                color = MaterialTheme.colorScheme.error,
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            OutlinedButton(
+                                                onClick = {
+                                                    selectedFav = null
+                                                    navigator.push(eu.kanade.tachiyomi.ui.browse.BrowseTab)
+                                                },
+                                                modifier = Modifier.fillMaxWidth(),
+                                            ) {
+                                                Text("⬇️  Get Extension")
+                                            }
+                                        }
+                                    }
+                                },
+                                confirmButton = {},
+                                dismissButton = {
+                                    TextButton(onClick = { selectedFav = null }) {
+                                        Text("Close")
+                                    }
+                                },
+                            )
+                        }
+                    }
                 }
+
                 Spacer(modifier = Modifier.height(48.dp))
             }
         }

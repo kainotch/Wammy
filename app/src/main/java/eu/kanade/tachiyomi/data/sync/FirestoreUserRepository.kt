@@ -238,6 +238,113 @@ class FirestoreUserRepository {
     }
 
     /**
+     * Saves the user's Top 5 Manga favorites to Firestore.
+     * Stores as a list of maps under the "topManga" field.
+     */
+    suspend fun saveTopManga(uid: String, favorites: List<FavoriteManga>): Result<Unit> {
+        return try {
+            val data = favorites.mapIndexed { index, fav ->
+                mapOf(
+                    "title" to fav.title,
+                    "author" to fav.author,
+                    "description" to fav.description,
+                    "thumbnailUrl" to fav.thumbnailUrl,
+                    "genres" to fav.genres,
+                    "sourceName" to fav.sourceName,
+                    "sourceId" to fav.sourceId,
+                    "mangaUrl" to fav.mangaUrl,
+                    "status" to fav.status,
+                    "order" to index,
+                )
+            }
+            usersCollection.document(uid).update("topManga", data).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Gets the user's Top 5 Manga favorites from Firestore.
+     */
+    @Suppress("UNCHECKED_CAST")
+    suspend fun getTopManga(uid: String): List<FavoriteManga> {
+        return try {
+            val doc = usersCollection.document(uid).get().await()
+            val list = doc.get("topManga") as? List<Map<String, Any?>> ?: return emptyList()
+            list.map { map ->
+                FavoriteManga(
+                    title = map["title"] as? String ?: "",
+                    author = map["author"] as? String ?: "",
+                    description = map["description"] as? String ?: "",
+                    thumbnailUrl = map["thumbnailUrl"] as? String ?: "",
+                    genres = (map["genres"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
+                    sourceName = map["sourceName"] as? String ?: "",
+                    sourceId = (map["sourceId"] as? Number)?.toLong() ?: 0L,
+                    mangaUrl = map["mangaUrl"] as? String ?: "",
+                    status = (map["status"] as? Number)?.toLong() ?: 0L,
+                    order = (map["order"] as? Number)?.toInt() ?: 0,
+                )
+            }.sortedBy { it.order }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    /**
+     * Saves the user's Top 5 Novel favorites to Firestore.
+     */
+    suspend fun saveTopNovels(uid: String, favorites: List<FavoriteManga>): Result<Unit> {
+        return try {
+            val data = favorites.mapIndexed { index, fav ->
+                mapOf(
+                    "title" to fav.title,
+                    "author" to fav.author,
+                    "description" to fav.description,
+                    "thumbnailUrl" to fav.thumbnailUrl,
+                    "genres" to fav.genres,
+                    "sourceName" to fav.sourceName,
+                    "sourceId" to fav.sourceId,
+                    "mangaUrl" to fav.mangaUrl,
+                    "status" to fav.status,
+                    "order" to index,
+                )
+            }
+            usersCollection.document(uid).update("topNovels", data).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Gets the user's Top 5 Novel favorites from Firestore.
+     */
+    @Suppress("UNCHECKED_CAST")
+    suspend fun getTopNovels(uid: String): List<FavoriteManga> {
+        return try {
+            val doc = usersCollection.document(uid).get().await()
+            val list = doc.get("topNovels") as? List<Map<String, Any?>> ?: return emptyList()
+            list.map { map ->
+                FavoriteManga(
+                    title = map["title"] as? String ?: "",
+                    author = map["author"] as? String ?: "",
+                    description = map["description"] as? String ?: "",
+                    thumbnailUrl = map["thumbnailUrl"] as? String ?: "",
+                    genres = (map["genres"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
+                    sourceName = map["sourceName"] as? String ?: "",
+                    sourceId = (map["sourceId"] as? Number)?.toLong() ?: 0L,
+                    mangaUrl = map["mangaUrl"] as? String ?: "",
+                    status = (map["status"] as? Number)?.toLong() ?: 0L,
+                    order = (map["order"] as? Number)?.toInt() ?: 0,
+                )
+            }.sortedBy { it.order }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    /**
      * Deletes a user account atomically.
      *
      * Atomic batch:
