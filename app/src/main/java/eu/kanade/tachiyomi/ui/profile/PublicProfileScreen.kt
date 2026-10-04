@@ -264,94 +264,122 @@ class PublicProfileScreen(
                             val fav = selectedFav!!
                             val hasExtension = sourceManager.get(fav.sourceId) != null
 
-                            AlertDialog(
-                                onDismissRequest = { selectedFav = null },
-                                title = {
-                                    Text(fav.title, fontWeight = FontWeight.Bold)
-                                },
-                                text = {
-                                    Column {
-                                        Row(verticalAlignment = Alignment.Top) {
-                                            AsyncImage(
-                                                model = tachiyomi.domain.manga.model.MangaCover(mangaId = fav.mangaUrl.hashCode().toLong(), sourceId = fav.sourceId, isMangaFavorite = false, url = fav.thumbnailUrl, lastModified = 0L),
-                                                contentDescription = fav.title,
-                                                contentScale = ContentScale.Crop,
-                                                modifier = Modifier
-                                                    .width(80.dp)
-                                                    .height(120.dp)
-                                                    .clip(RoundedCornerShape(8.dp)),
-                                            )
-                                            Spacer(modifier = Modifier.width(12.dp))
-                                            Column {
-                                                if (fav.author.isNotEmpty()) {
-                                                    Text("by ${fav.author}", style = MaterialTheme.typography.bodyMedium)
-                                                }
-                                                Spacer(modifier = Modifier.height(4.dp))
-                                                Text("Source: ${fav.sourceName}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                                                if (fav.genres.isNotEmpty()) {
-                                                    Spacer(modifier = Modifier.height(4.dp))
-                                                    Text(
-                                                        fav.genres.take(3).joinToString(" · "),
-                                                        style = MaterialTheme.typography.bodySmall,
-                                                        color = MaterialTheme.colorScheme.primary,
+                            androidx.compose.ui.window.Dialog(onDismissRequest = { selectedFav = null }) {
+                                Surface(
+                                    shape = RoundedCornerShape(16.dp),
+                                    color = Color.Black,
+                                    modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                                ) {
+                                    Box {
+                                        // Background Image
+                                        AsyncImage(
+                                            model = tachiyomi.domain.manga.model.MangaCover(mangaId = fav.mangaUrl.hashCode().toLong(), sourceId = fav.sourceId, isMangaFavorite = false, url = fav.thumbnailUrl, lastModified = 0L),
+                                            contentDescription = null,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxWidth().height(250.dp)
+                                        )
+                                        // Gradient Overlay
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(250.dp)
+                                                .background(
+                                                    Brush.verticalGradient(
+                                                        0.0f to Color.Transparent,
+                                                        0.5f to Color.Black.copy(alpha = 0.5f),
+                                                        1.0f to Color.Black
                                                     )
-                                                }
-                                            }
-                                        }
-                                        if (fav.description.isNotEmpty()) {
-                                            Spacer(modifier = Modifier.height(12.dp))
+                                                )
+                                        )
+                                        
+                                        // Content
+                                        Column(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(24.dp)
+                                        ) {
+                                            Spacer(modifier = Modifier.height(100.dp)) // push content down a bit to show the background
+                                            
                                             Text(
-                                                fav.description.take(200) + if (fav.description.length > 200) "..." else "",
-                                                style = MaterialTheme.typography.bodySmall,
-                                            )
-                                        }
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        if (hasExtension) {
-                                            Button(
-                                                onClick = {
-                                                    selectedFav = null
-                                                    scope.launch {
-                                                        val mangaRepo: tachiyomi.domain.manga.repository.MangaRepository = Injekt.get()
-                                                        val localManga = withContext(Dispatchers.IO) {
-                                                            mangaRepo.getMangaByUrlAndSourceId(fav.mangaUrl, fav.sourceId)
-                                                        }
-                                                        if (localManga != null) {
-                                                            navigator.push(eu.kanade.tachiyomi.ui.manga.MangaScreen(localManga.id, fromSource = true))
-                                                        } else {
-                                                            navigator.push(eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen(fav.sourceId, fav.mangaUrl))
-                                                        }
-                                                    }
-                                                },
-                                                modifier = Modifier.fillMaxWidth(),
-                                            ) {
-                                                Text("📖  Read")
-                                            }
-                                        } else {
-                                            Text(
-                                                "⚠️ Extension \"${fav.sourceName}\" not installed",
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.error,
+                                                text = fav.title,
+                                                style = MaterialTheme.typography.titleLarge,
+                                                fontWeight = FontWeight.Bold,
+                                                color = Color.White
                                             )
                                             Spacer(modifier = Modifier.height(8.dp))
-                                            OutlinedButton(
-                                                onClick = {
-                                                    selectedFav = null
-                                                    navigator.push(eu.kanade.tachiyomi.ui.browse.BrowseTab)
-                                                },
-                                                modifier = Modifier.fillMaxWidth(),
+                                            if (fav.author.isNotEmpty()) {
+                                                Text("by ${fav.author}", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.8f))
+                                            }
+                                            Text("Source: ${fav.sourceName}", style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.6f))
+                                            if (fav.genres.isNotEmpty()) {
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                                Text(
+                                                    fav.genres.take(3).joinToString(" • "),
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.primary,
+                                                )
+                                            }
+                                            if (fav.description.isNotEmpty()) {
+                                                Spacer(modifier = Modifier.height(16.dp))
+                                                Text(
+                                                    fav.description.take(200) + if (fav.description.length > 200) "..." else "",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = Color.White.copy(alpha = 0.8f)
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(24.dp))
+                                            
+                                            // Buttons
+                                            if (hasExtension) {
+                                                Button(
+                                                    onClick = {
+                                                        selectedFav = null
+                                                        // Navigate to MangaScreen by first finding the local manga
+                                                        scope.launch {
+                                                            val mangaRepo: tachiyomi.domain.manga.repository.MangaRepository = Injekt.get()
+                                                            val localManga = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                                                                mangaRepo.getMangaByUrlAndSourceId(fav.mangaUrl, fav.sourceId)
+                                                            }
+                                                            if (localManga != null) {
+                                                                navigator.push(eu.kanade.tachiyomi.ui.manga.MangaScreen(localManga.id, fromSource = true))
+                                                            } else {
+                                                                // Manga not in local DB => browse to it from source
+                                                                navigator.push(eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen(fav.sourceId, fav.mangaUrl))
+                                                            }
+                                                        }
+                                                    },
+                                                    modifier = Modifier.fillMaxWidth()
+                                                ) {
+                                                    Text("📖 Read")
+                                                }
+                                            } else {
+                                                Text(
+                                                    "Extension '${fav.sourceName}' is not installed.",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = MaterialTheme.colorScheme.error,
+                                                )
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                                OutlinedButton(
+                                                    onClick = {
+                                                        selectedFav = null
+                                                        navigator.push(eu.kanade.tachiyomi.ui.browse.BrowseTab)
+                                                    },
+                                                    modifier = Modifier.fillMaxWidth()
+                                                ) {
+                                                    Text("Get Extension")
+                                                }
+                                            }
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                            TextButton(
+                                                onClick = { selectedFav = null },
+                                                modifier = Modifier.align(Alignment.End)
                                             ) {
-                                                Text("⬇️  Get Extension")
+                                                Text("Close", color = Color.White)
                                             }
                                         }
                                     }
-                                },
-                                confirmButton = {},
-                                dismissButton = {
-                                    TextButton(onClick = { selectedFav = null }) {
-                                        Text("Close")
-                                    }
-                                },
-                            )
+                                }
+                            }
                         }
                     }
                 }
