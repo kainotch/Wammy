@@ -17,6 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Menu
@@ -492,9 +494,93 @@ class ProfileScreen : Screen {
                                 }
                             )
                         }
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
+                    // ── Active Trackers Section ──
+                    var showTrackerPicker by remember { mutableStateOf(false) }
+                    val trackerManager: eu.kanade.tachiyomi.data.track.TrackerManager = remember { uy.kohesive.injekt.Injekt.get() }
+                    val activeTrackers by trackerManager.loggedInTrackersFlow().collectAsState(initial = trackerManager.loggedInTrackers())
 
+                    if (activeTrackers.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            activeTrackers.forEach { tracker ->
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = Color.White.copy(alpha = 0.05f),
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                        androidx.compose.foundation.Image(
+                                            painter = androidx.compose.ui.res.painterResource(id = tracker.getLogo()),
+                                            contentDescription = tracker.name,
+                                            modifier = Modifier.size(28.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            
+                            // + Icon at the end
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clickable { showTrackerPicker = true }
+                            ) {
+                                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = "Add Tracker",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        // NO ACTIVE TRACKERS -> Show rounded square with [+ Add trackers]
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp)
+                                .height(64.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.White.copy(alpha = 0.05f))
+                                .clickable { showTrackerPicker = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Add Tracker",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Add trackers",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                    
+                    if (showTrackerPicker) {
+                        androidx.compose.material3.ModalBottomSheet(
+                            onDismissRequest = { showTrackerPicker = false },
+                            contentWindowInsets = { androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0) } 
+                        ) {
+                            eu.kanade.presentation.more.settings.PreferenceScreen(
+                                items = eu.kanade.presentation.more.settings.screen.SettingsTrackingScreen.getPreferences(),
+                                modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(24.dp))
 
