@@ -157,16 +157,26 @@ class ProfileScreen : Screen {
         if (user != null) {
             val highResPhotoUrl = user?.photoUrl?.toString()?.replace("s96-c", "s800-c")
 
-            Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+            val screenHeight = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+                    .verticalScroll(rememberScrollState())
+            ) {
                 AsyncImage(
                     model = highResPhotoUrl,
                     contentDescription = "Profile Background",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(screenHeight)
                 )
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
+                        .height(screenHeight)
                         .background(
                             Brush.verticalGradient(
                                 0.0f to Color.Transparent,
@@ -183,9 +193,7 @@ class ProfileScreen : Screen {
                 var showBottomSheet by remember { mutableStateOf(false) }
 
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState()),
+                    modifier = Modifier.fillMaxWidth(),
                     horizontalAlignment = Alignment.Start
                 ) {
                     Row(
