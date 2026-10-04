@@ -164,7 +164,7 @@ class ProfileScreen : Screen {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     IconButton(
-                        onClick = { navigator.pop() },
+                        onClick = { if (!navigator.pop()) (context as? android.app.Activity)?.finish() },
                         modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
                     ) {
                         Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
@@ -520,7 +520,7 @@ class ProfileScreen : Screen {
                         .padding(8.dp),
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    IconButton(onClick = { navigator.pop() }) {
+                    IconButton(onClick = { if (!navigator.pop()) (context as? android.app.Activity)?.finish() }) {
                         Icon(Icons.Default.Close, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
                     }
                 }

@@ -182,10 +182,24 @@ class MainActivity : BaseActivity() {
                 )
             }
 
+            val currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+            val initialScreen = if (currentUser == null) eu.kanade.tachiyomi.ui.profile.ProfileScreen() else HomeScreen
+
             Navigator(
-                screen = HomeScreen,
+                screen = initialScreen,
                 disposeBehavior = NavigatorDisposeBehavior(disposeNestedNavigators = false, disposeSteps = true),
             ) { navigator ->
+                val authManager: eu.kanade.tachiyomi.data.auth.AuthManager = uy.kohesive.injekt.Injekt.get()
+                val user by authManager.currentUser.collectAsState()
+
+                LaunchedEffect(user) {
+                    if (user == null) {
+                        navigator.replaceAll(eu.kanade.tachiyomi.ui.profile.ProfileScreen())
+                    } else if (navigator.lastItem is eu.kanade.tachiyomi.ui.profile.ProfileScreen && navigator.size == 1) {
+                        navigator.replaceAll(HomeScreen)
+                    }
+                }
+
                 LaunchedEffect(navigator) {
                     this@MainActivity.navigator = navigator
 
