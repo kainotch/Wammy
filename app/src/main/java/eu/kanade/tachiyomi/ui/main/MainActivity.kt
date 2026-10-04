@@ -107,6 +107,7 @@ import tachiyomi.domain.release.interactor.GetApplicationRelease
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.injectLazy
+import uy.kohesive.injekt.api.get
 
 class MainActivity : BaseActivity() {
 
