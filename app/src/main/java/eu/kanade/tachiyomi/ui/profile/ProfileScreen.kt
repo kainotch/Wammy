@@ -565,7 +565,7 @@ class ProfileScreen : Screen {
                                             .clickable { selectedFav = fav },
                                     ) {
                                         AsyncImage(
-                                            model = fav.thumbnailUrl,
+                                            model = tachiyomi.domain.manga.model.MangaCover(mangaId = fav.mangaUrl.hashCode().toLong(), sourceId = fav.sourceId, isMangaFavorite = false, url = fav.thumbnailUrl, lastModified = 0L),
                                             contentDescription = fav.title,
                                             contentScale = ContentScale.Crop,
                                             modifier = Modifier.fillMaxSize(),
@@ -624,7 +624,7 @@ class ProfileScreen : Screen {
                                         Column {
                                             Row(verticalAlignment = Alignment.Top) {
                                                 AsyncImage(
-                                                    model = fav.thumbnailUrl,
+                                                    model = tachiyomi.domain.manga.model.MangaCover(mangaId = fav.mangaUrl.hashCode().toLong(), sourceId = fav.sourceId, isMangaFavorite = false, url = fav.thumbnailUrl, lastModified = 0L),
                                                     contentDescription = fav.title,
                                                     contentScale = ContentScale.Crop,
                                                     modifier = Modifier

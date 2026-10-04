@@ -35,6 +35,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import tachiyomi.domain.manga.model.Manga
+import tachiyomi.domain.manga.model.asMangaCover
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
 import tachiyomi.domain.manga.repository.MangaRepository
 import tachiyomi.domain.source.service.SourceManager
 import uy.kohesive.injekt.Injekt
@@ -64,6 +67,8 @@ class FavoritePickerScreen(
         var libraryManga by remember { mutableStateOf<List<Manga>>(emptyList()) }
         var isLoading by remember { mutableStateOf(true) }
         var isSaving by remember { mutableStateOf(false) }
+        var searchQuery by remember { mutableStateOf("") }
+        var isSearchExpanded by remember { mutableStateOf(false) }
 
         // Track selected manga IDs in order
         val selectedIds = remember { mutableStateListOf<Long>() }
@@ -101,17 +106,56 @@ class FavoritePickerScreen(
             topBar = {
                 TopAppBar(
                     title = {
-                        Text(
-                            "Pick Top 5 ${if (isNovel) "Novels" else "Manga"}",
-                            fontWeight = FontWeight.Bold,
-                        )
+                        if (isSearchExpanded) {
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = { searchQuery = it },
+                                placeholder = { Text("Search library...", color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                                singleLine = true,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(end = 8.dp)
+                                    .height(50.dp),
+                                textStyle = LocalTextStyle.current.copy(color = MaterialTheme.colorScheme.onSurface),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent
+                                ),
+                                trailingIcon = {
+                                    if (searchQuery.isNotEmpty()) {
+                                        IconButton(onClick = { searchQuery = "" }) {
+                                            Icon(Icons.Default.Close, contentDescription = "Clear")
+                                        }
+                                    }
+                                }
+                            )
+                        } else {
+                            Text(
+                                "Pick Top 5 ${if (isNovel) "Novels" else "Manga"}",
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
                     },
                     navigationIcon = {
-                        IconButton(onClick = { navigator.pop() }) {
+                        IconButton(onClick = { 
+                            if (isSearchExpanded) {
+                                isSearchExpanded = false
+                                searchQuery = ""
+                            } else {
+                                navigator.pop() 
+                            }
+                        }) {
                             Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                         }
                     },
                     actions = {
+                        if (!isSearchExpanded) {
+                            IconButton(onClick = { isSearchExpanded = true }) {
+                                Icon(Icons.Default.Search, contentDescription = "Search")
+                            }
+                        }
                         TextButton(
                             onClick = {
                                 if (isSaving) return@TextButton
@@ -198,7 +242,8 @@ class FavoritePickerScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    items(libraryManga, key = { it.id }) { manga ->
+                    val filteredManga = if (searchQuery.isEmpty()) libraryManga else libraryManga.filter { it.title.contains(searchQuery, ignoreCase = true) }
+                    items(filteredManga, key = { it.id }) { manga ->
                         val isSelected = selectedIds.contains(manga.id)
                         val selectionIndex = selectedIds.indexOf(manga.id)
 
@@ -244,7 +289,7 @@ private fun MangaGridItem(
     ) {
         // Cover image
         AsyncImage(
-            model = manga.thumbnailUrl,
+            model = manga.asMangaCover(),
             contentDescription = manga.title,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize(),
