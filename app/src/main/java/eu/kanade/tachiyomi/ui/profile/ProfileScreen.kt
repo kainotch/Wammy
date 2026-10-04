@@ -795,7 +795,7 @@ class ProfileScreen : Screen {
                                                         },
                                                         modifier = Modifier.fillMaxWidth()
                                                     ) {
-                                                        Text("📖 Read")
+                                                        Text("Read")
                                                     }
                                                 } else {
                                                     Text(

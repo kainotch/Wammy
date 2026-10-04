@@ -350,7 +350,7 @@ class PublicProfileScreen(
                                                     },
                                                     modifier = Modifier.fillMaxWidth()
                                                 ) {
-                                                    Text("📖 Read")
+                                                    Text("Read")
                                                 }
                                             } else {
                                                 Text(
