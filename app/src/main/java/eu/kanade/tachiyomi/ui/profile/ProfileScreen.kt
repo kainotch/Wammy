@@ -179,27 +179,35 @@ class ProfileScreen : Screen {
 
                 var showEditDialog by remember { mutableStateOf(false) }
 
-                Row(
+                @OptIn(ExperimentalMaterial3Api::class)
+                var showBottomSheet by remember { mutableStateOf(false) }
+
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 48.dp, start = 16.dp, end = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.Start
                 ) {
-                    IconButton(
-                        onClick = { if (!navigator.pop()) (context as? android.app.Activity)?.finish() },
-                        modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 48.dp, start = 16.dp, end = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
-                    }
-                    @OptIn(ExperimentalMaterial3Api::class)
-                    var showBottomSheet by remember { mutableStateOf(false) }
-                    
-                    Box {
                         IconButton(
-                            onClick = { showBottomSheet = true },
+                            onClick = { if (!navigator.pop()) (context as? android.app.Activity)?.finish() },
                             modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
                         ) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.White)
+                            Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                        }
+                        
+                        Box {
+                            IconButton(
+                                onClick = { showBottomSheet = true },
+                                modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                            ) {
+                                Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.White)
+                            }
                         }
                     }
                     
@@ -235,16 +243,8 @@ class ProfileScreen : Screen {
                             }
                         }
                     }
-                }
-                
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 100.dp)
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Spacer(modifier = Modifier.height(36.dp))
                     Column(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                         horizontalAlignment = Alignment.Start
