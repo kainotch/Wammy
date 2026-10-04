@@ -194,10 +194,8 @@ class MainActivity : BaseActivity() {
                 val user by authManager.currentUser.collectAsState()
 
                 LaunchedEffect(user) {
-                    if (user == null) {
+                    if (user == null && navigator.lastItem !is eu.kanade.tachiyomi.ui.profile.ProfileScreen) {
                         navigator.replaceAll(eu.kanade.tachiyomi.ui.profile.ProfileScreen())
-                    } else if (navigator.lastItem is eu.kanade.tachiyomi.ui.profile.ProfileScreen && navigator.size == 1) {
-                        navigator.replaceAll(HomeScreen)
                     }
                 }
 
