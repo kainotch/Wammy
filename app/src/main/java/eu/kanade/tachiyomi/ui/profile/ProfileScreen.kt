@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -61,6 +62,7 @@ import eu.kanade.tachiyomi.data.sync.DriveSyncManager
 import eu.kanade.tachiyomi.data.sync.SyncResult
 import androidx.activity.result.IntentSenderRequest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -91,6 +93,7 @@ class ProfileScreen : Screen {
                 eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleRestoreCheck(context)
                 Toast.makeText(context, "Google Drive connected! Checking for restore...", Toast.LENGTH_SHORT).show()
             }
+            if (navigator.size == 1) navigator.replaceAll(eu.kanade.tachiyomi.ui.home.HomeScreen)
         }
         
         LaunchedEffect(user) {
@@ -612,7 +615,12 @@ class ProfileScreen : Screen {
                                                 Toast.makeText(context, "Signed in successfully!", Toast.LENGTH_SHORT).show()
                                                 
                                                 // Request Google Drive permission for sync immediately after login
-                                                scope.launch {
+                                                  scope.launch {
+                                                      // Wait for their profile to be fully created/loaded first
+                                                      val currentUid = FirebaseAuth.getInstance().currentUser?.uid
+                                                      if (currentUid != null) {
+                                                          androidx.compose.runtime.snapshotFlow { cloudUser }.first { it != null }
+                                                      }
                                                     when (val authResult = driveApiHelper.requestDriveAuthorization()) {
                                                         is AuthorizationResult.NeedsConsent -> {
                                                             // New device/account -> prompt for Drive permission
@@ -622,9 +630,11 @@ class ProfileScreen : Screen {
                                                         is AuthorizationResult.Success -> {
                                                             // Already authorized (silently got token) -> trigger restore check now!
                                                             eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleRestoreCheck(context)
+                                                            if (navigator.size == 1) navigator.replaceAll(eu.kanade.tachiyomi.ui.home.HomeScreen)
                                                         }
                                                         is AuthorizationResult.Error -> {
                                                             android.util.Log.e("ProfileScreen", "Drive Auth Error: ${authResult.message}")
+                                                            if (navigator.size == 1) navigator.replaceAll(eu.kanade.tachiyomi.ui.home.HomeScreen)
                                                         }
                                                     }
                                                 }
