@@ -26,8 +26,15 @@ import tachiyomi.core.common.util.system.logcat
  */
 class DriveApiHelper(
     private val context: Context,
-    private val client: OkHttpClient,
+    baseClient: OkHttpClient,
 ) {
+    // Dedicated client with generous timeouts for large backup uploads/downloads
+    private val client: OkHttpClient = baseClient.newBuilder()
+        .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+        .readTimeout(90, java.util.concurrent.TimeUnit.SECONDS)
+        .writeTimeout(120, java.util.concurrent.TimeUnit.SECONDS)
+        .build()
+
     private val authClient: AuthorizationClient = Identity.getAuthorizationClient(context)
 
     companion object {

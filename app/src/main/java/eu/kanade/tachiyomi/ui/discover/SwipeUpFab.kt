@@ -130,7 +130,8 @@ fun SwipeUpFab(
                                 text = text,
                                 color = Color.White,
                                 fontSize = 18.sp,
-                                fontWeight = FontWeight.Bold,
+                                lineHeight = 24.sp,
+                                fontWeight = FontWeight.Medium,
                                 textAlign = androidx.compose.ui.text.style.TextAlign.End,
                                 modifier = Modifier.padding(bottom = 16.dp, end = 16.dp)
                             )

@@ -117,7 +117,7 @@ class ProfileScreen : Screen {
                 val uid = user?.uid
                 if (uid != null) {
                     val hasProfile = repo.hasProfile(uid)
-                    if (!hasProfile) {
+                    if (hasProfile == false) {
                         navigator.push(UsernamePickerScreen())
                     }
                 }
@@ -152,7 +152,7 @@ class ProfileScreen : Screen {
             }
         }
 
-        val webClientId = "997612260567-i7gkfnks53c0tlh9kvfslmml0bnn0lle.apps.googleusercontent.com"
+        val webClientId = eu.kanade.tachiyomi.data.auth.AuthConstants.WEB_CLIENT_ID
 
         if (user != null) {
             val highResPhotoUrl = user?.photoUrl?.toString()?.replace("s96-c", "s800-c")
@@ -420,7 +420,7 @@ class ProfileScreen : Screen {
                                                 val file = java.io.File(fileUri.path!!)
                                                 val client = Injekt.get<NetworkHelper>().client
                                                 
-                                                GlobalScope.launch(Dispatchers.IO) {
+                                                scope.launch(Dispatchers.IO) {
                                                     try {
                                                         val requestBody = MultipartBody.Builder()
                                                             .setType(MultipartBody.FORM)

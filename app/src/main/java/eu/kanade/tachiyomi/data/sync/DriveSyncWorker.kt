@@ -114,7 +114,8 @@ class DriveSyncWorker(
 
                 val result = driveSyncManager.restore()
                 if (result is SyncResult.Success) {
-                    prefs.edit().putLong(KEY_LAST_SYNC_TIME, System.currentTimeMillis()).apply()
+                    // Use the cloud timestamp (not device time) to avoid clock skew issues
+                    prefs.edit().putLong(KEY_LAST_SYNC_TIME, cloudTime).apply()
                     context.notify(NOTIF_ID_RESTORE, eu.kanade.tachiyomi.data.notification.Notifications.CHANNEL_BACKUP_RESTORE_COMPLETE) {
                         setContentTitle("Google Drive")
                         setContentText("Library restored!")
@@ -151,8 +152,17 @@ class DriveSyncWorker(
 
         if (success) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            // Use Drive server timestamp (not device time) to avoid clock skew
+            val driveApiHelper: DriveApiHelper = Injekt.get()
+            val token = driveApiHelper.getAccessToken()
+            val serverTime = if (token != null) {
+                val modifiedStr = driveApiHelper.getSyncFileModifiedTime(token)
+                if (modifiedStr != null) {
+                    try { java.time.Instant.parse(modifiedStr).toEpochMilli() } catch (_: Exception) { System.currentTimeMillis() }
+                } else System.currentTimeMillis()
+            } else System.currentTimeMillis()
             prefs.edit()
-                .putLong(KEY_LAST_SYNC_TIME, System.currentTimeMillis())
+                .putLong(KEY_LAST_SYNC_TIME, serverTime)
                 .putBoolean(KEY_DATA_DIRTY, false)
                 .apply()
 

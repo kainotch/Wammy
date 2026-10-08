@@ -50,12 +50,20 @@ import kotlinx.coroutines.launch
 class UserSearchScreen : Screen {
 
     private fun loadRecentUsers(prefs: SharedPreferences): List<Pair<String, CloudUser>> {
-        val str = prefs.getString("recent_users_list", "") ?: ""
-        if (str.isEmpty()) return emptyList()
-        return str.split(";;;").mapNotNull {
-            val parts = it.split("|", limit = 4)
-            if (parts.size == 4) parts[0] to CloudUser(username = parts[1], displayName = parts[2], avatarUrl = parts[3]) else null
-        }
+        val str = prefs.getString("recent_users_list", null) ?: return emptyList()
+        return try {
+            val arr = org.json.JSONArray(str)
+            (0 until arr.length()).mapNotNull { i ->
+                val obj = arr.getJSONObject(i)
+                val uid = obj.optString("uid", "") 
+                val user = CloudUser(
+                    username = obj.optString("username", ""),
+                    displayName = obj.optString("displayName", ""),
+                    avatarUrl = obj.optString("avatarUrl", ""),
+                )
+                if (uid.isNotEmpty()) uid to user else null
+            }
+        } catch (_: Exception) { emptyList() }
     }
 
     private fun saveRecentUser(prefs: SharedPreferences, uid: String, user: CloudUser): List<Pair<String, CloudUser>> {
@@ -63,9 +71,17 @@ class UserSearchScreen : Screen {
         current.removeAll { it.first == uid }
         current.add(0, uid to user)
         if (current.size > 15) current.removeLast()
-        
-        val str = current.joinToString(";;;") { "${it.first}|${it.second.username}|${it.second.displayName}|${it.second.avatarUrl}" }
-        prefs.edit().putString("recent_users_list", str).apply()
+
+        val arr = org.json.JSONArray()
+        current.forEach { (id, u) ->
+            arr.put(org.json.JSONObject().apply {
+                put("uid", id)
+                put("username", u.username)
+                put("displayName", u.displayName)
+                put("avatarUrl", u.avatarUrl)
+            })
+        }
+        prefs.edit().putString("recent_users_list", arr.toString()).apply()
         return current
     }
     
@@ -75,9 +91,11 @@ class UserSearchScreen : Screen {
     }
 
     private fun loadRecentQueries(prefs: SharedPreferences, key: String): List<String> {
-        val str = prefs.getString(key, "") ?: ""
-        if (str.isEmpty()) return emptyList()
-        return str.split(";;;")
+        val str = prefs.getString(key, null) ?: return emptyList()
+        return try {
+            val arr = org.json.JSONArray(str)
+            (0 until arr.length()).map { arr.getString(it) }
+        } catch (_: Exception) { emptyList() }
     }
 
     private fun saveRecentQuery(prefs: SharedPreferences, key: String, query: String): List<String> {
@@ -86,7 +104,7 @@ class UserSearchScreen : Screen {
         current.add(0, query)
         if (current.size > 15) current.removeLast()
         
-        prefs.edit().putString(key, current.joinToString(";;;")).apply()
+        prefs.edit().putString(key, org.json.JSONArray(current).toString()).apply()
         return current
     }
 

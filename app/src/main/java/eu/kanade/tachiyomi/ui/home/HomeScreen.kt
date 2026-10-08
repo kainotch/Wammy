@@ -18,6 +18,18 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.Text
+import eu.kanade.tachiyomi.data.auth.AuthManager
+import eu.kanade.tachiyomi.ui.profile.LoginBottomSheet
+import eu.kanade.tachiyomi.data.sync.DriveApiHelper
+import eu.kanade.tachiyomi.data.sync.FirestoreUserRepository
+import eu.kanade.tachiyomi.ui.profile.UsernamePickerScreen
+import com.google.firebase.auth.FirebaseUser
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.foundation.background
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -97,6 +109,26 @@ object HomeScreen : Screen() {
         val navigator = LocalNavigator.currentOrThrow
         val libraryPreferences = remember { Injekt.get<tachiyomi.domain.library.service.LibraryPreferences>() }
         val basePreferences = remember { Injekt.get<BasePreferences>() }
+        val authManager: AuthManager = remember { Injekt.get() }
+        val user: FirebaseUser? by authManager.currentUser.collectAsState()
+        val driveApiHelper: DriveApiHelper = remember { Injekt.get() }
+        val repo: FirestoreUserRepository = remember { Injekt.get() }
+        
+        // Re-check whenever auth state changes OR user navigates back to HomeScreen
+        val currentScreen = navigator.lastItem
+        LaunchedEffect(user, currentScreen) {
+            val uid = user?.uid
+            if (uid != null && currentScreen is HomeScreen) {
+                val hasProfile = repo.hasProfile(uid)
+                if (hasProfile == false) {
+                    navigator.push(UsernamePickerScreen())
+                } else if (hasProfile == null) {
+                    // Network error — show toast, will re-check on next navigation
+                    android.util.Log.w("HomeScreen", "Could not verify profile (network error), will retry")
+                }
+            }
+        }
+
         val isJoined by libraryPreferences.joinedLibrary.collectAsState()
         val hideMangaUi by basePreferences.hideMangaUi.collectAsState()
         val tabs = if (isJoined || hideMangaUi) JOINED_TABS else TABS
@@ -106,7 +138,8 @@ object HomeScreen : Screen() {
         ) { tabNavigator ->
             // Provide usable navigator to content screen
             CompositionLocalProvider(LocalNavigator provides navigator) {
-                Scaffold(
+                Box(modifier = Modifier.fillMaxSize()) {
+                    Scaffold(
                     startBar = {
                         if (isTabletUi()) {
                             NavigationRail {
@@ -155,6 +188,22 @@ object HomeScreen : Screen() {
                         }
                     }
                 }
+
+                val hasShownOnboarding by basePreferences.shownOnboardingFlow.collectAsState()
+                if (user == null && hasShownOnboarding) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black.copy(alpha = 0.5f))
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                                onClick = {}
+                            )
+                    )
+                    LoginBottomSheet(navigator = navigator, driveApiHelper = driveApiHelper)
+                }
+            }
             }
 
             val goToDiscoverTab = { tabNavigator.current = eu.kanade.tachiyomi.ui.discover.DiscoverTab }

@@ -184,7 +184,7 @@ class MainActivity : BaseActivity() {
             }
 
             val currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
-            val initialScreen = if (currentUser == null) eu.kanade.tachiyomi.ui.profile.ProfileScreen() else HomeScreen
+            val initialScreen = HomeScreen
 
             Navigator(
                 screen = initialScreen,
@@ -193,11 +193,7 @@ class MainActivity : BaseActivity() {
                 val authManager: eu.kanade.tachiyomi.data.auth.AuthManager = uy.kohesive.injekt.Injekt.get()
                 val user by authManager.currentUser.collectAsState()
 
-                LaunchedEffect(user) {
-                    if (user == null && navigator.lastItem !is eu.kanade.tachiyomi.ui.profile.ProfileScreen) {
-                        navigator.replaceAll(eu.kanade.tachiyomi.ui.profile.ProfileScreen())
-                    }
-                }
+                // Removed forced ProfileScreen navigation to allow HomeScreen background
 
                 LaunchedEffect(navigator) {
                     this@MainActivity.navigator = navigator
