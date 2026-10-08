@@ -42,6 +42,7 @@ fun RelatedMangasRow(
     onMangaClick: (Manga) -> Unit,
     onMangaLongClick: (Manga) -> Unit,
     onSeeRecommendationsClick: () -> Unit,
+    onSuggestionArrowClick: () -> Unit,
 ) {
     Column {
         // Header
@@ -57,7 +58,7 @@ fun RelatedMangasRow(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold,
             )
-            IconButton(onClick = onSeeRecommendationsClick) {
+            IconButton(onClick = onSuggestionArrowClick) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Outlined.ArrowForward,
                     contentDescription = null,

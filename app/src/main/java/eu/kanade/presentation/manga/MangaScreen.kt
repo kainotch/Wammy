@@ -113,6 +113,7 @@ fun MangaScreen(
     
     // For recommendations
     onSeeRecommendationsClick: () -> Unit,
+    onSuggestionArrowClick: () -> Unit,
     onSuggestionClick: (Manga) -> Unit,
     onSuggestionLongClick: (Manga) -> Unit,
 
@@ -183,6 +184,7 @@ fun MangaScreen(
             onContinueReading = onContinueReading,
             onSearch = onSearch,
             onSeeRecommendationsClick = onSeeRecommendationsClick,
+            onSuggestionArrowClick = onSuggestionArrowClick,
             onSuggestionClick = onSuggestionClick,
             onSuggestionLongClick = onSuggestionLongClick,
             onCoverClicked = onCoverClicked,
@@ -236,6 +238,7 @@ fun MangaScreen(
             onContinueReading = onContinueReading,
             onSearch = onSearch,
             onSeeRecommendationsClick = onSeeRecommendationsClick,
+            onSuggestionArrowClick = onSuggestionArrowClick,
             onSuggestionClick = onSuggestionClick,
             onSuggestionLongClick = onSuggestionLongClick,
             onCoverClicked = onCoverClicked,
@@ -297,6 +300,7 @@ private fun MangaScreenSmallImpl(
     
     // For recommendations
     onSeeRecommendationsClick: () -> Unit,
+    onSuggestionArrowClick: () -> Unit,
     onSuggestionClick: (Manga) -> Unit,
     onSuggestionLongClick: (Manga) -> Unit,
 
@@ -560,6 +564,7 @@ private fun MangaScreenSmallImpl(
                             onMangaClick = onSuggestionClick,
                             onMangaLongClick = onSuggestionLongClick,
                             onSeeRecommendationsClick = onSeeRecommendationsClick,
+            onSuggestionArrowClick = onSuggestionArrowClick,
                         )
                     }
 
@@ -623,6 +628,7 @@ fun MangaScreenLargeImpl(
     
     // For recommendations
     onSeeRecommendationsClick: () -> Unit,
+    onSuggestionArrowClick: () -> Unit,
     onSuggestionClick: (Manga) -> Unit,
     onSuggestionLongClick: (Manga) -> Unit,
 
@@ -862,6 +868,7 @@ fun MangaScreenLargeImpl(
                             onMangaClick = onSuggestionClick,
                             onMangaLongClick = onSuggestionLongClick,
                             onSeeRecommendationsClick = onSeeRecommendationsClick,
+            onSuggestionArrowClick = onSuggestionArrowClick,
                         )
                     }
                 },

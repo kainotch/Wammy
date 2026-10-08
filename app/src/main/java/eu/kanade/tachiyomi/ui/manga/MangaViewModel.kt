@@ -341,30 +341,58 @@ class MangaViewModel(
 
         viewModelScope.launchIO {
             try {
-                // Strip special characters and just do one search
-                val title = manga.title.replace(Regex("([^a-zA-Z0-9 ]|\\s-|-\\s|\\s\\.|\\.\\s)"), " ")
-                    .replace(Regex("\\s+"), " ")
-                    .trim()
+                // 1. Generate keywords for search
+                val regexWhitespace = Regex("\\s+")
+                val regexSpecialCharacters = Regex("([^a-zA-Z0-9 ]|\\s-|-\\s|\\s\\.|\\.\\s)")
+                val regexNumberOnly = Regex("^\\d+$")
+                
+                fun String.stripKeywordForRelatedMangas(): List<String> {
+                    return replace(regexSpecialCharacters, " ")
+                        .split(regexWhitespace)
+                        .map { it.replace(regexNumberOnly, "").lowercase() }
+                        .filter { it.length > 1 }
+                }
 
-                if (title.isEmpty()) {
+                val words = HashSet<String>()
+                words.add(manga.title)
+                manga.title.stripKeywordForRelatedMangas()
+                    .filterNot { word -> words.any { it.lowercase() == word } }
+                    .onEach { words.add(it) }
+                
+                if (words.isEmpty()) {
                     updateSuccessState { it.copy(isRelatedMangasFetching = false) }
                     return@launchIO
                 }
 
-                val results = source.getSearchManga(1, title, eu.kanade.tachiyomi.source.model.FilterList()).mangas
-                val networkToLocalManga = Injekt.get<tachiyomi.domain.manga.interactor.NetworkToLocalManga>()
+                // 2. Fetch all in parallel
+                val filterList = eu.kanade.tachiyomi.source.model.FilterList()
+                val allResults = java.util.concurrent.ConcurrentLinkedQueue<eu.kanade.tachiyomi.source.model.SManga>()
                 
-                val domainMangas = results.map { 
+                kotlinx.coroutines.coroutineScope {
+                    words.forEach { keyword ->
+                        launch {
+                            try {
+                                val results = source.getSearchManga(1, keyword, filterList).mangas
+                                allResults.addAll(results)
+                            } catch (e: Exception) {
+                                logcat(LogPriority.ERROR, e) { "Failed related manga search: ${e}" }
+                            }
+                        }
+                    }
+                }
+
+                val networkToLocalManga = uy.kohesive.injekt.Injekt.get<tachiyomi.domain.manga.interactor.NetworkToLocalManga>()
+                val domainMangas = allResults.map { 
                     it.toDomainManga(source.id, successState.isNovel) 
                 }
                 
                 val savedMangas = if (domainMangas.isNotEmpty()) {
-                    networkToLocalManga(domainMangas)
+                    networkToLocalManga(domainMangas.toList())
                 } else {
                     emptyList()
                 }
 
-                val filteredMangas = savedMangas.filter { it.id != manga.id }.distinctBy { it.id }
+                val filteredMangas = savedMangas.filter { it.id != manga.id }.distinctBy { it.url }
                 
                 updateSuccessState { 
                     it.copy(
