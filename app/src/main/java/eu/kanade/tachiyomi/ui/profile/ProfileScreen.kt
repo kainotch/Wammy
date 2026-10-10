@@ -10,12 +10,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.MoreHoriz
 import androidx.compose.material.icons.filled.Menu
@@ -31,6 +34,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -61,6 +65,7 @@ import eu.kanade.tachiyomi.data.sync.DriveSyncManager
 import eu.kanade.tachiyomi.data.sync.SyncResult
 import androidx.activity.result.IntentSenderRequest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -79,6 +84,12 @@ class ProfileScreen : Screen {
         val repo = remember { eu.kanade.tachiyomi.data.sync.FirestoreUserRepository() }
         val driveApiHelper: DriveApiHelper = remember { Injekt.get() }
 
+        // Top 5 Favorites state
+        var topManga by remember { mutableStateOf<List<eu.kanade.tachiyomi.data.sync.FavoriteManga>>(emptyList()) }
+        var topNovels by remember { mutableStateOf<List<eu.kanade.tachiyomi.data.sync.FavoriteManga>>(emptyList()) }
+        var favoritesLoaded by remember { mutableStateOf(false) }
+        val sourceManager: tachiyomi.domain.source.service.SourceManager = remember { Injekt.get() }
+
         val notificationPermissionLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission()
         ) { /* Just recording that they answered */ }
@@ -91,6 +102,7 @@ class ProfileScreen : Screen {
                 eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleRestoreCheck(context)
                 Toast.makeText(context, "Google Drive connected! Checking for restore...", Toast.LENGTH_SHORT).show()
             }
+            if (navigator.size == 1) navigator.replaceAll(eu.kanade.tachiyomi.ui.home.HomeScreen)
         }
         
         LaunchedEffect(user) {
@@ -105,10 +117,20 @@ class ProfileScreen : Screen {
                 val uid = user?.uid
                 if (uid != null) {
                     val hasProfile = repo.hasProfile(uid)
-                    if (!hasProfile) {
+                    if (hasProfile == false) {
                         navigator.push(UsernamePickerScreen())
                     }
                 }
+            }
+        }
+
+        // Load Top 5 Favorites from Firestore
+        LaunchedEffect(user) {
+            val uid = user?.uid
+            if (uid != null) {
+                topManga = repo.getTopManga(uid)
+                topNovels = repo.getTopNovels(uid)
+                favoritesLoaded = true
             }
         }
 
@@ -130,21 +152,31 @@ class ProfileScreen : Screen {
             }
         }
 
-        val webClientId = "997612260567-i7gkfnks53c0tlh9kvfslmml0bnn0lle.apps.googleusercontent.com"
+        val webClientId = eu.kanade.tachiyomi.data.auth.AuthConstants.WEB_CLIENT_ID
 
         if (user != null) {
             val highResPhotoUrl = user?.photoUrl?.toString()?.replace("s96-c", "s800-c")
 
-            Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
+            val screenHeight = androidx.compose.ui.platform.LocalConfiguration.current.screenHeightDp.dp
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black)
+                    .verticalScroll(rememberScrollState())
+            ) {
                 AsyncImage(
                     model = highResPhotoUrl,
                     contentDescription = "Profile Background",
                     contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(screenHeight)
                 )
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
+                        .height(screenHeight)
                         .background(
                             Brush.verticalGradient(
                                 0.0f to Color.Transparent,
@@ -157,27 +189,33 @@ class ProfileScreen : Screen {
 
                 var showEditDialog by remember { mutableStateOf(false) }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 48.dp, start = 16.dp, end = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween
+                @OptIn(ExperimentalMaterial3Api::class)
+                var showBottomSheet by remember { mutableStateOf(false) }
+
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.Start
                 ) {
-                    IconButton(
-                        onClick = { navigator.pop() },
-                        modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 48.dp, start = 16.dp, end = 16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
-                    }
-                    @OptIn(ExperimentalMaterial3Api::class)
-                    var showBottomSheet by remember { mutableStateOf(false) }
-                    
-                    Box {
                         IconButton(
-                            onClick = { showBottomSheet = true },
+                            onClick = { if (!navigator.pop()) (context as? android.app.Activity)?.finish() },
                             modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
                         ) {
-                            Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.White)
+                            Icon(Icons.Default.Close, contentDescription = "Close", tint = Color.White)
+                        }
+                        
+                        Box {
+                            IconButton(
+                                onClick = { showBottomSheet = true },
+                                modifier = Modifier.background(Color.Black.copy(alpha = 0.5f), CircleShape)
+                            ) {
+                                Icon(Icons.Default.Menu, contentDescription = "Menu", tint = Color.White)
+                            }
                         }
                     }
                     
@@ -213,16 +251,8 @@ class ProfileScreen : Screen {
                             }
                         }
                     }
-                }
-                
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(top = 100.dp)
-                        .verticalScroll(rememberScrollState()),
-                    horizontalAlignment = Alignment.Start
-                ) {
-                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Spacer(modifier = Modifier.height(36.dp))
                     Column(
                         modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                         horizontalAlignment = Alignment.Start
@@ -390,7 +420,7 @@ class ProfileScreen : Screen {
                                                 val file = java.io.File(fileUri.path!!)
                                                 val client = Injekt.get<NetworkHelper>().client
                                                 
-                                                GlobalScope.launch(Dispatchers.IO) {
+                                                scope.launch(Dispatchers.IO) {
                                                     try {
                                                         val requestBody = MultipartBody.Builder()
                                                             .setType(MultipartBody.FORM)
@@ -472,25 +502,333 @@ class ProfileScreen : Screen {
                                 }
                             )
                         }
-                    Spacer(modifier = Modifier.height(32.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
+                    // ── Active Trackers Section ──
+                    var showTrackerPicker by remember { mutableStateOf(false) }
+                    val trackerManager: eu.kanade.tachiyomi.data.track.TrackerManager = remember { uy.kohesive.injekt.Injekt.get() }
+                    val activeTrackers by trackerManager.loggedInTrackersFlow().collectAsState(initial = trackerManager.loggedInTrackers())
 
+                    if (activeTrackers.isNotEmpty()) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            activeTrackers.forEach { tracker ->
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = Color.White.copy(alpha = 0.05f),
+                                    modifier = Modifier.size(48.dp)
+                                ) {
+                                    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                        androidx.compose.foundation.Image(
+                                            painter = androidx.compose.ui.res.painterResource(id = tracker.getLogo()),
+                                            contentDescription = tracker.name,
+                                            modifier = Modifier.size(28.dp)
+                                        )
+                                    }
+                                }
+                            }
+                            
+                            // + Icon at the end
+                            Surface(
+                                shape = RoundedCornerShape(12.dp),
+                                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clickable { showTrackerPicker = true }
+                            ) {
+                                Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                                    Icon(
+                                        imageVector = Icons.Default.Add,
+                                        contentDescription = "Add Tracker",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(28.dp)
+                                    )
+                                }
+                            }
+                        }
+                    } else {
+                        // NO ACTIVE TRACKERS -> Show rounded square with [+ Add trackers]
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp)
+                                .height(64.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.White.copy(alpha = 0.05f))
+                                .clickable { showTrackerPicker = true },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    imageVector = Icons.Default.Add,
+                                    contentDescription = "Add Tracker",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = "Add trackers",
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+                        }
+                    }
+                    
+                    if (showTrackerPicker) {
+                        androidx.compose.material3.ModalBottomSheet(
+                            onDismissRequest = { showTrackerPicker = false },
+                            contentWindowInsets = { androidx.compose.foundation.layout.WindowInsets(0, 0, 0, 0) } 
+                        ) {
+                            eu.kanade.presentation.more.settings.PreferenceScreen(
+                                items = eu.kanade.presentation.more.settings.screen.SettingsTrackingScreen.getPreferences(),
+                                modifier = Modifier.fillMaxWidth().weight(1f, fill = false)
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(24.dp))
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                            .height(180.dp)
-                            .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "Top 5 Fav Manga\n(Coming Soon)",
-                            color = Color.White.copy(alpha = 0.5f),
-                            textAlign = TextAlign.Center
-                        )
+
+                    // ── Top 5 Favorites Section ──
+                    var selectedFavTab by remember { mutableIntStateOf(0) }
+                    val favTabs = listOf("Manga", "Novels")
+                    val currentFavList = if (selectedFavTab == 0) topManga else topNovels
+
+                    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp)) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "Top 5 Favorites",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                            )
+                            TextButton(onClick = {
+                                navigator.push(FavoritePickerScreen(isNovel = selectedFavTab == 1, existing = currentFavList))
+                            }) {
+                                Text("Edit", color = MaterialTheme.colorScheme.primary)
+                            }
+                        }
+
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            favTabs.forEachIndexed { index, title ->
+                                FilterChip(
+                                    selected = selectedFavTab == index,
+                                    onClick = { selectedFavTab = index },
+                                    label = { Text(title) },
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        if (currentFavList.isEmpty()) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(160.dp)
+                                    .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp)),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Text(
+                                    text = "No favorites yet.\nTap Edit to add your Top 5!",
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
+                        } else {
+                            // Bottom sheet state for manga info
+                            var selectedFav by remember { mutableStateOf<eu.kanade.tachiyomi.data.sync.FavoriteManga?>(null) }
+
+                            androidx.compose.foundation.lazy.LazyRow(
+                                horizontalArrangement = Arrangement.spacedBy(10.dp),
+                            ) {
+                                items(items = currentFavList, key = { it.title }) { fav ->
+                                    val index = currentFavList.indexOf(fav)
+                                    Box(
+                                        modifier = Modifier
+                                            .width(110.dp)
+                                            .height(160.dp)
+                                            .clip(RoundedCornerShape(10.dp))
+                                            .clickable { selectedFav = fav },
+                                    ) {
+                                        AsyncImage(
+                                            model = tachiyomi.domain.manga.model.MangaCover(mangaId = fav.mangaUrl.hashCode().toLong(), sourceId = fav.sourceId, isMangaFavorite = false, url = fav.thumbnailUrl, lastModified = 0L),
+                                            contentDescription = fav.title,
+                                            contentScale = ContentScale.Crop,
+                                            modifier = Modifier.fillMaxSize(),
+                                        )
+                                        // Gradient overlay
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .align(Alignment.BottomCenter)
+                                                .background(
+                                                    brush = Brush.verticalGradient(
+                                                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.85f)),
+                                                    ),
+                                                )
+                                                .padding(6.dp),
+                                        ) {
+                                            Text(
+                                                text = fav.title,
+                                                color = Color.White,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                maxLines = 2,
+                                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                            )
+                                        }
+                                        // Rank badge
+                                        Box(
+                                            modifier = Modifier
+                                                .align(Alignment.TopStart)
+                                                .padding(4.dp)
+                                                .size(22.dp)
+                                                .background(MaterialTheme.colorScheme.primary, CircleShape),
+                                            contentAlignment = Alignment.Center,
+                                        ) {
+                                            Text(
+                                                text = "${index + 1}",
+                                                color = MaterialTheme.colorScheme.onPrimary,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                fontWeight = FontWeight.Bold,
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Info Bottom Sheet
+                            if (selectedFav != null) {
+                                val fav = selectedFav!!
+                                val hasExtension = sourceManager.get(fav.sourceId) != null
+
+                                androidx.compose.ui.window.Dialog(onDismissRequest = { selectedFav = null }) {
+                                    Surface(
+                                        shape = RoundedCornerShape(16.dp),
+                                        color = Color.Black,
+                                        modifier = Modifier.fillMaxWidth().wrapContentHeight()
+                                    ) {
+                                        Box {
+                                            // Background Image
+                                            AsyncImage(
+                                                model = tachiyomi.domain.manga.model.MangaCover(mangaId = fav.mangaUrl.hashCode().toLong(), sourceId = fav.sourceId, isMangaFavorite = false, url = fav.thumbnailUrl, lastModified = 0L),
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.fillMaxWidth().height(250.dp)
+                                            )
+                                            // Gradient Overlay
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(250.dp)
+                                                    .background(
+                                                        Brush.verticalGradient(
+                                                            0.0f to Color.Transparent,
+                                                            0.5f to Color.Black.copy(alpha = 0.5f),
+                                                            1.0f to Color.Black
+                                                        )
+                                                    )
+                                            )
+                                            
+                                            // Content
+                                            Column(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(24.dp)
+                                            ) {
+                                                Spacer(modifier = Modifier.height(100.dp)) // push content down a bit to show the background
+                                                
+                                                Text(
+                                                    text = fav.title,
+                                                    style = MaterialTheme.typography.titleLarge,
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = Color.White
+                                                )
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                                if (fav.author.isNotEmpty()) {
+                                                    Text("by ${fav.author}", style = MaterialTheme.typography.bodyMedium, color = Color.White.copy(alpha = 0.8f))
+                                                }
+                                                Text("Source: ${fav.sourceName}", style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.6f))
+                                                if (fav.genres.isNotEmpty()) {
+                                                    Spacer(modifier = Modifier.height(8.dp))
+                                                    Text(
+                                                        fav.genres.take(3).joinToString(" • "),
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.primary,
+                                                    )
+                                                }
+                                                if (fav.description.isNotEmpty()) {
+                                                    Spacer(modifier = Modifier.height(16.dp))
+                                                    Text(
+                                                        fav.description.take(200) + if (fav.description.length > 200) "..." else "",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = Color.White.copy(alpha = 0.8f)
+                                                    )
+                                                }
+                                                Spacer(modifier = Modifier.height(24.dp))
+                                                
+                                                // Buttons
+                                                if (hasExtension) {
+                                                    Button(
+                                                        onClick = {
+                                                            selectedFav = null
+                                                            // Navigate to MangaScreen by first finding the local manga
+                                                            scope.launch {
+                                                                val mangaRepo: tachiyomi.domain.manga.repository.MangaRepository = Injekt.get()
+                                                                val localManga = withContext(Dispatchers.IO) {
+                                                                    mangaRepo.getMangaByUrlAndSourceId(fav.mangaUrl, fav.sourceId)
+                                                                }
+                                                                if (localManga != null) {
+                                                                    navigator.push(eu.kanade.tachiyomi.ui.manga.MangaScreen(localManga.id, fromSource = true))
+                                                                } else {
+                                                                    // Manga not in local DB => browse to it from source
+                                                                    navigator.push(eu.kanade.tachiyomi.ui.browse.source.browse.BrowseSourceScreen(fav.sourceId, fav.mangaUrl))
+                                                                }
+                                                            }
+                                                        },
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        Text("Read")
+                                                    }
+                                                } else {
+                                                    Text(
+                                                        "Extension '${fav.sourceName}' is not installed.",
+                                                        style = MaterialTheme.typography.bodySmall,
+                                                        color = MaterialTheme.colorScheme.error,
+                                                    )
+                                                    Spacer(modifier = Modifier.height(8.dp))
+                                                    OutlinedButton(
+                                                        onClick = {
+                                                            selectedFav = null
+                                                            navigator.push(eu.kanade.tachiyomi.ui.browse.BrowseTab)
+                                                        },
+                                                        modifier = Modifier.fillMaxWidth()
+                                                    ) {
+                                                        Text("Get Extension")
+                                                    }
+                                                }
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                                TextButton(
+                                                    onClick = { selectedFav = null },
+                                                    modifier = Modifier.align(Alignment.End)
+                                                ) {
+                                                    Text("Close", color = Color.White)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
+
                     Spacer(modifier = Modifier.height(48.dp))
                 }
             }
@@ -520,7 +858,7 @@ class ProfileScreen : Screen {
                         .padding(8.dp),
                     horizontalArrangement = Arrangement.Start
                 ) {
-                    IconButton(onClick = { navigator.pop() }) {
+                    IconButton(onClick = { if (!navigator.pop()) (context as? android.app.Activity)?.finish() }) {
                         Icon(Icons.Default.Close, contentDescription = "Back", tint = MaterialTheme.colorScheme.onBackground)
                     }
                 }
@@ -612,7 +950,12 @@ class ProfileScreen : Screen {
                                                 Toast.makeText(context, "Signed in successfully!", Toast.LENGTH_SHORT).show()
                                                 
                                                 // Request Google Drive permission for sync immediately after login
-                                                scope.launch {
+                                                  scope.launch {
+                                                      // Wait for their profile to be fully created/loaded first
+                                                      val currentUid = FirebaseAuth.getInstance().currentUser?.uid
+                                                      if (currentUid != null) {
+                                                          androidx.compose.runtime.snapshotFlow { cloudUser }.first { it != null }
+                                                      }
                                                     when (val authResult = driveApiHelper.requestDriveAuthorization()) {
                                                         is AuthorizationResult.NeedsConsent -> {
                                                             // New device/account -> prompt for Drive permission
@@ -622,9 +965,11 @@ class ProfileScreen : Screen {
                                                         is AuthorizationResult.Success -> {
                                                             // Already authorized (silently got token) -> trigger restore check now!
                                                             eu.kanade.tachiyomi.data.sync.DriveSyncWorker.scheduleRestoreCheck(context)
+                                                            if (navigator.size == 1) navigator.replaceAll(eu.kanade.tachiyomi.ui.home.HomeScreen)
                                                         }
                                                         is AuthorizationResult.Error -> {
                                                             android.util.Log.e("ProfileScreen", "Drive Auth Error: ${authResult.message}")
+                                                            if (navigator.size == 1) navigator.replaceAll(eu.kanade.tachiyomi.ui.home.HomeScreen)
                                                         }
                                                     }
                                                 }

@@ -107,6 +107,7 @@ import tachiyomi.domain.release.interactor.GetApplicationRelease
 import tachiyomi.presentation.core.components.material.Scaffold
 import tachiyomi.presentation.core.util.collectAsState
 import uy.kohesive.injekt.injectLazy
+import uy.kohesive.injekt.api.get
 
 class MainActivity : BaseActivity() {
 
@@ -182,10 +183,18 @@ class MainActivity : BaseActivity() {
                 )
             }
 
+            val currentUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+            val initialScreen = HomeScreen
+
             Navigator(
-                screen = HomeScreen,
+                screen = initialScreen,
                 disposeBehavior = NavigatorDisposeBehavior(disposeNestedNavigators = false, disposeSteps = true),
             ) { navigator ->
+                val authManager: eu.kanade.tachiyomi.data.auth.AuthManager = uy.kohesive.injekt.Injekt.get()
+                val user by authManager.currentUser.collectAsState()
+
+                // Removed forced ProfileScreen navigation to allow HomeScreen background
+
                 LaunchedEffect(navigator) {
                     this@MainActivity.navigator = navigator
 

@@ -19,14 +19,15 @@ class FirestoreUserRepository {
 
     /**
      * Checks whether a Firestore profile exists for the given UID.
+     * Returns null on network error (so the caller can retry instead of bypassing).
      */
-    suspend fun hasProfile(uid: String): Boolean {
+    suspend fun hasProfile(uid: String): Boolean? {
         return try {
             val doc = usersCollection.document(uid).get().await()
             doc.exists()
         } catch (e: Exception) {
-            android.util.Log.e("FirestoreUserRepo", "Error checking profile, assuming true to prevent gatekeeper lock", e)
-            true
+            android.util.Log.e("FirestoreUserRepo", "Error checking profile", e)
+            null // Return null so caller knows it was a network error, not a real "has profile"
         }
     }
 
@@ -214,15 +215,13 @@ class FirestoreUserRepository {
     suspend fun searchByPrefix(prefix: String, limit: Int = 10): List<Pair<String, CloudUser>> {
         if (prefix.isEmpty()) return emptyList()
         val lowered = prefix.lowercase()
-        // Create the upper bound for the range query
-        // e.g., "igk" -> search for >= "igk" and < "igl"
-        val end = lowered.substring(0, lowered.length - 1) +
-            (lowered.last() + 1).toChar()
+        // Use Firestore's standard Unicode sentinel for prefix search
+        // \uf8ff is a very high Unicode code point — any string starting with `lowered` will be < lowered + \uf8ff
 
         return try {
             val snapshot = usersCollection
                 .whereGreaterThanOrEqualTo("username", lowered)
-                .whereLessThan("username", end)
+                .whereLessThanOrEqualTo("username", lowered + "\uf8ff")
                 .orderBy("username", Query.Direction.ASCENDING)
                 .limit(limit.toLong())
                 .get()
@@ -238,33 +237,141 @@ class FirestoreUserRepository {
     }
 
     /**
+     * Saves the user's Top 5 Manga favorites to Firestore.
+     * Stores as a list of maps under the "topManga" field.
+     */
+    suspend fun saveTopManga(uid: String, favorites: List<FavoriteManga>): Result<Unit> {
+        return try {
+            val data = favorites.mapIndexed { index, fav ->
+                mapOf(
+                    "title" to fav.title,
+                    "author" to fav.author,
+                    "description" to fav.description,
+                    "thumbnailUrl" to fav.thumbnailUrl,
+                    "genres" to fav.genres,
+                    "sourceName" to fav.sourceName,
+                    "sourceId" to fav.sourceId,
+                    "mangaUrl" to fav.mangaUrl,
+                    "status" to fav.status,
+                    "order" to index,
+                )
+            }
+            usersCollection.document(uid).update("topManga", data).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Gets the user's Top 5 Manga favorites from Firestore.
+     */
+    @Suppress("UNCHECKED_CAST")
+    suspend fun getTopManga(uid: String): List<FavoriteManga> {
+        return try {
+            val doc = usersCollection.document(uid).get().await()
+            val list = doc.get("topManga") as? List<Map<String, Any?>> ?: return emptyList()
+            list.map { map ->
+                FavoriteManga(
+                    title = map["title"] as? String ?: "",
+                    author = map["author"] as? String ?: "",
+                    description = map["description"] as? String ?: "",
+                    thumbnailUrl = map["thumbnailUrl"] as? String ?: "",
+                    genres = (map["genres"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
+                    sourceName = map["sourceName"] as? String ?: "",
+                    sourceId = (map["sourceId"] as? Number)?.toLong() ?: 0L,
+                    mangaUrl = map["mangaUrl"] as? String ?: "",
+                    status = (map["status"] as? Number)?.toLong() ?: 0L,
+                    order = (map["order"] as? Number)?.toInt() ?: 0,
+                )
+            }.sortedBy { it.order }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    /**
+     * Saves the user's Top 5 Novel favorites to Firestore.
+     */
+    suspend fun saveTopNovels(uid: String, favorites: List<FavoriteManga>): Result<Unit> {
+        return try {
+            val data = favorites.mapIndexed { index, fav ->
+                mapOf(
+                    "title" to fav.title,
+                    "author" to fav.author,
+                    "description" to fav.description,
+                    "thumbnailUrl" to fav.thumbnailUrl,
+                    "genres" to fav.genres,
+                    "sourceName" to fav.sourceName,
+                    "sourceId" to fav.sourceId,
+                    "mangaUrl" to fav.mangaUrl,
+                    "status" to fav.status,
+                    "order" to index,
+                )
+            }
+            usersCollection.document(uid).update("topNovels", data).await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    /**
+     * Gets the user's Top 5 Novel favorites from Firestore.
+     */
+    @Suppress("UNCHECKED_CAST")
+    suspend fun getTopNovels(uid: String): List<FavoriteManga> {
+        return try {
+            val doc = usersCollection.document(uid).get().await()
+            val list = doc.get("topNovels") as? List<Map<String, Any?>> ?: return emptyList()
+            list.map { map ->
+                FavoriteManga(
+                    title = map["title"] as? String ?: "",
+                    author = map["author"] as? String ?: "",
+                    description = map["description"] as? String ?: "",
+                    thumbnailUrl = map["thumbnailUrl"] as? String ?: "",
+                    genres = (map["genres"] as? List<*>)?.filterIsInstance<String>() ?: emptyList(),
+                    sourceName = map["sourceName"] as? String ?: "",
+                    sourceId = (map["sourceId"] as? Number)?.toLong() ?: 0L,
+                    mangaUrl = map["mangaUrl"] as? String ?: "",
+                    status = (map["status"] as? Number)?.toLong() ?: 0L,
+                    order = (map["order"] as? Number)?.toInt() ?: 0,
+                )
+            }.sortedBy { it.order }
+        } catch (e: Exception) {
+            emptyList()
+        }
+    }
+
+    /**
      * Deletes a user account atomically.
      *
      * Atomic batch:
-     *   1. Delete usernames/{username} lock
-     *   2. Delete users/{uid}/private/settings
-     *   3. Delete users/{uid} profile
+     *   1. Delete Firebase Auth account (so user is immediately logged out)
+     *   2. Delete usernames/{username} lock
+     *   3. Delete users/{uid}/private/settings
+     *   4. Delete users/{uid} profile
      *
-     * After the batch, call FirebaseAuth.currentUser.delete() separately.
+     * Auth is deleted first so if the app crashes mid-deletion, the user is
+     * safely logged out. Orphaned Firestore data is harmless.
      */
     suspend fun deleteAccount(uid: String, username: String): Result<Unit> {
         return try {
+            // 1. Delete Firebase Auth first (immediate logout = safe state on crash)
+            val authUser = FirebaseAuth.getInstance().currentUser
+            authUser?.delete()?.await()
+
+            // 2. Clean up Firestore data atomically
             val batch = db.batch()
-
-            // 1. Delete username lock
             batch.delete(usernamesCollection.document(username))
-
-            // 2. Delete private settings subcollection doc
             batch.delete(
                 usersCollection.document(uid)
                     .collection(CloudUser.PRIVATE_COLLECTION)
                     .document(CloudUser.SETTINGS_DOC)
             )
-
-            // 3. Delete user profile
             batch.delete(usersCollection.document(uid))
-
             batch.commit().await()
+
             Result.success(Unit)
         } catch (e: Exception) {
             Result.failure(e)

@@ -74,6 +74,7 @@ import tachiyomi.domain.manga.model.CustomMangaInfo
 import tachiyomi.domain.manga.model.Manga
 import tachiyomi.i18n.MR
 import eu.kanade.tachiyomi.ui.manga.recommendations.RecommendationsScreen
+import eu.kanade.tachiyomi.ui.manga.suggestions.SuggestionsScreen
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import eu.kanade.domain.manga.interactor.UpdateManga
@@ -232,6 +233,9 @@ class MangaScreen(
             },
             onSeeRecommendationsClick = {
                 navigator.push(RecommendationsScreen(successState.manga.id, successState.source.id))
+            },
+            onSuggestionArrowClick = {
+                navigator.push(SuggestionsScreen(successState.manga.id))
             },
             onSuggestionClick = { manga ->
                 navigator.push(MangaScreen(manga.id, true))

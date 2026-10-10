@@ -48,6 +48,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -96,7 +101,7 @@ object DiscoverTab : Tab {
         @Composable
         get() {
             val title = "Home"
-            val icon = rememberVectorPainter(Icons.Outlined.Explore)
+            val icon = rememberVectorPainter(Icons.Outlined.Home)
             return remember {
                 cafe.adriel.voyager.navigator.tab.TabOptions(
                     index = 0u,
@@ -106,6 +111,7 @@ object DiscoverTab : Tab {
             }
         }
 
+    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow
@@ -120,29 +126,22 @@ object DiscoverTab : Tab {
         val libraryPreferences = remember { Injekt.get<LibraryPreferences>() }
         val updatesCount by libraryPreferences.newUpdatesCount.collectAsState()
 
+        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
         Scaffold(
+            modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
             topBar = {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.background)
-                        .statusBarsPadding()
-                        .padding(horizontal = 16.dp)
-                        .padding(top = 16.dp, bottom = 8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
+                TopAppBar(
+                    title = {
                         Text(
                             text = if (state.isNovel) "Novels" else "Manga",
                             fontSize = 32.sp,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.onBackground
                         )
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            IconButton(onClick = { navigator.push(eu.kanade.tachiyomi.ui.updates.UpdatesTab) }) {
+                    },
+                    actions = {
+                        IconButton(onClick = { navigator.push(eu.kanade.tachiyomi.ui.updates.UpdatesTab) }) {
                                 BadgedBox(
                                     badge = {
                                         if (updatesCount > 0) {
@@ -181,28 +180,13 @@ object DiscoverTab : Tab {
                                 )
                             }
                         }
-                        }
-                    }
-
-                    // Tabs removed as part of FAB transition
-                    /*
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        CustomTab(
-                            text = "Manga",
-                            isSelected = !state.isNovel,
-                            onClick = { viewModel.toggleNovel(false) }
-                        )
-                        Spacer(modifier = Modifier.width(24.dp))
-                        CustomTab(
-                            text = "Novels",
-                            isSelected = state.isNovel,
-                            onClick = { viewModel.toggleNovel(true) }
-                        )
-                    }
-                    */
-                }
+                    },
+                    scrollBehavior = scrollBehavior,
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.background,
+                        scrolledContainerColor = MaterialTheme.colorScheme.background
+                    )
+                )
             },
             floatingActionButton = {
                 SwipeUpFab(onSlideUpTriggered = { viewModel.toggleNovel(!state.isNovel) })

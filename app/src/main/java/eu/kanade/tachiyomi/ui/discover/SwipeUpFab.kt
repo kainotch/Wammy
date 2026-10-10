@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.input.pointer.pointerInput
@@ -68,61 +70,118 @@ fun SwipeUpFab(
     val animatedOffset by animateFloatAsState(targetValue = dragOffset)
 
     if (showTutorialOverlay) {
+        var tutorialStep by remember { mutableIntStateOf(1) }
+        
+        val fakeFabScale by animateFloatAsState(
+            targetValue = if (tutorialStep == 2) 1.2f else 1.0f,
+            animationSpec = tween(400, easing = FastOutSlowInEasing)
+        )
+        
+        val fakeFabOffsetY by animateFloatAsState(
+            targetValue = if (tutorialStep == 3) -150f else 0f,
+            animationSpec = tween(600, easing = FastOutSlowInEasing)
+        )
+        
+        val fakeFabAlpha by animateFloatAsState(
+            targetValue = if (tutorialStep == 4) 0f else 1f,
+            animationSpec = tween(300)
+        )
+
         Dialog(
             onDismissRequest = {
                 showTutorialOverlay = false
                 hasShownTutorial = true
                 libraryPreferences.hasShownSwipeUpFabTutorial.set(true)
             },
-            properties = DialogProperties(usePlatformDefaultWidth = false)
+            properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = false)
         ) {
-            val infiniteTransition = rememberInfiniteTransition()
-            val fingerY by infiniteTransition.animateFloat(
-                initialValue = 0f,
-                targetValue = -120f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(1500, delayMillis = 500, easing = FastOutSlowInEasing),
-                    repeatMode = RepeatMode.Restart
-                )
-            )
-            val fingerAlpha by infiniteTransition.animateFloat(
-                initialValue = 1f,
-                targetValue = 0f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(1500, delayMillis = 500, easing = FastOutSlowInEasing),
-                    repeatMode = RepeatMode.Restart
-                )
-            )
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.7f))
-                    .clickable {
-                        showTutorialOverlay = false
-                        hasShownTutorial = true
-                        libraryPreferences.hasShownSwipeUpFabTutorial.set(true)
+                    .background(Color.Black.copy(alpha = 0.65f))
+                    .clickable(
+                        interactionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() },
+                        indication = null
+                    ) {
+                        if (tutorialStep < 4) {
+                            tutorialStep++
+                        }
                     }
             ) {
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                
+                // Left Text 
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(bottom = 90.dp, end = 90.dp) // Left of the FAB
                 ) {
-                    Text(
-                        text = "Press and hold, then slide up\nto switch section",
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                    )
-                    Spacer(modifier = Modifier.height(24.dp))
-                    Button(onClick = {
-                        showTutorialOverlay = false
-                        hasShownTutorial = true
-                        libraryPreferences.hasShownSwipeUpFabTutorial.set(true)
-                    }) {
-                        Text("Got it")
+                    androidx.compose.animation.Crossfade(
+                        targetState = tutorialStep,
+                        animationSpec = tween(300)
+                    ) { step ->
+                        val text = when (step) {
+                            1 -> "This button switches between\nManga and Novel worlds."
+                            2 -> "First, press and\nhold the button..."
+                            3 -> "...then simply swipe up!"
+                            else -> ""
+                        }
+                        if (text.isNotEmpty()) {
+                            Text(
+                                text = text,
+                                color = Color.White,
+                                fontSize = 18.sp,
+                                lineHeight = 24.sp,
+                                fontWeight = FontWeight.Medium,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.End,
+                                modifier = Modifier.padding(bottom = 16.dp, end = 16.dp)
+                            )
+                        }
                     }
+                }
+                
+                // Center text for Step 4
+                if (tutorialStep == 4) {
+                    Column(
+                        modifier = Modifier.align(Alignment.Center),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "That's how you change\nfrom Manga to Novel!",
+                            color = Color.White,
+                            fontSize = 22.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(32.dp))
+                        Button(onClick = {
+                            showTutorialOverlay = false
+                            hasShownTutorial = true
+                            libraryPreferences.hasShownSwipeUpFabTutorial.set(true)
+                        }) {
+                            Text("Got it!")
+                        }
+                    }
+                }
+
+                // Tap anywhere blinking text at bottom
+                if (tutorialStep < 4) {
+                    val infiniteTransition = rememberInfiniteTransition()
+                    val alpha by infiniteTransition.animateFloat(
+                        initialValue = 0.4f,
+                        targetValue = 1f,
+                        animationSpec = infiniteRepeatable(
+                            animation = tween(800),
+                            repeatMode = RepeatMode.Reverse
+                        )
+                    )
+                    Text(
+                        text = "Tap anywhere to continue",
+                        color = Color.White.copy(alpha = alpha),
+                        fontSize = 14.sp,
+                        modifier = Modifier
+                            .align(Alignment.BottomCenter)
+                            .padding(bottom = 32.dp)
+                    )
                 }
 
                 // Spotlight Fake FAB in bottom right
@@ -131,28 +190,15 @@ fun SwipeUpFab(
                         .align(Alignment.BottomEnd)
                         .padding(16.dp)
                         .padding(bottom = 80.dp) // Approximate padding above bottom nav
+                        .offset { IntOffset(0, fakeFabOffsetY.toInt()) }
+                        .graphicsLayer {
+                            scaleX = fakeFabScale
+                            scaleY = fakeFabScale
+                            alpha = fakeFabAlpha
+                        }
                 ) {
                     val customImageRes = eu.kanade.tachiyomi.R.drawable.devil_fruit
 
-                    // --- VISUAL OPTIONS FOR FAB ---
-                    // Option A (Standard FAB with inside image):
-                    /*
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer)
-                    ) {
-                        Image(
-                            painter = painterResource(id = customImageRes),
-                            contentDescription = null,
-                            contentScale = ContentScale.Inside,
-                            modifier = Modifier.align(Alignment.Center).padding(8.dp)
-                        )
-                    }
-                    */
-
-                    // Option B (Freeform Image without background/shadow):
                     Box(
                         modifier = Modifier
                             .size(fabSizeDp.dp) // slightly larger to compensate for no background padding
@@ -164,16 +210,6 @@ fun SwipeUpFab(
                             modifier = Modifier.fillMaxSize().align(Alignment.Center)
                         )
                     }
-
-                    Icon(
-                        Icons.Filled.TouchApp,
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = fingerAlpha),
-                        modifier = Modifier
-                            .size(48.dp)
-                            .offset { IntOffset(0, fingerY.toInt()) }
-                            .align(Alignment.Center)
-                    )
                 }
             }
         }

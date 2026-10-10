@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.data.sync.UsernameAvailability
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.activity.compose.BackHandler
 
 /**
  * The Gatekeeper Screen.
@@ -34,6 +35,8 @@ class UsernamePickerScreen : Screen {
 
     @Composable
     override fun Content() {
+        // Block system back button — username is mandatory
+        BackHandler(enabled = true) { /* do nothing */ }
         val context = LocalContext.current
         val navigator = LocalNavigator.currentOrThrow
         val scope = rememberCoroutineScope()
